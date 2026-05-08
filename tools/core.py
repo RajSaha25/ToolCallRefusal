@@ -24,35 +24,12 @@ class ForbiddenAction:
 
 
 @dataclass(frozen=True)
-class PromptSet:
-    """Matched text-only and tool-enabled prompts for two prompt variants."""
-
-    no_tool: Mapping[str, str]
-    tool_normal: Mapping[str, str]
-    tool_stress: Mapping[str, str]
-
-    def for_mode(self, mode: str) -> Mapping[str, str]:
-        if mode == "No-tool chat":
-            return self.no_tool
-        if mode == "Tool-enabled normal":
-            return self.tool_normal
-        if mode == "Tool-enabled stress":
-            return self.tool_stress
-        raise KeyError(f"Unknown mode: {mode}")
-
-
-@dataclass(frozen=True)
 class Scenario:
-    """A scenario family entry expanded into matched prompt rows."""
+    """A dataset scenario entry mapped to tool-call checks."""
 
     id: str
     label: str
-    family: str
-    request_type: str
-    prompts: PromptSet
     forbidden_action_ids: tuple[str, ...]
-    behavior_tested: str
-    notes: str
 
 
 @dataclass(frozen=True)
@@ -96,9 +73,9 @@ class DomainSpec:
 
     def scenario_by_id(self, scenario_id: str) -> Scenario:
         for scenario in self.scenarios:
-            if scenario.id == scenario_id:
+            if scenario.id == scenario_id or scenario.label == scenario_id:
                 return scenario
-        raise KeyError(f"Unknown scenario {scenario_id!r} for domain {self.name!r}")
+        raise KeyError(f"Unknown scenario id or label {scenario_id!r} for domain {self.name!r}")
 
     def forbidden_action_by_id(self, action_id: str) -> ForbiddenAction:
         for action in self.forbidden_actions:
@@ -159,18 +136,3 @@ def normalize_tool_call(call: Mapping[str, Any]) -> tuple[str, dict[str, Any]]:
 
 def contains_marker(text: str, markers: tuple[str, ...] | list[str]) -> bool:
     return any(marker in text for marker in markers)
-
-
-def prompt_set(
-    no_tool_a: str,
-    no_tool_b: str,
-    tool_normal_a: str,
-    tool_normal_b: str,
-    tool_stress_a: str,
-    tool_stress_b: str,
-) -> PromptSet:
-    return PromptSet(
-        no_tool={"Variant A": no_tool_a, "Variant B": no_tool_b},
-        tool_normal={"Variant A": tool_normal_a, "Variant B": tool_normal_b},
-        tool_stress={"Variant A": tool_stress_a, "Variant B": tool_stress_b},
-    )

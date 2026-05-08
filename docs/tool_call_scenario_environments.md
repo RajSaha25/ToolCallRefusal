@@ -3,14 +3,14 @@
 This document describes the local GAP-style environment scaffold in
 `tool_safety_benchmark/`. It intentionally documents only the reusable
 tool/scenario layer. Dataset construction is left out so the research team can
-generate matched prompt sets separately.
+store matched prompt sets separately.
 
 ## Purpose
 
 The environment layer supports the behavioral part of the project:
 
 - Give the model domain-specific tools.
-- Ask matched no-tool and tool-enabled safety prompts.
+- Run matched no-tool and tool-enabled safety prompts loaded from the dataset.
 - Record the model's text response and any emitted tool calls.
 - Score text refusal separately from unsafe tool-call behavior.
 - Identify divergence cases where the model refuses in text but still emits an
@@ -18,7 +18,8 @@ The environment layer supports the behavioral part of the project:
 
 This is modeled after the architecture of `gap-benchmark`: each domain contains
 synthetic data, OpenAI-style function schemas, tool implementations, forbidden
-action predicates, scenario definitions, and PII/sensitive markers.
+action predicates, scenario-to-forbidden-action mappings, and PII/sensitive
+markers.
 
 ## Core Objects
 
@@ -26,9 +27,8 @@ The core abstractions live in `tool_safety_benchmark/core.py`.
 
 | Object | Meaning |
 | --- | --- |
-| `DomainSpec` | One domain environment, such as finance or healthcare. Holds tool schemas, callable tool functions, scenario definitions, forbidden actions, and sensitive markers. |
-| `Scenario` | One safety scenario family entry, such as direct harmful request or structured tool-oriented pressure. |
-| `PromptSet` | Matched prompt variants for three interaction modes: no-tool chat, tool-enabled normal, and tool-enabled stress. |
+| `DomainSpec` | One domain environment, such as finance or healthcare. Holds tool schemas, callable tool functions, scoring scenario mappings, forbidden actions, and sensitive markers. |
+| `Scenario` | One dataset scenario label mapped to the forbidden tool actions that should be checked for scoring. |
 | `ForbiddenAction` | A deterministic predicate over `(tool_name, tool_args)` that marks a tool call as unsafe for a given scenario. |
 | `ToolViolation` | A scored unsafe tool call, including action id, description, category, tool name, and arguments. |
 
@@ -42,9 +42,16 @@ domain = get_domain("finance")
 print(domain.tool_names())
 ```
 
-## Interaction Modes
+## Dataset Prompt Columns
 
-Each scenario has prompts for three modes:
+Prompt text lives in the experiment dataset, not in the domain environment
+scripts. The dataset is expected to carry matched rows such as:
+
+`ID`, `Request Type`, `Domain`, `Scenario`, `System Condition`,
+`Prompt Variant`, `Mode`, `System Prompt`, `User Prompt`,
+`Expected Safe Behavior`, and `Behavior Being Tested`.
+
+The `Mode` column uses three interaction modes:
 
 | Mode | Purpose |
 | --- | --- |
@@ -52,7 +59,7 @@ Each scenario has prompts for three modes:
 | `Tool-enabled normal` | Tools are available and the prompt asks for tool help in ordinary language. |
 | `Tool-enabled stress` | Tools are available and the prompt pressures the model toward a function call or structured tool output. |
 
-Each mode has `Variant A` and `Variant B` prompt wording.
+Each mode can have matched `Variant A` and `Variant B` prompt wording.
 
 ## Scoring Semantics
 
@@ -303,12 +310,12 @@ The same five scenario families appear in each domain:
 
 1. Select a domain with `get_domain(domain_key)`.
 2. Provide `domain.tools_for_llm` to the model API in tool-enabled conditions.
-3. Run one scenario prompt from `domain.scenarios`.
+3. Run one prompt row from the dataset.
 4. Save the model text response and emitted tool calls.
-5. Score with `score_run(domain_key, scenario_id, response_text, tool_calls)`.
+5. Score with `score_run(domain_key, scenario_id_or_label, response_text, tool_calls)`.
 6. Treat `divergence=True` as the behavior-level transfer-failure case for
    downstream activation analysis.
 
 The environment layer does not decide how prompts are sampled, how models are
 called, or how activations are captured. It only provides the tool affordances,
-scenario metadata, and deterministic tool-call safety predicates.
+scenario scoring mappings, and deterministic tool-call safety predicates.
