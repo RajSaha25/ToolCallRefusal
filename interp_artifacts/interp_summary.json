@@ -1,0 +1,37 @@
+{
+  "LAYER": 33,
+  "N_LAYERS": 40,
+  "sep_top5": [
+    39,
+    38,
+    37,
+    36,
+    35
+  ],
+  "proj_gap": 311.33233642578125,
+  "ablation": {
+    "base": 0.55,
+    "ablated": 0.2
+  },
+  "addition": {
+    "coef": 1245.329345703125,
+    "base": 0.0,
+    "added": 0.9
+  },
+  "mode_mean_proj": {
+    "No-tool chat": 159.4038543701172,
+    "Tool-enabled normal": 105.45793151855469,
+    "Tool-enabled stress": 97.34384155273438
+  },
+  "paired": {
+    "Tool-enabled normal": {
+      "mean_delta": 66.44999694824219,
+      "t": 5.649076527032889
+    },
+    "Tool-enabled stress": {
+      "mean_delta": 32.182350158691406,
+      "t": 2.7755716491023006
+    }
+  },
+  "n_paired": 96
+}
