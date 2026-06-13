@@ -296,17 +296,17 @@ interp_artifacts/
   interp2_summary.json   # round-2 numbers (when finished)
   fig_*.png              # figures
 
-run_interp.py            # round 1: extract -> validate -> project-by-mode
-run_interp2.py           # round 2: patching / steering / heads / system-condition
-Mechanistic_Refusal_Direction.ipynb   # the interactive notebook (same logic, with results cell)
+run_direction_and_suppression.py            # round 1: extract -> validate -> project-by-mode
+legacy/round2_experiments.py           # round 2: patching / steering / heads / system-condition
+01_refusal_direction_and_suppression.ipynb   # the interactive notebook (same logic, with results cell)
 ```
 
 **Reproduce** (from repo root, A100-class GPU, bf16 weights ~28 GB cached under `$HF_HOME`):
 ```bash
-python3 run_interp.py     # round 1  (~8-11 min)
-python3 run_interp2.py    # round 2  (~25-40 min; generation-heavy)
+python3 run_direction_and_suppression.py     # round 1  (~8-11 min)
+python3 legacy/round2_experiments.py    # round 2  (~25-40 min; generation-heavy)
 ```
-Both reuse the dataset in `data/` and the `tools/` package. `run_interp2.py` loads the validated
+Both reuse the dataset in `data/` and the `tools/` package. `legacy/round2_experiments.py` loads the validated
 direction from `refusal_dirs.pt`, so the geometry is identical across rounds.
 
 ---
@@ -342,4 +342,4 @@ direction from `refusal_dirs.pt`, so the geometry is identical across rounds.
   Mediated by a Single Direction.* arXiv:2406.11717.
 
 *Generated as part of the ToolCallRefusal project. Numbers in §5.1–5.3 are from an executed run on
-Qwen3-14B; §5.4 is populated when `run_interp2.py` completes.*
+Qwen3-14B; §5.4 is populated when `legacy/round2_experiments.py` completes.*

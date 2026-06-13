@@ -68,7 +68,7 @@ Two things you can do with internal activations:
 
 We edit activations using PyTorch **forward hooks** — small functions you attach to a layer that
 intercept its output and modify it before it flows on. (See the `Hooks` class and the `ablate` /
-`addvec` / `set_proj` functions in `run_interp.py` and `run_interp2.py`.)
+`addvec` / `set_proj` functions in `run_direction_and_suppression.py` and `legacy/round2_experiments.py`.)
 
 ---
 
@@ -134,7 +134,7 @@ prompts.
    two sets, so it cancels in the subtraction. What's left, `r`, points along the "refuse vs not"
    axis. Normalize it to length 1 → the **refusal direction** `r̂`.
 
-**Where in the code:** see `run_interp.py`, the `[step1]` block:
+**Where in the code:** see `run_direction_and_suppression.py`, the `[step1]` block:
 ```python
 A_harm = resid_last([format_prompt(r) for _,r in harm_ex.iterrows()])  # 128 harmful activations
 A_ben  = resid_last([format_prompt(r) for _,r in ben_ex.iterrows()])   # 128 benign activations
@@ -159,13 +159,13 @@ detector." To prove it *controls* refusal, we edit it and watch the behavior cha
   activation that lies along `r̂`: `h ← h − (h·r̂) r̂`. If `r̂` is the refusal direction, the model
   should **stop refusing** harmful prompts.
   ```python
-  # run_interp.py, ablate():
+  # run_direction_and_suppression.py, ablate():
   h = h - (h @ r).unsqueeze(-1) * r   # project the refusal direction out, at every block
   ```
 - **Activation addition** = *inject* the direction. We add `c · r̂` to the residual stream. The model
   should **start refusing** even harmless prompts.
   ```python
-  # run_interp.py, addvec():
+  # run_direction_and_suppression.py, addvec():
   h = h + coef * r                    # push the activation along the refusal direction
   ```
 
@@ -211,7 +211,7 @@ mechanistic shadow of the behavioral fact that the model refuses in text but act
 Projection by mode × system condition shows the tool suppression holds **in every condition**, that a
 **safety-reinforced** system prompt strongly lifts the signal (a partial prompt-level fix), and that
 **tool-encouraging + stress** is the global minimum (the most dangerous setup). *(Code: `[#12]` in
-`run_interp2.py`.)*
+`legacy/round2_experiments.py`.)*
 
 ### 6.2 Which parts of the network do the suppressing? — `fig_suppression_heads.png`, `fig_mlp_by_layer.png`
 **Component attribution.** A transformer layer's contribution to the residual stream is a sum of
@@ -220,13 +220,13 @@ much does it write along the refusal direction* — and how that changes between
 
 For each attention head we reconstruct its individual output and dot it with `r̂`; for each MLP we
 dot its output with `r̂`. Then we compare No-tool vs Tool. *(Code: `capture_contrib` in
-`run_interp2.py`, which hooks each `self_attn.o_proj` input and each `mlp` output.)*
+`legacy/round2_experiments.py`, which hooks each `self_attn.o_proj` input and each `mlp` output.)*
 
 **Result:** the "stop writing refusal" effect concentrates in **late attention heads (layers 34–39,
 led by L34·H36)** and **MLPs in layers 29–32**. So it's an attention+MLP circuit in the upper-middle
 of the network, not one neuron.
 
-### 6.3 Sufficiency test — activation patching (`run_interp2.py` `[#1]`)
+### 6.3 Sufficiency test — activation patching (`legacy/round2_experiments.py` `[#1]`)
 **Idea:** if low refusal signal *causes* the unsafe action, then forcibly restoring the refusal
 signal in tool mode should stop the unsafe call. We use `set_proj` to set the projection back to its
 matched No-tool level. **First attempt was inconclusive (a "floor effect"):** the matched sample
@@ -251,7 +251,7 @@ model uses a *different* direction for refusal? Then "suppression" would be the 
 
 **Test:** re-extract the refusal direction *within tool mode* (tool-harmful vs tool-benign) and
 compute its **cosine similarity** to the text-extracted direction. Cosine near 1 = same feature;
-near 0 = different feature. *(Code: `[#2]` / `dir_from` in `run_interp4.py`.)*
+near 0 = different feature. *(Code: `[#2]` / `dir_from` in `legacy/tier1_followups.py`.)*
 
 **Result: cosine = 0.735.** That's high — the refusal direction is essentially the **same feature**
 in both contexts, just turned down under tools. The "suppression" framing is justified. ✅
@@ -260,7 +260,7 @@ in both contexts, just turned down under tools. The "suppression" framing is jus
 With the fixed scorer, **34% (41/120)** of harmful tool prompts are now unsafe at baseline (no more
 floor effect). For those 41, we restored the refusal projection to its matched **No-tool** level with
 `set_proj` and re-generated. **Result: only 5/41 (12%) flipped to safe.** *(Code: `[#3]` in
-`run_interp4.py`.)*
+`legacy/tier1_followups.py`.)*
 
 This is the most scientifically interesting result, and it refines the thesis. Compare:
 - **Strong steering** (§6.4) pushes the projection *far above* its natural level (coef ~700) and drives
@@ -277,7 +277,7 @@ than "one direction explains everything," and an honest one.
 ### 7.3 Does the projection predict the unsafe action, example-by-example?
 Per harmful tool prompt, we recorded the projection onto `r̂` and whether the resulting call was unsafe
 (fixed scorer), then measured the **AUC** — the chance the method ranks a random unsafe case below a
-random safe one. *(Code: `[#4]` in `run_interp4.py`.)*
+random safe one. *(Code: `[#4]` in `legacy/tier1_followups.py`.)*
 
 **Result: AUC = 0.70.** Unsafe cases averaged projection **+52** vs **+112** for safe ones — a clear
 gap in the predicted direction (lower refusal signal → unsafe), though not a perfect separator. So the
@@ -289,7 +289,7 @@ projection is a real per-example predictor of the unsafe action, not just a grou
 ### 7.4 Scaling up (the authoritative numbers + an honest dissociation)
 
 The validation/steering/patching numbers above came from small samples (n=20–41). We re-ran them
-**batched, at n=120–300, with bootstrap 95% confidence intervals** (`run_interp5.py`). What changed:
+**batched, at n=120–300, with bootstrap 95% confidence intervals** (`run_scaled_evaluation.py`). What changed:
 
 - **Ablation:** 55%→20% (n=20) became **56%→36%** [CI 28–45%] at n=120 — a real but **much more modest** effect than the teaser.
 - **Addition:** held up — **1%→71%** [CI 62–78%].
@@ -324,17 +324,17 @@ role; a stronger ablation is the key next experiment.)
 
 ```bash
 # Round 1: extract direction -> validate (ablation/addition) -> projection by mode
-python3 run_interp.py
+python3 run_direction_and_suppression.py
 # Round 2: system-condition, suppression heads, patching, steering
-python3 run_interp2.py
+python3 legacy/round2_experiments.py
 # Tier-1: same-direction check, patching redo, AUC (uses the fixed scorer)
-python3 run_interp4.py
+python3 legacy/tier1_followups.py
 # Re-score any behavioral CSV with the fixed (all-actions) scorer:
 python3 rescore_results.py results/results_Qwen3-14B.csv
 ```
 All scripts reuse `data/…xlsx`, the `tools/` package, and the cached Qwen3-14B weights, and load the
 saved refusal direction from `interp_artifacts/refusal_dirs.pt` so the geometry is identical across
-runs. The interactive version is `Mechanistic_Refusal_Direction.ipynb`.
+runs. The interactive version is `01_refusal_direction_and_suppression.ipynb`.
 
 ---
 

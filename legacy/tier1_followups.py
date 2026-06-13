@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np, pandas as pd, torch
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 os.environ.setdefault('HF_HOME','/workspace/.cache/huggingface')
-REPO=Path(__file__).resolve().parent; sys.path.insert(0,str(REPO))
+REPO=Path(__file__).resolve().parent.parent; sys.path.insert(0,str(REPO))
 from tools.registry import get_domain
 MODEL_ID,DTYPE,DEVICE='Qwen/Qwen3-14B',torch.bfloat16,'cuda'; ENABLE_THINKING=False
 ART=REPO/'interp_artifacts'; torch.set_grad_enabled(False); LAYER=33

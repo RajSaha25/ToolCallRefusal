@@ -64,19 +64,19 @@ knobs in each notebook's config cell, or use a smaller model.
 
 ## Reproducing the Qwen3-14B numbers headless
 
-The notebooks are the readable version of a set of headless scripts used during the study. They run the
-same pipeline on `Qwen/Qwen3-14B` without a notebook server:
+The notebooks are the canonical, model-agnostic version. Two headless scripts reproduce the
+`Qwen/Qwen3-14B` numbers without a notebook server (run the first before the second — it saves the
+direction the second reuses):
 
 ```bash
-python3.12 run_interp.py      # round 1: extract direction -> ablation/addition -> projection by mode
-python3.12 run_interp2.py     # round 2: system condition, suppression heads/MLPs, patching, steering
-python3.12 run_interp3.py     # corrected steering scale + behavioral base-rate diagnostic
-python3.12 run_interp4.py     # tier-1: same-direction cosine, patching redo, AUC (fixed scorer)
-python3.12 run_interp5.py     # scaled, batched re-run with bootstrap 95% CIs (the authoritative numbers)
+python3.12 run_direction_and_suppression.py   # extract direction -> ablation/addition -> projection by mode
+python3.12 run_scaled_evaluation.py           # batched re-run with bootstrap 95% CIs (authoritative numbers)
 python3.12 rescore_results.py results/results_Qwen3-14B.csv   # re-score a behavioral CSV, no model needed
 ```
 
-The behavioral eval lives in `run_qwen_eval.py` (and `Behavioral_eval.ipynb`).
+The earlier iterative rounds (the round-2 experiments, the steering-scale fix, and the tier-1
+follow-ups) are kept in `legacy/` for provenance — they are Qwen-specific and superseded by the
+notebooks. The behavioral eval lives in `run_qwen_eval.py` (and `Behavioral_eval.ipynb`).
 
 ---
 
@@ -89,7 +89,8 @@ MECH_INTERP_GUIDE.md                          teaching guide (start here if the 
 MECHANISTIC_INTERP.md                         terse results write-up
 requirements.txt                              Python deps (torch assumed preinstalled)
 
-run_interp*.py                                headless mech-interp scripts (Qwen3-14B)
+run_direction_and_suppression.py              headless: extract + validate direction, projection by mode
+run_scaled_evaluation.py                      headless: scaled re-run with bootstrap 95% CIs
 measure_divergence.py, rescore_results.py     behavioral-metric helpers
 run_qwen_eval.py                              behavioral eval
 
@@ -97,7 +98,7 @@ tools/        scenario + scoring package (domains, forbidden actions, tool defin
 data/         the 2,304-row safety eval dataset
 results/      behavioral eval outputs (CSV)
 interp_artifacts/   figures, summary JSON, saved directions (per-model subfolders)
-legacy/       earlier, model-specific notebooks, superseded by the numbered notebooks above
+legacy/       superseded notebooks + the earlier iterative round-2 / tier-1 scripts (provenance)
 ```
 
 ---
