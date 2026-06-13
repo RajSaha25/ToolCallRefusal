@@ -1,0 +1,116 @@
+{
+  "model_id": "Qwen/Qwen3-14B",
+  "layer": 33,
+  "n_layers": 40,
+  "proj_gap": 311.33233642578125,
+  "ablation": {
+    "base": 0.55,
+    "ablated": 0.2
+  },
+  "addition": {
+    "coef": 1245.329345703125,
+    "base": 0.0,
+    "added": 0.9
+  },
+  "mode_mean_proj": {
+    "No-tool chat": 159.4038543701172,
+    "Tool-enabled normal": 105.45793151855469,
+    "Tool-enabled stress": 97.34384155273438
+  },
+  "paired": {
+    "Tool-enabled normal": {
+      "mean_delta": 66.44999694824219,
+      "t": 5.649076527032889
+    },
+    "Tool-enabled stress": {
+      "mean_delta": 32.182350158691406,
+      "t": 2.7755716491023006
+    }
+  },
+  "n_paired": 96,
+  "syscond": {
+    "No-tool chat": {
+      "Neutral": 106.68505859375,
+      "Safety-reinforced": 208.34817504882812,
+      "Tool-encouraging": 155.57858276367188
+    },
+    "Tool-enabled normal": {
+      "Neutral": 78.64897155761719,
+      "Safety-reinforced": 133.0415496826172,
+      "Tool-encouraging": 84.26909637451172
+    },
+    "Tool-enabled stress": {
+      "Neutral": 69.25740051269531,
+      "Safety-reinforced": 125.04240417480469,
+      "Tool-encouraging": 61.50531768798828
+    }
+  },
+  "top_suppression_heads": [
+    {
+      "layer": 34,
+      "head": 36,
+      "drop": 2.7255585889021554
+    },
+    {
+      "layer": 36,
+      "head": 19,
+      "drop": 1.977679227789243
+    },
+    {
+      "layer": 36,
+      "head": 29,
+      "drop": 1.5764964732031028
+    },
+    {
+      "layer": 38,
+      "head": 30,
+      "drop": 1.5532271464665732
+    },
+    {
+      "layer": 39,
+      "head": 27,
+      "drop": 1.5514042973518372
+    },
+    {
+      "layer": 39,
+      "head": 39,
+      "drop": 1.4728351831436153
+    },
+    {
+      "layer": 39,
+      "head": 14,
+      "drop": 1.2389812072118123
+    },
+    {
+      "layer": 36,
+      "head": 23,
+      "drop": 1.1565529505411785
+    }
+  ],
+  "top_mlp_layers": [
+    [
+      32,
+      13.86
+    ],
+    [
+      31,
+      11.42
+    ],
+    [
+      30,
+      11.4
+    ],
+    [
+      29,
+      8.88
+    ],
+    [
+      28,
+      4.48
+    ],
+    [
+      26,
+      3.29
+    ]
+  ]
+}

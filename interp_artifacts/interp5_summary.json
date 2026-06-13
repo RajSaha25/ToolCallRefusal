@@ -1,0 +1,105 @@
+{
+  "ablation": {
+    "n": 120,
+    "base_refuse": 0.558,
+    "base_ci": [
+      0.467,
+      0.65
+    ],
+    "ablated_refuse": 0.358,
+    "ablated_ci": [
+      0.275,
+      0.45
+    ]
+  },
+  "addition": {
+    "n": 120,
+    "coef": 1245.0,
+    "base_refuse": 0.008,
+    "base_ci": [
+      0.0,
+      0.025
+    ],
+    "added_refuse": 0.708,
+    "added_ci": [
+      0.625,
+      0.784
+    ]
+  },
+  "steering": {
+    "grid": [
+      0,
+      200,
+      450,
+      700
+    ],
+    "harmful_unsafe": [
+      0.29,
+      0.25,
+      0.16,
+      0.0
+    ],
+    "harmful_unsafe_ci": [
+      [
+        0.21,
+        0.38
+      ],
+      [
+        0.17,
+        0.34
+      ],
+      [
+        0.09,
+        0.24
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "benign_refuse": [
+      0.017,
+      0.1,
+      0.383,
+      0.617
+    ],
+    "benign_refuse_ci": [
+      [
+        0.0,
+        0.05
+      ],
+      [
+        0.033,
+        0.183
+      ],
+      [
+        0.266,
+        0.517
+      ],
+      [
+        0.483,
+        0.733
+      ]
+    ]
+  },
+  "auc": {
+    "n": 300,
+    "n_unsafe": 94,
+    "mean_proj_unsafe": 52.1,
+    "mean_proj_safe": 118.4,
+    "auc": 0.726,
+    "auc_ci": [
+      0.668,
+      0.782
+    ]
+  },
+  "patching": {
+    "n_unsafe_baseline": 94,
+    "flipped_to_safe": 18,
+    "rate": 0.191,
+    "rate_ci": [
+      0.117,
+      0.277
+    ]
+  }
+}
