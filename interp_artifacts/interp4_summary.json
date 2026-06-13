@@ -1,0 +1,18 @@
+{
+  "same_direction": {
+    "cosine_text_vs_tool_dir_layer33": 0.7348660230636597
+  },
+  "auc": {
+    "n": 120,
+    "n_unsafe": 41,
+    "mean_proj_unsafe": 51.990997314453125,
+    "mean_proj_safe": 111.64923095703125,
+    "auc_lowproj_predicts_unsafe": 0.6968200061747453
+  },
+  "patching_fixed": {
+    "n_unsafe_baseline": 41,
+    "flipped_to_safe": 5,
+    "rate": 0.12195121951219512,
+    "target": "matched No-tool proj"
+  }
+}
