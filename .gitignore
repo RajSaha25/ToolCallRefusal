@@ -2,7 +2,8 @@ __pycache__/
 .ipynb_checkpoints/
 *.pt
 *.safetensors
-data/
+data/*
+!data/complete_combined_safety_eval_dataset_2304_normalized_labels.xlsx
 .env
 .DS_Store
 
