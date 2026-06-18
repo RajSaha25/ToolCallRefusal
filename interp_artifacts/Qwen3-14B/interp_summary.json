@@ -1,116 +1,42 @@
 {
-  "model_id": "Qwen/Qwen3-14B",
-  "layer": 33,
-  "n_layers": 40,
-  "proj_gap": 311.33233642578125,
+  "MODEL_ID": "Qwen/Qwen3-14B",
+  "LAYER": 33,
+  "N_LAYERS": 40,
+  "D_MODEL": 5120,
+  "n_harm": 384,
+  "n_ben": 384,
+  "proj_gap": 322.9978942871094,
+  "ADD_COEF": 1291.9915771484375,
+  "sep_top5": [
+    39,
+    38,
+    37,
+    36,
+    35
+  ],
   "ablation": {
-    "base": 0.55,
-    "ablated": 0.2
+    "base": 0.5666666666666667,
+    "ablated": 0.31666666666666665
   },
   "addition": {
-    "coef": 1245.329345703125,
-    "base": 0.0,
-    "added": 0.9
+    "coef": 1291.9915771484375,
+    "base": 0.008333333333333333,
+    "added": 0.7083333333333334
   },
   "mode_mean_proj": {
-    "No-tool chat": 159.4038543701172,
-    "Tool-enabled normal": 105.45793151855469,
-    "Tool-enabled stress": 97.34384155273438
+    "No-tool chat": 159.59349060058594,
+    "Tool-enabled normal": 96.23860931396484,
+    "Tool-enabled stress": 91.34223175048828
   },
   "paired": {
     "Tool-enabled normal": {
-      "mean_delta": 66.44999694824219,
-      "t": 5.649076527032889
+      "mean_delta": 66.80040740966797,
+      "t": 5.570757877091276
     },
     "Tool-enabled stress": {
-      "mean_delta": 32.182350158691406,
-      "t": 2.7755716491023006
+      "mean_delta": 31.081174850463867,
+      "t": 2.6239759496097146
     }
   },
-  "n_paired": 96,
-  "syscond": {
-    "No-tool chat": {
-      "Neutral": 106.68505859375,
-      "Safety-reinforced": 208.34817504882812,
-      "Tool-encouraging": 155.57858276367188
-    },
-    "Tool-enabled normal": {
-      "Neutral": 78.64897155761719,
-      "Safety-reinforced": 133.0415496826172,
-      "Tool-encouraging": 84.26909637451172
-    },
-    "Tool-enabled stress": {
-      "Neutral": 69.25740051269531,
-      "Safety-reinforced": 125.04240417480469,
-      "Tool-encouraging": 61.50531768798828
-    }
-  },
-  "top_suppression_heads": [
-    {
-      "layer": 34,
-      "head": 36,
-      "drop": 2.7255585889021554
-    },
-    {
-      "layer": 36,
-      "head": 19,
-      "drop": 1.977679227789243
-    },
-    {
-      "layer": 36,
-      "head": 29,
-      "drop": 1.5764964732031028
-    },
-    {
-      "layer": 38,
-      "head": 30,
-      "drop": 1.5532271464665732
-    },
-    {
-      "layer": 39,
-      "head": 27,
-      "drop": 1.5514042973518372
-    },
-    {
-      "layer": 39,
-      "head": 39,
-      "drop": 1.4728351831436153
-    },
-    {
-      "layer": 39,
-      "head": 14,
-      "drop": 1.2389812072118123
-    },
-    {
-      "layer": 36,
-      "head": 23,
-      "drop": 1.1565529505411785
-    }
-  ],
-  "top_mlp_layers": [
-    [
-      32,
-      13.86
-    ],
-    [
-      31,
-      11.42
-    ],
-    [
-      30,
-      11.4
-    ],
-    [
-      29,
-      8.88
-    ],
-    [
-      28,
-      4.48
-    ],
-    [
-      26,
-      3.29
-    ]
-  ]
+  "n_paired": 96
 }

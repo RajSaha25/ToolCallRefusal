@@ -1,0 +1,107 @@
+{
+  "MODEL_ID": "Qwen/Qwen3-14B",
+  "LAYER": 33,
+  "ablation": {
+    "n": 200,
+    "base_refuse": 0.54,
+    "base_ci": [
+      0.475,
+      0.61
+    ],
+    "ablated_refuse": 0.34,
+    "ablated_ci": [
+      0.275,
+      0.405
+    ]
+  },
+  "addition": {
+    "n": 200,
+    "coef": 1291.9915771484375,
+    "base_refuse": 0.01,
+    "base_ci": [
+      0.0,
+      0.025
+    ],
+    "added_refuse": 0.665,
+    "added_ci": [
+      0.6,
+      0.73
+    ]
+  },
+  "steering": {
+    "grid": [
+      0,
+      200,
+      450,
+      700
+    ],
+    "harmful_unsafe": [
+      0.28,
+      0.24,
+      0.153,
+      0.0
+    ],
+    "harmful_unsafe_ci": [
+      [
+        0.213,
+        0.353
+      ],
+      [
+        0.173,
+        0.313
+      ],
+      [
+        0.093,
+        0.213
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "benign_refuse": [
+      0.02,
+      0.1,
+      0.37,
+      0.72
+    ],
+    "benign_refuse_ci": [
+      [
+        0.0,
+        0.05
+      ],
+      [
+        0.05,
+        0.16
+      ],
+      [
+        0.28,
+        0.47
+      ],
+      [
+        0.63,
+        0.81
+      ]
+    ]
+  },
+  "auc": {
+    "n": 384,
+    "n_unsafe": 119,
+    "mean_proj_unsafe": 49.0,
+    "mean_proj_safe": 117.5,
+    "auc": 0.724,
+    "auc_ci": [
+      0.673,
+      0.774
+    ]
+  },
+  "patching": {
+    "n_unsafe_baseline": 119,
+    "flipped_to_safe": 21,
+    "rate": 0.176,
+    "rate_ci": [
+      0.109,
+      0.252
+    ]
+  }
+}
