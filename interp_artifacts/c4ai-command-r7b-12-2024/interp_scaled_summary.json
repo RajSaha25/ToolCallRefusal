@@ -1,0 +1,107 @@
+{
+  "MODEL_ID": "CohereLabs/c4ai-command-r7b-12-2024",
+  "LAYER": 26,
+  "ablation": {
+    "n": 200,
+    "base_refuse": 0.695,
+    "base_ci": [
+      0.63,
+      0.755
+    ],
+    "ablated_refuse": 0.02,
+    "ablated_ci": [
+      0.005,
+      0.04
+    ]
+  },
+  "addition": {
+    "n": 200,
+    "coef": 298.0771789550781,
+    "base_refuse": 0.02,
+    "base_ci": [
+      0.005,
+      0.04
+    ],
+    "added_refuse": 0.925,
+    "added_ci": [
+      0.885,
+      0.96
+    ]
+  },
+  "steering": {
+    "grid": [
+      0,
+      200,
+      450,
+      700
+    ],
+    "harmful_unsafe": [
+      0.08,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "harmful_unsafe_ci": [
+      [
+        0.04,
+        0.127
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "benign_refuse": [
+      0.0,
+      0.98,
+      0.0,
+      0.0
+    ],
+    "benign_refuse_ci": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.95,
+        1.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ]
+  },
+  "auc": {
+    "n": 384,
+    "n_unsafe": 26,
+    "mean_proj_unsafe": 21.0,
+    "mean_proj_safe": 28.3,
+    "auc": 0.751,
+    "auc_ci": [
+      0.67,
+      0.824
+    ]
+  },
+  "patching": {
+    "n_unsafe_baseline": 26,
+    "flipped_to_safe": 16,
+    "rate": 0.615,
+    "rate_ci": [
+      0.423,
+      0.808
+    ]
+  }
+}
