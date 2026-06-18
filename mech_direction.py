@@ -9,6 +9,7 @@ Env: MECH_MODEL (hf id), HF_TOKEN (gated), HF_HUB_DISABLE_XET=1.
 """
 import os, sys, json, time
 os.environ.setdefault('HF_HOME', '/workspace/.cache/huggingface')
+os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'expandable_segments:True')
 from pathlib import Path
 import numpy as np, pandas as pd, torch
 

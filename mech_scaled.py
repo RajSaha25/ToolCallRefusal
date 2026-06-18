@@ -6,9 +6,10 @@ All-actions scorer. Model-agnostic loader + layer accessor + multi-format tool p
 
 Env: MECH_MODEL (hf id), HF_TOKEN, HF_HUB_DISABLE_XET=1.
 """
-import os, sys, json, re, time
+import os, sys, json, re, time, gc
 from contextlib import nullcontext
 os.environ.setdefault('HF_HOME','/workspace/.cache/huggingface')
+os.environ.setdefault('PYTORCH_CUDA_ALLOC_CONF','expandable_segments:True')
 from pathlib import Path
 import numpy as np, pandas as pd, torch
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
@@ -19,7 +20,7 @@ from tools.registry import get_domain
 MODEL_ID=os.environ.get('MECH_MODEL','Qwen/Qwen3-14B'); MODEL_SHORT=MODEL_ID.split('/')[-1]
 HF_TOKEN=os.environ.get('HF_TOKEN','') or None
 DTYPE,DEVICE='cuda' and torch.bfloat16, 'cuda'; ENABLE_THINKING=False
-ART=REPO/'interp_artifacts'/MODEL_SHORT; torch.set_grad_enabled(False); BS=24
+ART=REPO/'interp_artifacts'/MODEL_SHORT; torch.set_grad_enabled(False); BS=16
 RNG=np.random.RandomState(0)
 # experiment sizes (bumped above the original small samples)
 N_ABL=200; N_ADD=200; N_STEER_H=150; N_STEER_B=100; N_AUC=400
@@ -137,11 +138,17 @@ def gen_all(prompts,hook_fn=None):
     return texts
 @torch.no_grad()
 def proj_last(prompts):
-    out=[]
-    for i in range(0,len(prompts),BS):
-        enc=tok(prompts[i:i+BS],return_tensors='pt',padding=True,truncation=True,max_length=2048).to(DEVICE)
-        hs=model(**enc,output_hidden_states=True).hidden_states
-        out.append((hs[LAYER][:,-1,:].float().cpu()@r_text).numpy())
+    # capture only the operating layer via a hook (avoids materializing all hidden states)
+    out=[]; cap={}
+    def hook(m,i,o):
+        h=o[0] if isinstance(o,tuple) else o; cap['h']=h[:,-1,:].float().cpu()
+    PB=8
+    for i in range(0,len(prompts),PB):
+        enc=tok(prompts[i:i+PB],return_tensors='pt',padding=True,truncation=True,max_length=2048).to(DEVICE)
+        hh=_layers()[LAYER-1].register_forward_hook(hook)
+        model(**enc); hh.remove()
+        out.append((cap['h']@r_text).numpy())
+        del enc; torch.cuda.empty_cache()
     return np.concatenate(out)
 def ci(a,n=2000):
     a=np.asarray(a,float)
@@ -186,6 +193,7 @@ for c in GRID:
     steer['benign_refuse'].append(round(np.mean(rb),3)); steer['benign_refuse_ci'].append(ci(rb))
     log(f"   c={c} unsafe={np.mean(uh):.0%} | benign refuse={np.mean(rb):.0%}")
 out['steering']=steer; log(f'[steer] {time.time()-t0:.0f}s')
+gc.collect(); torch.cuda.empty_cache()
 
 t0=time.time(); log(f'[auc/patch] n={N_AUC}...')
 ps=toolh.sample(min(N_AUC,len(toolh)),random_state=4).reset_index(drop=True); psp=[format_prompt(r) for _,r in ps.iterrows()]
