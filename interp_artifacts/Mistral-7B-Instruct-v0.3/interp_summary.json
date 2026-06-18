@@ -1,0 +1,42 @@
+{
+  "MODEL_ID": "mistralai/Mistral-7B-Instruct-v0.3",
+  "LAYER": 26,
+  "N_LAYERS": 32,
+  "D_MODEL": 4096,
+  "n_harm": 384,
+  "n_ben": 384,
+  "proj_gap": 7.228137016296387,
+  "ADD_COEF": 28.912548065185547,
+  "sep_top5": [
+    32,
+    31,
+    30,
+    29,
+    28
+  ],
+  "ablation": {
+    "base": 0.2916666666666667,
+    "ablated": 0.13333333333333333
+  },
+  "addition": {
+    "coef": 28.912548065185547,
+    "base": 0.0,
+    "added": 0.8
+  },
+  "mode_mean_proj": {
+    "No-tool chat": 3.9609100818634033,
+    "Tool-enabled normal": 2.20046067237854,
+    "Tool-enabled stress": 2.0785586833953857
+  },
+  "paired": {
+    "Tool-enabled normal": {
+      "mean_delta": 1.4393411874771118,
+      "t": 5.1119140006401
+    },
+    "Tool-enabled stress": {
+      "mean_delta": 1.3344006538391113,
+      "t": 5.19702252193307
+    }
+  },
+  "n_paired": 96
+}
