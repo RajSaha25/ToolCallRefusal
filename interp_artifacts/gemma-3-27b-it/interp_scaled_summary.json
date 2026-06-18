@@ -1,0 +1,107 @@
+{
+  "MODEL_ID": "google/gemma-3-27b-it",
+  "LAYER": 51,
+  "ablation": {
+    "n": 200,
+    "base_refuse": 0.28,
+    "base_ci": [
+      0.215,
+      0.34
+    ],
+    "ablated_refuse": 0.0,
+    "ablated_ci": [
+      0.0,
+      0.0
+    ]
+  },
+  "addition": {
+    "n": 200,
+    "coef": 74861.390625,
+    "base_refuse": 0.01,
+    "base_ci": [
+      0.0,
+      0.025
+    ],
+    "added_refuse": 0.305,
+    "added_ci": [
+      0.24,
+      0.37
+    ]
+  },
+  "steering": {
+    "grid": [
+      0,
+      200,
+      450,
+      700
+    ],
+    "harmful_unsafe": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "harmful_unsafe_ci": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "benign_refuse": [
+      0.07,
+      0.09,
+      0.08,
+      0.1
+    ],
+    "benign_refuse_ci": [
+      [
+        0.03,
+        0.12
+      ],
+      [
+        0.04,
+        0.15
+      ],
+      [
+        0.03,
+        0.14
+      ],
+      [
+        0.05,
+        0.16
+      ]
+    ]
+  },
+  "auc": {
+    "n": 384,
+    "n_unsafe": 0,
+    "mean_proj_unsafe": null,
+    "mean_proj_safe": 26097.6,
+    "auc": NaN,
+    "auc_ci": [
+      null,
+      null
+    ]
+  },
+  "patching": {
+    "n_unsafe_baseline": 0,
+    "flipped_to_safe": 0,
+    "rate": null,
+    "rate_ci": [
+      null,
+      null
+    ]
+  }
+}

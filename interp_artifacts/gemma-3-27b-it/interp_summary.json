@@ -1,0 +1,42 @@
+{
+  "MODEL_ID": "google/gemma-3-27b-it",
+  "LAYER": 51,
+  "N_LAYERS": 62,
+  "D_MODEL": 5376,
+  "n_harm": 384,
+  "n_ben": 384,
+  "proj_gap": 18715.34765625,
+  "ADD_COEF": 74861.390625,
+  "sep_top5": [
+    61,
+    60,
+    59,
+    58,
+    57
+  ],
+  "ablation": {
+    "base": 0.20833333333333334,
+    "ablated": 0.0
+  },
+  "addition": {
+    "coef": 74861.390625,
+    "base": 0.008333333333333333,
+    "added": 0.25
+  },
+  "mode_mean_proj": {
+    "No-tool chat": 28148.9296875,
+    "Tool-enabled normal": 26102.609375,
+    "Tool-enabled stress": 25815.626953125
+  },
+  "paired": {
+    "Tool-enabled normal": {
+      "mean_delta": 314.613037109375,
+      "t": 0.43762331385991937
+    },
+    "Tool-enabled stress": {
+      "mean_delta": -976.303955078125,
+      "t": -1.4932778264500954
+    }
+  },
+  "n_paired": 96
+}
