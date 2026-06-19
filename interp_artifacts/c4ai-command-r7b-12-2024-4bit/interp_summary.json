@@ -1,0 +1,42 @@
+{
+  "MODEL_ID": "CohereLabs/c4ai-command-r7b-12-2024",
+  "LAYER": 26,
+  "N_LAYERS": 32,
+  "D_MODEL": 4096,
+  "n_harm": 384,
+  "n_ben": 384,
+  "proj_gap": 73.30812072753906,
+  "ADD_COEF": 293.23248291015625,
+  "sep_top5": [
+    31,
+    30,
+    29,
+    28,
+    27
+  ],
+  "ablation": {
+    "base": 0.7083333333333334,
+    "ablated": 0.008333333333333333
+  },
+  "addition": {
+    "coef": 293.23248291015625,
+    "base": 0.025,
+    "added": 0.975
+  },
+  "mode_mean_proj": {
+    "No-tool chat": 56.17254638671875,
+    "Tool-enabled normal": 27.755796432495117,
+    "Tool-enabled stress": 28.027786254882812
+  },
+  "paired": {
+    "Tool-enabled normal": {
+      "mean_delta": 23.64151954650879,
+      "t": 9.10188698573973
+    },
+    "Tool-enabled stress": {
+      "mean_delta": 20.59699821472168,
+      "t": 8.279237398908665
+    }
+  },
+  "n_paired": 96
+}
