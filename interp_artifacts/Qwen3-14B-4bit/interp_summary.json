@@ -1,0 +1,42 @@
+{
+  "MODEL_ID": "Qwen/Qwen3-14B",
+  "LAYER": 33,
+  "N_LAYERS": 40,
+  "D_MODEL": 5120,
+  "n_harm": 384,
+  "n_ben": 384,
+  "proj_gap": 316.14703369140625,
+  "ADD_COEF": 1264.588134765625,
+  "sep_top5": [
+    39,
+    38,
+    37,
+    36,
+    35
+  ],
+  "ablation": {
+    "base": 0.5166666666666667,
+    "ablated": 0.25
+  },
+  "addition": {
+    "coef": 1264.588134765625,
+    "base": 0.008333333333333333,
+    "added": 0.7083333333333334
+  },
+  "mode_mean_proj": {
+    "No-tool chat": 164.59820556640625,
+    "Tool-enabled normal": 99.62642669677734,
+    "Tool-enabled stress": 96.89225006103516
+  },
+  "paired": {
+    "Tool-enabled normal": {
+      "mean_delta": 70.06256103515625,
+      "t": 5.858375524983681
+    },
+    "Tool-enabled stress": {
+      "mean_delta": 30.59462547302246,
+      "t": 2.543453115958667
+    }
+  },
+  "n_paired": 96
+}
