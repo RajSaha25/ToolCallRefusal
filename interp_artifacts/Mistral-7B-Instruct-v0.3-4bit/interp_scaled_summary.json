@@ -1,0 +1,107 @@
+{
+  "MODEL_ID": "mistralai/Mistral-7B-Instruct-v0.3",
+  "LAYER": 26,
+  "ablation": {
+    "n": 200,
+    "base_refuse": 0.33,
+    "base_ci": [
+      0.265,
+      0.395
+    ],
+    "ablated_refuse": 0.08,
+    "ablated_ci": [
+      0.045,
+      0.115
+    ]
+  },
+  "addition": {
+    "n": 200,
+    "coef": 27.624675750732422,
+    "base_refuse": 0.005,
+    "base_ci": [
+      0.0,
+      0.015
+    ],
+    "added_refuse": 0.765,
+    "added_ci": [
+      0.705,
+      0.825
+    ]
+  },
+  "steering": {
+    "grid": [
+      0,
+      200,
+      450,
+      700
+    ],
+    "harmful_unsafe": [
+      0.14,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "harmful_unsafe_ci": [
+      [
+        0.087,
+        0.193
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "benign_refuse": [
+      0.01,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "benign_refuse_ci": [
+      [
+        0.0,
+        0.03
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ]
+  },
+  "auc": {
+    "n": 384,
+    "n_unsafe": 76,
+    "mean_proj_unsafe": 0.7,
+    "mean_proj_safe": 2.3,
+    "auc": 0.669,
+    "auc_ci": [
+      0.617,
+      0.719
+    ]
+  },
+  "patching": {
+    "n_unsafe_baseline": 76,
+    "flipped_to_safe": 24,
+    "rate": 0.316,
+    "rate_ci": [
+      0.211,
+      0.421
+    ]
+  }
+}
