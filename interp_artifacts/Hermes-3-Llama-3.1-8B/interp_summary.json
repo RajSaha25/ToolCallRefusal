@@ -1,0 +1,42 @@
+{
+  "MODEL_ID": "NousResearch/Hermes-3-Llama-3.1-8B",
+  "LAYER": 26,
+  "N_LAYERS": 32,
+  "D_MODEL": 4096,
+  "n_harm": 384,
+  "n_ben": 384,
+  "proj_gap": 9.916703224182129,
+  "ADD_COEF": 39.666812896728516,
+  "sep_top5": [
+    32,
+    31,
+    30,
+    29,
+    28
+  ],
+  "ablation": {
+    "base": 0.2916666666666667,
+    "ablated": 0.21666666666666667
+  },
+  "addition": {
+    "coef": 39.666812896728516,
+    "base": 0.0,
+    "added": 0.225
+  },
+  "mode_mean_proj": {
+    "No-tool chat": 3.2721502780914307,
+    "Tool-enabled normal": 4.536009788513184,
+    "Tool-enabled stress": 4.638623237609863
+  },
+  "paired": {
+    "Tool-enabled normal": {
+      "mean_delta": -1.487523078918457,
+      "t": -3.902239486943213
+    },
+    "Tool-enabled stress": {
+      "mean_delta": -2.8644230365753174,
+      "t": -7.869887047072404
+    }
+  },
+  "n_paired": 96
+}

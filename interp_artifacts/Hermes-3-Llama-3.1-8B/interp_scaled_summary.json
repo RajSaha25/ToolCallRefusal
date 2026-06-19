@@ -1,0 +1,107 @@
+{
+  "MODEL_ID": "NousResearch/Hermes-3-Llama-3.1-8B",
+  "LAYER": 26,
+  "ablation": {
+    "n": 200,
+    "base_refuse": 0.28,
+    "base_ci": [
+      0.22,
+      0.34
+    ],
+    "ablated_refuse": 0.235,
+    "ablated_ci": [
+      0.18,
+      0.295
+    ]
+  },
+  "addition": {
+    "n": 200,
+    "coef": 39.666812896728516,
+    "base_refuse": 0.005,
+    "base_ci": [
+      0.0,
+      0.015
+    ],
+    "added_refuse": 0.25,
+    "added_ci": [
+      0.195,
+      0.315
+    ]
+  },
+  "steering": {
+    "grid": [
+      0,
+      200,
+      450,
+      700
+    ],
+    "harmful_unsafe": [
+      0.32,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "harmful_unsafe_ci": [
+      [
+        0.247,
+        0.393
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "benign_refuse": [
+      0.01,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "benign_refuse_ci": [
+      [
+        0.0,
+        0.03
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ]
+  },
+  "auc": {
+    "n": 384,
+    "n_unsafe": 121,
+    "mean_proj_unsafe": 3.3,
+    "mean_proj_safe": 5.1,
+    "auc": 0.696,
+    "auc_ci": [
+      0.642,
+      0.752
+    ]
+  },
+  "patching": {
+    "n_unsafe_baseline": 121,
+    "flipped_to_safe": 10,
+    "rate": 0.083,
+    "rate_ci": [
+      0.033,
+      0.132
+    ]
+  }
+}
