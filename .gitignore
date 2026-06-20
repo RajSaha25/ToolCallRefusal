@@ -7,3 +7,5 @@ data/
 .DS_Store
 *.gsheet
 *.gdoc
+*.gsheet
+*.gdoc
