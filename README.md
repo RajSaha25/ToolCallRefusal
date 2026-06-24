@@ -91,7 +91,7 @@ Run order: **6 → 6b → 6c → 8**. (Cell 7 is the older paired-divergence vie
 
 ---
 
-## Run the mechanistic interpretability workflow on your model
+## Step 2 — Run the mechanistic interpretability workflow on your model
 
 The two numbered notebooks are the main deliverable. They are written to run on **any** Hugging Face
 causal LM whose chat template supports tool definitions — you set `MODEL_ID` and everything else adapts
