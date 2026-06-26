@@ -8,3 +8,7 @@ data/
 
 # Python virtual environment
 .venv/
+
+# local tooling / scratch (not part of the repo)
+.claude/
+MECH_INTERP_SUMMARY.html
