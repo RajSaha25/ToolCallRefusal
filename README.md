@@ -151,9 +151,7 @@ python3.12 run_scaled_evaluation.py           # batched re-run with bootstrap 95
 python3.12 rescore_results.py results/results_Qwen3-14B.csv   # re-score a behavioral CSV, no model needed
 ```
 
-The earlier iterative rounds (the round-2 experiments, the steering-scale fix, and the tier-1
-follow-ups) are kept in `legacy/` for provenance — they are Qwen-specific and superseded by the
-notebooks. The behavioral eval lives in `run_qwen_eval.py` (and `Behavioral_eval.ipynb`).
+The behavioral eval lives in `run_qwen_eval.py` (and `Behavioral_eval.ipynb`).
 
 ---
 
@@ -175,7 +173,6 @@ tools/        scenario + scoring package (domains, forbidden actions, tool defin
 data/         the 2,304-row safety eval dataset
 results/      behavioral eval outputs (CSV)
 interp_artifacts/   figures, summary JSON, saved directions (per-model subfolders)
-legacy/       superseded notebooks + the earlier iterative round-2 / tier-1 scripts (provenance)
 ```
 
 ---
