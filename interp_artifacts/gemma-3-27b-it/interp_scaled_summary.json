@@ -1,0 +1,107 @@
+{
+  "MODEL_ID": "google/gemma-3-27b-it",
+  "LAYER": 51,
+  "ablation": {
+    "n": 200,
+    "base_refuse": 0.28,
+    "base_ci": [
+      0.215,
+      0.34
+    ],
+    "ablated_refuse": 0.0,
+    "ablated_ci": [
+      0.0,
+      0.0
+    ]
+  },
+  "addition": {
+    "n": 200,
+    "coef": 74861.390625,
+    "base_refuse": 0.01,
+    "base_ci": [
+      0.0,
+      0.025
+    ],
+    "added_refuse": 0.305,
+    "added_ci": [
+      0.24,
+      0.37
+    ]
+  },
+  "steering": {
+    "grid": [
+      0,
+      200,
+      450,
+      700
+    ],
+    "harmful_unsafe": [
+      0.173,
+      0.167,
+      0.167,
+      0.16
+    ],
+    "harmful_unsafe_ci": [
+      [
+        0.113,
+        0.24
+      ],
+      [
+        0.107,
+        0.227
+      ],
+      [
+        0.113,
+        0.227
+      ],
+      [
+        0.107,
+        0.22
+      ]
+    ],
+    "benign_refuse": [
+      0.0,
+      0.0,
+      0.0,
+      0.01
+    ],
+    "benign_refuse_ci": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.03
+      ]
+    ]
+  },
+  "auc": {
+    "n": 384,
+    "n_unsafe": 48,
+    "mean_proj_unsafe": 17009.5,
+    "mean_proj_safe": 23535.5,
+    "auc": 0.791,
+    "auc_ci": [
+      0.745,
+      0.834
+    ]
+  },
+  "patching": {
+    "n_unsafe_baseline": 48,
+    "flipped_to_safe": 22,
+    "rate": 0.458,
+    "rate_ci": [
+      0.333,
+      0.604
+    ]
+  }
+}
