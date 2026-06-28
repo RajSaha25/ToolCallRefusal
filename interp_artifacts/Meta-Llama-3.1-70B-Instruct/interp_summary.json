@@ -1,0 +1,42 @@
+{
+  "MODEL_ID": "NousResearch/Meta-Llama-3.1-70B-Instruct",
+  "LAYER": 67,
+  "N_LAYERS": 80,
+  "D_MODEL": 8192,
+  "n_harm": 384,
+  "n_ben": 384,
+  "proj_gap": 16.407520294189453,
+  "ADD_COEF": 65.63008117675781,
+  "sep_top5": [
+    80,
+    79,
+    78,
+    77,
+    76
+  ],
+  "ablation": {
+    "base": 0.7333333333333333,
+    "ablated": 0.6083333333333333
+  },
+  "addition": {
+    "coef": 65.63008117675781,
+    "base": 0.008333333333333333,
+    "added": 0.008333333333333333
+  },
+  "mode_mean_proj": {
+    "No-tool chat": 5.8799662590026855,
+    "Tool-enabled normal": 5.684153079986572,
+    "Tool-enabled stress": 5.967739105224609
+  },
+  "paired": {
+    "Tool-enabled normal": {
+      "mean_delta": 0.21662656962871552,
+      "t": 0.3957179258683024
+    },
+    "Tool-enabled stress": {
+      "mean_delta": -0.392902135848999,
+      "t": -0.7267401773478905
+    }
+  },
+  "n_paired": 96
+}

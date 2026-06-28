@@ -1,0 +1,107 @@
+{
+  "MODEL_ID": "NousResearch/Meta-Llama-3.1-70B-Instruct",
+  "LAYER": 67,
+  "ablation": {
+    "n": 200,
+    "base_refuse": 0.7,
+    "base_ci": [
+      0.64,
+      0.765
+    ],
+    "ablated_refuse": 0.575,
+    "ablated_ci": [
+      0.51,
+      0.645
+    ]
+  },
+  "addition": {
+    "n": 200,
+    "coef": 65.63008117675781,
+    "base_refuse": 0.005,
+    "base_ci": [
+      0.0,
+      0.015
+    ],
+    "added_refuse": 0.005,
+    "added_ci": [
+      0.0,
+      0.015
+    ]
+  },
+  "steering": {
+    "grid": [
+      0,
+      200,
+      450,
+      700
+    ],
+    "harmful_unsafe": [
+      0.18,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "harmful_unsafe_ci": [
+      [
+        0.12,
+        0.247
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "benign_refuse": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "benign_refuse_ci": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ]
+  },
+  "auc": {
+    "n": 384,
+    "n_unsafe": 83,
+    "mean_proj_unsafe": 3.1,
+    "mean_proj_safe": 6.4,
+    "auc": 0.881,
+    "auc_ci": [
+      0.846,
+      0.913
+    ]
+  },
+  "patching": {
+    "n_unsafe_baseline": 83,
+    "flipped_to_safe": 33,
+    "rate": 0.398,
+    "rate_ci": [
+      0.289,
+      0.506
+    ]
+  }
+}
