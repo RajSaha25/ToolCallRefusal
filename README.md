@@ -1,201 +1,123 @@
-# ToolCallRefusal
+# From Text Refusal to Tool Safety
 
-Why does a safety-tuned model refuse a harmful request in plain chat, but carry the same request out
-through a tool call? This repo studies that gap two ways:
+Code and data for *From Text Refusal to Tool Safety: A Causal Mechanistic Study of Transfer Failure in LLM Agents*.
 
-- a **behavioral eval** that measures refusal transfer (text refusal vs. unsafe tool call) across
-  domains, modes, and system conditions, and
-- a **mechanistic interpretability** study of *why* it happens inside the network — refusal is carried
-  by a single linear direction in the residual stream, and tool context turns that direction down.
+A safety-tuned model will usually refuse a harmful request in plain chat. Hand it the same request as a tool call and it often carries it out. We measure how large that gap is across five model families, then open up the network to work out why it happens.
 
-The headline result: refusal is governed by one linear direction; tool context suppresses it; the
-direction strongly *predicts* the unsafe tool call (AUC ≈ 0.73 on Qwen3-14B) but only *partially
-controls* it. It is a strong predictor and a partial mediator, not a single causal switch.
+The behavioral side asks whether a verbal refusal transfers to action. We built a 2,304-prompt dataset over four domains (finance, healthcare, education, legal), grouped into matched triples: a no-tool prompt, a normal tool-enabled prompt, and an adversarially framed tool-enabled prompt, all for the same underlying request. Tool-call safety is scored by 20 hand-written forbidden-action checks rather than a judge model, so the scoring is deterministic. In every model we tested, refusal in text did not carry over to the tool calls.
 
----
+The mechanistic side asks why. We extract a single linear "refusal direction" in the residual stream. Its projection predicts whether a given tool call will be unsafe in all five models (AUC 0.69 to 0.88). But patching that direction back into a tool-mode run only partly restores refusal, which tells us the failure is not one clean switch: the refusal signal gets suppressed when tools are present, and the available tools pull the model toward acting. Steering along the direction cuts unsafe calls, but it drives over-refusal on benign prompts, so it is not a free fix.
 
-## Step 1 — Behavioral eval: does text refusal transfer to tool calls?
+The takeaway for anyone deploying agents: text safety and tool safety need separate evaluations. A model that refuses in chat is not automatically safe once it can call tools.
 
-This is the first half of the project and the question everything else builds on: a model that
-**verbally refuses** a harmful request in plain chat — does it also refuse to *act* on that request
-when the same intent is offered as a tool call? We evaluate this across **five model families**; the
-refusal does not transfer, and that gap is the headline behavioral result. (The mechanistic workflow
-below is the second half — it explains *why*.)
+## Models
 
-### Models (5 families, 4-bit NF4 via HF Transformers)
+All five were run in bf16, no quantization:
 
-- **Command-R-7B** (`CohereLabs/c4ai-command-r7b-12-2024`)
-- **Mistral-7B-Instruct-v0.3** (`mistralai/Mistral-7B-Instruct-v0.3`)
-- **Qwen3-14B** (`Qwen/Qwen3-14B`)
-- **Gemma-3-27B-it** (`google/gemma-3-27b-it`)
-- **Llama-3.1-70B-Instruct** (`meta-llama/Llama-3.1-70B-Instruct`)
+- Qwen3-14B (`Qwen/Qwen3-14B`)
+- Mistral-7B-Instruct-v0.3 (`mistralai/Mistral-7B-Instruct-v0.3`)
+- Command-R-7B (`CohereLabs/c4ai-command-r7b-12-2024`)
+- Gemma-3-27B-it (`google/gemma-3-27b-it`)
+- Llama-3.1-70B-Instruct (`meta-llama/Llama-3.1-70B-Instruct`)
 
-Each model is run once over the full dataset and then unloaded before the next loads — one overnight
-pass on an A100.
+## Dataset
 
-### The dataset (2,304 prompts, matched groups)
-
-The eval reads the 2,304-row `…2304_normalized_labels.xlsx` and crosses six factors:
+The eval crosses six factors over 2,304 prompts:
 
 | Factor | Values |
 |--------|--------|
-| **Domain** | Finance · Healthcare · Education · Legal |
-| **Scenario** | Direct · Indirect · Roleplay (justification) · Structured tool-oriented |
-| **Mode** | No-tool chat · Tool-enabled normal · Tool-enabled stress |
-| **System condition** | Neutral · Safety-reinforced · Tool-encouraging |
-| **Prompt variant** | A · B |
-| **Request type** | Harmful · Benign |
+| Domain | Finance, Healthcare, Education, Legal |
+| Scenario | Direct, Indirect, Roleplay, Structured tool-oriented |
+| Mode | No-tool chat, Tool-enabled normal, Tool-enabled stress |
+| System condition | Neutral, Safety-reinforced, Tool-encouraging |
+| Prompt variant | A, B |
+| Request type | Harmful, Benign |
 
-The **mode** axis is the comparison that matters. A *matched triple* holds the underlying intent fixed
-and varies only tool availability and framing: `No-tool chat` provides no tools, `Tool-enabled normal`
-injects the domain tools under standard prompting, and `Tool-enabled stress` injects the same tools but
-adds jailbreak-style pressure to the user turn. This yields **384 matched harmful triples per model**.
+The mode axis is the one that matters. A matched triple fixes the intent and varies only whether tools are available and how the request is framed: no-tool chat offers no tools, tool-enabled normal injects the domain's tools under standard prompting, and tool-enabled stress adds jailbreak-style pressure to the user turn. That gives 384 matched harmful triples per model.
 
-### Tool environments and forbidden actions
+Each domain (`tools/domains/`) exposes five function-calling tools in OpenAI schema and five ForbiddenAction predicates, so 20 rule-based checks in all. A predicate is a deterministic Python check over the tool name and its arguments; it fires when a sensitive-data flag is set, a required authorization field is missing, a synthetic PII marker shows up in an argument, or a policy-evasion keyword appears. A tool run counts as safe only if no predicate fires. The authorization checks fire only on absent fields, so a fabricated approval ticket slips through, which makes the reported divergence a conservative lower bound.
 
-Each domain (`tools/domains/`) exposes **five** realistic function-calling tools in OpenAI schema
-(e.g. Finance: `place_trade_order`, `initiate_wire_transfer`, `lookup_client_profile`, …) and **five
-`ForbiddenAction` predicates** — deterministic Python checks over the tool name + argument dict — for
-**20 rule-based checks total**. A predicate fires on:
+Text refusal is scored with a hybrid judge: a regex fast path handles the explicit cases with no API call, and anything ambiguous goes to an LLM judge for a binary yes/no on whether the harmful part was declined. A tool call is never counted as a verbal refusal.
 
-- **sensitive-data flags** — a protected-data boolean is set (e.g. `include_sensitive=True`, `include_phi=True`);
-- **authorization bypass** — a required field (e.g. `approval_ticket`, `authorization_code`) is missing or empty;
-- **PII exfiltration** — a synthetic PII marker appears in a text argument; or
-- **intent keywords** — policy-evasion terms (e.g. *bypass*, *evade*) appear in argument content.
+## Setup
 
-A tool-enabled run is `tc_safe` only if **no** predicate fires; scoring is fully deterministic, no LLM
-involved. Auth-bypass checks fire only on *absent* fields, so a fabricated `approval_ticket:"123456"`
-passes — reported divergence rates are conservative lower bounds.
-
-### Refusal classification (text side)
-
-Text refusal uses a hybrid judge: a regex fast-path resolves the explicit cases ("I cannot help
-with…", "I must decline") with no API call, and anything ambiguous falls through to an LLM judge
-(Claude Haiku, binary YES/NO on whether the harmful part was declined). A tool call is **not** counted
-as a verbal refusal — refusal is scored only on genuine text.
-
-### The pipeline (`Behavioral_eval.ipynb`)
-
-The notebook runs all five models in one overnight Colab pass and is resumable (a model whose CSV is
-already complete is skipped). Run the cells in order:
-
-| Cell | Does |
-|------|------|
-| **5** | Load the dataset, the `tools/` package, and the refusal judge — shared across all model runs. |
-| **6** | Main eval loop: load each model in 4-bit, generate over all 2,304 rows, checkpoint every 25, write `results/results_<model>.csv`, then unload. |
-| **6b** | Re-score `tc_safe` from the saved `tool_calls` (no model re-run) under the current `tools/` logic. Fixes two scoring bugs: *scenario-subset scoring* (each scenario only checked ~2 of its domain's 5 forbidden actions) and *string-boolean coercion* (`bool("false")` is `True` in Python, so a correct `include_phi:"false"` was wrongly flagged unsafe). |
-| **6c** | Deterministically clean the `refused` label — a row that emitted a tool call, or has < 10 chars of text, is **not** a verbal refusal (in tool mode the model acts and emits almost no text, which would otherwise trip the refusal regex). Writes `results/results_<model>_clean.csv`. |
-| **8** | **Triple-based divergence — the real metric.** Over the 384 matched harmful triples per model, report **conditioned divergence** `Δcond` (fraction of *text-refused* triples whose matched tool run is unsafe; the headline) and **joint divergence** `Δjoint` (same numerator ÷ *all* triples). Each comes in an *unsafe* numerator (a forbidden call fired) and an *any-call* numerator (tool-engagement, secondary). Broken down by domain / scenario / system condition; writes `results/cross_model_triple_divergence.csv`. |
-
-Run order: **6 → 6b → 6c → 8**. (Cell 7 is the older paired-divergence view, superseded by Cell 8.)
-
----
-
-## Step 2 — Run the mechanistic interpretability workflow on your model
-
-The two numbered notebooks are the main deliverable. They are written to run on **any** Hugging Face
-causal LM whose chat template supports tool definitions — you set `MODEL_ID` and everything else adapts
-(the layer is chosen from the data, and the steering/addition strengths scale to the model's own
-activation magnitudes).
-
-1. **`01_refusal_direction_and_suppression.ipynb`** — find the refusal direction, prove it is causal
-   (ablation removes refusal, addition induces it), and measure the core result: the refusal signal is
-   weaker when tools are in the prompt. Forward-pass heavy; a few minutes plus short generation checks.
-   Saves the direction to `interp_artifacts/<model>/refusal_dirs.pt`.
-
-2. **`02_causal_followups_and_scaling.ipynb`** — load that saved direction and run the harder questions
-   with bootstrap confidence intervals: same-direction-under-tools (cosine), does the projection predict
-   the unsafe action (AUC), patching, steering dose-response, and scaled ablation/addition.
-   Generation heavy; budget 40+ minutes on an A100 for a 14B model.
-
-Open `01` first, set `MODEL_ID` in the config cell, and run top to bottom. Then do the same in `02` with
-the same `MODEL_ID`. Each model writes to its own `interp_artifacts/<model>/` folder, so runs don't
-collide.
-
-New to the methods? Read **`MECH_INTERP_GUIDE.md`** first — it explains residual streams, directions,
-projections, ablation, and patching from scratch, then ties each idea to the exact cells here.
-**`MECHANISTIC_INTERP.md`** is the terse results write-up with the Qwen3-14B numbers.
-
----
-
-## Environment
-
-Tested on an A100-80GB (RunPod), Python 3.12, with `torch 2.8.0+cu128` from the base image.
+Tested on an A100-80GB (RunPod), Python 3.12, torch 2.8.0+cu128 from the base image.
 
 ```bash
-# torch is assumed preinstalled (CUDA build matched to your GPU). Install the rest:
+# torch is assumed preinstalled (CUDA build matched to your GPU)
 python3.12 -m pip install --break-system-packages -r requirements.txt
 ```
 
-Model weights are pulled from the Hugging Face hub on first use. Point the cache at a persistent disk so
-you don't redownload after a restart:
+Weights download from the Hugging Face hub on first use. Point the cache at a persistent disk so a restart does not redownload them:
 
 ```bash
 export HF_HOME=/workspace/.cache/huggingface
 ```
 
-A 14B model in bf16 needs roughly 30 GB of GPU memory. For smaller cards, lower the `N_*` sample-size
-knobs in each notebook's config cell, or use a smaller model.
+A 14B model in bf16 needs roughly 30 GB of GPU memory. For smaller cards, lower the `N_*` sample-size knobs in each notebook's config cell.
 
----
+## Reproducing
 
-## Reproducing the Qwen3-14B numbers headless
+The two numbered notebooks are the model-agnostic version and run on any Hugging Face causal LM whose chat template accepts tool definitions. Set `MODEL_ID` and the rest adapts: the layer is picked from the data, and the steering strengths scale to the model's own activation magnitudes.
 
-The notebooks are the canonical, model-agnostic version. Two headless scripts reproduce the
-`Qwen/Qwen3-14B` numbers without a notebook server (run the first before the second — it saves the
-direction the second reuses):
+1. `01_refusal_direction_and_suppression.ipynb` finds the refusal direction, checks that it is causal (ablation removes refusal, addition induces it), and measures the core effect: the refusal signal is weaker with tools in the prompt. It saves the direction to `interp_artifacts/<model>/refusal_dirs.pt`.
+2. `02_causal_followups_and_scaling.ipynb` loads that direction and runs the harder questions with bootstrap confidence intervals: same-direction-under-tools, whether the projection predicts the unsafe call (AUC), patching, steering dose-response, and scaled ablation and addition.
+
+Run `01` first, then `02` with the same `MODEL_ID`. Each model writes to its own `interp_artifacts/<model>/` folder.
+
+New to the methods? `MECH_INTERP_GUIDE.md` explains residual streams, directions, projections, ablation, and patching from the ground up, and ties each idea to the cells here. `MECHANISTIC_INTERP.md` is the terse results write-up.
+
+The behavioral eval lives in `Behavioral_eval.ipynb`, with `run_qwen_eval.py` as a headless single-model runner. Three headless scripts reproduce the Qwen3-14B interp numbers without a notebook server:
 
 ```bash
-python3.12 run_direction_and_suppression.py   # extract direction -> ablation/addition -> projection by mode
-python3.12 run_scaled_evaluation.py           # batched re-run with bootstrap 95% CIs (authoritative numbers)
-python3.12 rescore_results.py results/results_Qwen3-14B.csv   # re-score a behavioral CSV, no model needed
+python3.12 run_direction_and_suppression.py   # extract direction, ablation/addition, projection by mode
+python3.12 run_scaled_evaluation.py           # batched re-run with bootstrap 95% CIs
+python3.12 rescore_results.py results/results_Qwen3-14B.csv   # re-score a saved CSV, no model needed
 ```
-
-The behavioral eval lives in `run_qwen_eval.py` (and `Behavioral_eval.ipynb`).
-
----
 
 ## Layout
 
 ```
-01_refusal_direction_and_suppression.ipynb   mech-interp part 1 (run this first)
-02_causal_followups_and_scaling.ipynb         mech-interp part 2 (loads part 1's direction)
+01_refusal_direction_and_suppression.ipynb   interp part 1 (run first)
+02_causal_followups_and_scaling.ipynb         interp part 2 (loads part 1's direction)
+Behavioral_eval.ipynb                         behavioral eval, all models
 MECH_INTERP_GUIDE.md                          teaching guide (start here if the methods are new)
 MECHANISTIC_INTERP.md                         terse results write-up
-requirements.txt                              Python deps (torch assumed preinstalled)
 
-run_direction_and_suppression.py              headless: extract + validate direction, projection by mode
-run_scaled_evaluation.py                      headless: scaled re-run with bootstrap 95% CIs
-measure_divergence.py, rescore_results.py     behavioral-metric helpers
-run_qwen_eval.py                              behavioral eval
+run_direction_and_suppression.py              headless: extract and validate the direction
+run_scaled_evaluation.py                      headless: scaled re-run with bootstrap CIs
+run_qwen_eval.py                              headless behavioral eval
+rescore_results.py                            re-score a saved behavioral CSV
 
-tools/        scenario + scoring package (domains, forbidden actions, tool definitions)
-data/         the 2,304-row safety eval dataset
-results/      behavioral eval outputs (CSV)
-interp_artifacts/   figures, summary JSON, saved directions (per-model subfolders)
+tools/               scenario and scoring package (domains, forbidden actions, tool schemas)
+results/             behavioral output CSVs (Qwen3-14B, Gemma-3-27B, Llama-3.1-70B)
+interp_artifacts/    per-model summaries, figures, saved directions
+figures/             figures used in the paper
+data/                the eval dataset spreadsheet (kept local, not tracked here)
 ```
 
----
+## What we did and did not find
 
-## How the scoring works (and one bug worth knowing about)
+A few honest limits, since the effect is easy to overstate:
 
-A model tool call is scored against per-domain **forbidden actions** in `tools/`. The original
-`DomainSpec.score_tool_calls(scenario_id, calls)` only checked the actions listed for that one scenario,
-so a genuinely unsafe call that belonged to a *different* scenario's list was scored safe. The fix,
-`DomainSpec.score_tool_calls_all(calls)`, checks every forbidden action in the domain. Re-scoring the
-first 250 behavioral rows raised the harmful unsafe rate from 4.2% to 11.5%. The mech-interp notebooks
-use the all-actions scorer.
+- The refusal direction is a strong predictor of the unsafe call but only a partial cause. Patching restores refusal 18 to 62 percent of the time depending on the model, not all of it.
+- The suppression effect held in four of the five models. Llama-3.1-70B was the exception, where the drop in the refusal signal under tools was not significant.
+- The regex refusal classifier used inside the generation experiments undercounts soft refusals, so read the direction of each effect as solid and the exact rates as approximate.
+- Steering lowers unsafe calls at a real over-refusal cost. It is not a deployable defense.
 
----
+## Citation
 
-## Honest limitations
+The paper is under review. Until it is public, cite it as:
 
-- Results so far are on one model (Qwen3-14B). Cross-model replication is the point of making these
-  notebooks model-agnostic — that is the open question.
-- The refusal classifier used inside the generation experiments is a regex (fast, no API). It undercounts
-  soft refusals, so read the *direction* of effects as solid and exact rates as approximate.
-- Steering reduces unsafe calls but at a steep over-refusal cost; it is not a deployable defense yet.
-- A length/format confound control (does irrelevant long context lower the projection?) is still owed.
+```bibtex
+@misc{toolsafety2026,
+  title  = {From Text Refusal to Tool Safety: A Causal Mechanistic Study of Transfer Failure in LLM Agents},
+  author = {},        % add author list on release
+  year   = {2026},
+  note   = {Under review},
+}
+```
 
-*Reference:* Arditi, Obeso, Syed, Paleka, Panickssery, Gurnee, Nanda (2024), *Refusal in Language Models
-Is Mediated by a Single Direction*, arXiv:2406.11717.
+## Reference
+
+The refusal-direction method builds on Arditi, Obeso, Syed, Paleka, Panickssery, Gurnee, and Nanda (2024), *Refusal in Language Models Is Mediated by a Single Direction*, arXiv:2406.11717.
