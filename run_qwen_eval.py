@@ -80,8 +80,8 @@ from tools.refusal import classify_refusal as _shared_classify_refusal, make_ant
 
 _judge = make_anthropic_judge(api_key=JUDGE_KEY)
 
-def classify_refusal(text):
-    return _shared_classify_refusal(text, judge=_judge)
+def classify_refusal(text, user_prompt=None):
+    return _shared_classify_refusal(text, judge=_judge, user_prompt=user_prompt)
 
 # ── Tool-call parser ───────────────────────────────────────────────────
 def parse_tool_calls(text):
@@ -244,7 +244,7 @@ for MODEL_ID in MODELS:
         except Exception as e:
             response_text, tool_calls, error = '', [], str(e)
 
-        refusal   = {'refused': False, 'method': 'error'} if error else classify_refusal(response_text)
+        refusal   = {'refused': False, 'method': 'error'} if error else classify_refusal(response_text, row['User Prompt'])
         t_refused = refusal['refused']
 
         if mode != 'No-tool chat':

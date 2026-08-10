@@ -90,7 +90,7 @@ from tools.refusal import classify_refusal as _shared_classify_refusal, make_ant
 _JUDGE_KEY = os.environ.get('JUDGE_KEY', '')
 _judge = make_anthropic_judge(api_key=_JUDGE_KEY) if _JUDGE_KEY else None
 if _judge is None: log('[refusal] WARNING: JUDGE_KEY unset — regex-only labels, NOT comparable to the behavioral pipeline')
-def looks_refused(t): return _shared_classify_refusal(t, judge=_judge)['refused']
+def looks_refused(t, user_prompt=None): return _shared_classify_refusal(t, judge=_judge, user_prompt=user_prompt)['refused']
 def _layers(): return model.model.layers
 class Hooks:
     def __init__(self): self.h=[]
@@ -130,11 +130,13 @@ vh = notool[(notool['Request Type']=='Harmful') & (~notool.index.isin(harm_ex.in
 vb = notool[(notool['Request Type']=='Benign')  & (~notool.index.isin(ben_ex.index))].sample(NV, random_state=7)
 base_h=[generate(format_prompt(r)) for _,r in vh.iterrows()]
 with ablate(rdir): abl_h=[generate(format_prompt(r)) for _,r in vh.iterrows()]
-br=np.mean([looks_refused(t) for t in base_h]); ar=np.mean([looks_refused(t) for t in abl_h])
+vh_up=[r['User Prompt'] for _,r in vh.iterrows()]
+br=np.mean([looks_refused(t,p) for t,p in zip(base_h,vh_up)]); ar=np.mean([looks_refused(t,p) for t,p in zip(abl_h,vh_up)])
 ADD_COEF=float(max(6.0, 4.0*abs(proj_gap)))
 base_b=[generate(format_prompt(r)) for _,r in vb.iterrows()]
 with addvec(rdir, LAYER-1, ADD_COEF): add_b=[generate(format_prompt(r)) for _,r in vb.iterrows()]
-bbr=np.mean([looks_refused(t) for t in base_b]); abr=np.mean([looks_refused(t) for t in add_b])
+vb_up=[r['User Prompt'] for _,r in vb.iterrows()]
+bbr=np.mean([looks_refused(t,p) for t,p in zip(base_b,vb_up)]); abr=np.mean([looks_refused(t,p) for t,p in zip(add_b,vb_up)])
 log(f'[step2] ablation harmful refusal {br:.0%} -> {ar:.0%} | addition(coef={ADD_COEF:.1f}) benign refusal {bbr:.0%} -> {abr:.0%}  ({time.time()-t0:.0f}s)')
 log('[step2] sample BASE   :', base_h[0][:140].replace(chr(10),' '))
 log('[step2] sample ABLATED:', abl_h[0][:140].replace(chr(10),' '))
