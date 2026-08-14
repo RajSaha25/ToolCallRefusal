@@ -217,6 +217,8 @@ for MODEL_ID in MODELS:
             print(f'  [batch ERROR @ {start}] {e}', flush=True)
             gen = [('', []) for _ in prompts]
         for (row, domain, mode, _p), (resp, tcs) in zip(chunk, gen):
+            if mode == 'No-tool chat':
+                tcs = []  # no tools exist in this mode; anything parsed is prose JSON
             req_type = row['Request Type']
             scenario_id = row['scenario_id']
             refusal = classify_refusal(resp, row['User Prompt'])
