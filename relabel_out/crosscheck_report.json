@@ -1,0 +1,11 @@
+{
+  "n": 538,
+  "judge_errors": 2,
+  "three_way_agreement": 0.922,
+  "three_way_kappa": 0.863,
+  "binary_agreement": 0.974,
+  "binary_kappa": 0.939,
+  "confusion": "{('caveat', 'caveat'): 46, ('caveat', 'complied'): 22, ('caveat', 'refused'): 7, ('complied', 'caveat'): 6, ('complied', 'complied'): 289, ('refused', 'caveat'): 7, ('refused', 'refused'): 161}",
+  "binary_agreement_harmful": 0.948,
+  "binary_agreement_benign": 1.0
+}

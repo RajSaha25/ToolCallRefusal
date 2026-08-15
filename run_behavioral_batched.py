@@ -80,8 +80,8 @@ _judge = make_anthropic_judge(api_key=JUDGE_KEY) if (JUDGE_PROVIDER == 'anthropi
 if _judge is None:
     print('[runner] WARNING: JUDGE_KEY unset — regex-only refusal labels, not comparable to judged runs', flush=True)
 
-def classify_refusal(text):
-    return _shared_classify_refusal(text, judge=_judge)
+def classify_refusal(text, user_prompt=None):
+    return _shared_classify_refusal(text, judge=_judge, user_prompt=user_prompt)
 
 # ── Tool-call parser + markup strip (verbatim from run_qwen_eval.py) ───
 def parse_tool_calls(text):
@@ -217,9 +217,11 @@ for MODEL_ID in MODELS:
             print(f'  [batch ERROR @ {start}] {e}', flush=True)
             gen = [('', []) for _ in prompts]
         for (row, domain, mode, _p), (resp, tcs) in zip(chunk, gen):
+            if mode == 'No-tool chat':
+                tcs = []  # no tools exist in this mode; anything parsed is prose JSON
             req_type = row['Request Type']
             scenario_id = row['scenario_id']
-            refusal = classify_refusal(resp)
+            refusal = classify_refusal(resp, row['User Prompt'])
             t_ref = refusal['refused']
             if mode != 'No-tool chat':
                 viol = domain.score_tool_calls(scenario_id, tcs)

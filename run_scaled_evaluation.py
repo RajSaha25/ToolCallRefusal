@@ -55,7 +55,7 @@ from tools.refusal import classify_refusal as _shared_classify_refusal, make_ant
 _JUDGE_KEY=os.environ.get('JUDGE_KEY','')
 _judge=make_anthropic_judge(api_key=_JUDGE_KEY) if _JUDGE_KEY else None
 if _judge is None: log('[refusal] WARNING: JUDGE_KEY unset — regex-only labels, NOT comparable to the behavioral pipeline')
-def looks_refused(t): return _shared_classify_refusal(t, judge=_judge)['refused']
+def looks_refused(t, user_prompt=None): return _shared_classify_refusal(t, judge=_judge, user_prompt=user_prompt)['refused']
 def _layers(): return model.model.layers
 class Hooks:
     def __init__(self): self.h=[]
@@ -130,16 +130,18 @@ toolh=harm[harm['Mode']=='Tool-enabled normal']; toolb=ben[ben['Mode']=='Tool-en
 # ---- Ablation (n=120 harmful No-tool) ----
 t0=time.time(); log('[abl] ablation n=120...')
 va=notool_h.sample(120,random_state=7).reset_index(drop=True); pa=[format_prompt(r) for _,r in va.iterrows()]
-base=[looks_refused(t) for t in gen_all(pa)]
-abl=[looks_refused(t) for t in gen_all(pa, hook_fn=lambda i,n: ablate())]
+va_up=list(va['User Prompt'])
+base=[looks_refused(t, va_up[k]) for k,t in enumerate(gen_all(pa))]
+abl=[looks_refused(t, va_up[k]) for k,t in enumerate(gen_all(pa, hook_fn=lambda i,n: ablate()))]
 out['ablation']={'n':120,'base_refuse':round(np.mean(base),3),'base_ci':ci(base),'ablated_refuse':round(np.mean(abl),3),'ablated_ci':ci(abl)}
 log(f"[abl] refuse {np.mean(base):.0%} {out['ablation']['base_ci']} -> {np.mean(abl):.0%} {out['ablation']['ablated_ci']}  ({time.time()-t0:.0f}s)")
 
 # ---- Addition (n=120 benign No-tool, coef 1245) ----
 t0=time.time(); log('[add] addition n=120...')
 vb=notool_b.sample(120,random_state=7).reset_index(drop=True); pb=[format_prompt(r) for _,r in vb.iterrows()]
-bbase=[looks_refused(t) for t in gen_all(pb)]
-badd=[looks_refused(t) for t in gen_all(pb, hook_fn=lambda i,n: addvec(1245.0))]
+vb_up=list(vb['User Prompt'])
+bbase=[looks_refused(t, vb_up[k]) for k,t in enumerate(gen_all(pb))]
+badd=[looks_refused(t, vb_up[k]) for k,t in enumerate(gen_all(pb, hook_fn=lambda i,n: addvec(1245.0)))]
 out['addition']={'n':120,'coef':1245.0,'base_refuse':round(np.mean(bbase),3),'base_ci':ci(bbase),'added_refuse':round(np.mean(badd),3),'added_ci':ci(badd)}
 log(f"[add] refuse {np.mean(bbase):.0%} {out['addition']['base_ci']} -> {np.mean(badd):.0%} {out['addition']['added_ci']}  ({time.time()-t0:.0f}s)")
 
@@ -151,7 +153,7 @@ GRID=[0,200,450,700]; steer={'grid':GRID,'harmful_unsafe':[],'harmful_unsafe_ci'
 for c in GRID:
     hf=(lambda i,n,cc=c: addvec(float(cc))) if c>0 else None
     uh=[unsafe_all(sh.iloc[k],t) for k,t in enumerate(gen_all(shp,hook_fn=hf))]
-    rb=[looks_refused(t) for t in gen_all(sbp,hook_fn=hf)]
+    rb=[looks_refused(t, sb.iloc[k]['User Prompt']) for k,t in enumerate(gen_all(sbp,hook_fn=hf))]
     steer['harmful_unsafe'].append(round(np.mean(uh),3)); steer['harmful_unsafe_ci'].append(ci(uh))
     steer['benign_refuse'].append(round(np.mean(rb),3)); steer['benign_refuse_ci'].append(ci(rb))
     log(f"   c={c:4d} unsafe={np.mean(uh):.0%} {steer['harmful_unsafe_ci'][-1]} | benign refuse={np.mean(rb):.0%} {steer['benign_refuse_ci'][-1]}")
