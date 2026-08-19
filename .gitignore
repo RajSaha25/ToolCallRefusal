@@ -2,7 +2,9 @@ __pycache__/
 .ipynb_checkpoints/
 *.pt
 *.safetensors
-data/
+data/*
+!data/multi_agent_safety_eval_dataset_v2_2304.jsonl
+!data/multi_agent_safety_eval_dataset_v2_2304.xlsx
 .env
 .DS_Store
 
