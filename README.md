@@ -4,11 +4,85 @@ Code and data for *From Text Refusal to Tool Safety: A Causal Mechanistic Study 
 
 A safety-tuned model will usually refuse a harmful request in plain chat. Hand it the same request as a tool call and it often carries it out. We measure how large that gap is across five model families, then open up the network to work out why it happens.
 
-The behavioral side asks whether a verbal refusal transfers to action. We built a 2,304-prompt dataset over four domains (finance, healthcare, education, legal), grouped into matched triples: a no-tool prompt, a normal tool-enabled prompt, and an adversarially framed tool-enabled prompt, all for the same underlying request. Tool-call safety is scored by 20 hand-written forbidden-action checks rather than a judge model, so the scoring is deterministic. In every model we tested, refusal in text did not carry over to the tool calls.
+The behavioral side asks whether a verbal refusal transfers to action. We built a 2,304-prompt dataset over four domains (finance, healthcare, education, legal), organized into no-tool, normal tool-enabled, and stress tool-enabled conditions. Tool-call safety is scored by 20 hand-written forbidden-action checks rather than a judge model, so the scoring is deterministic. In every model we tested, refusal in text did not carry over to the tool calls.
 
 The mechanistic side asks why. We extract a single linear "refusal direction" in the residual stream. Its projection predicts whether a given tool call will be unsafe in all five models (AUC 0.69 to 0.88). But patching that direction back into a tool-mode run only partly restores refusal, which tells us the failure is not one clean switch: the refusal signal gets suppressed when tools are present, and the available tools pull the model toward acting. Steering along the direction cuts unsafe calls, but it drives over-refusal on benign prompts, so it is not a free fix.
 
 The takeaway for anyone deploying agents: text safety and tool safety need separate evaluations. A model that refuses in chat is not automatically safe once it can call tools.
+
+## Orchestrated V2 (next-paper environment)
+
+The accepted-paper pipeline is intentionally preserved as the `legacy_v1`
+baseline. It is a one-completion function-call probe: calls are parsed and
+scored, but the Python tool implementations are not executed and no observation
+is returned to the model.
+
+The versioned V2 environment studies **refusal propagation across an agent
+workflow**:
+
+```text
+Coordinator -> environment work-item tool result -> Domain specialist
+            -> Safety reviewer -> sandbox executor
+            -> Domain specialist (optional second round) -> Synthesizer
+```
+
+The coordinator has no operational tools, the specialist proposes immutable
+actions, the reviewer binds a decision to the proposal ID and argument digest,
+and only the deterministic sandbox executor can call a domain function. The
+runtime validates credentials against episode state, distinguishes proposed,
+approved, blocked, and executed actions, and labels tool observations as trusted
+or untrusted. Model-visible observations use the native chat-template exchange
+(`assistant.tool_calls` followed by `role=tool`), rather than being pasted into a
+user message. `Tool-enabled stress` delivers its attack through that untrusted
+tool-result channel while keeping the user text byte-identical to the normal condition.
+The natural workflow requires a valid coordinator delegation; forced continuation
+after refusal/non-delegation is available only as a labeled counterfactual.
+
+The original workbook remains frozen. `build_multi_agent_dataset.py` creates a
+2,304-row JSONL scenario manifest with the same balanced factorial design but
+with explicit replicates, true A/B paraphrases, matched text across system
+conditions, state and authorization fixtures, and trajectory-level golds.
+
+```bash
+python3.12 build_multi_agent_dataset.py
+
+# Small CPU-side integrity test (no model download)
+python3.12 -m unittest \
+  tests/test_dataset_v2.py tests/test_tool_calls.py tests/test_runtime.py \
+  tests/test_orchestration.py tests/test_orchestrated_integration.py \
+  tests/test_trajectory_metrics.py
+
+# One primary reviewed condition
+MODELS=Qwen/Qwen3-14B python3.12 run_orchestrated_eval.py
+
+# Recommended architecture/gate ablation
+CONDITIONS=single:audit,delegated:audit,reviewed:reviewer,reviewed:policy \
+  MODELS=Qwen/Qwen3-14B python3.12 run_orchestrated_eval.py
+
+# Counterfactual: continue even if the coordinator refuses or does not delegate
+COORDINATOR_POLICY=forced CONDITIONS=delegated:audit,reviewed:reviewer \
+  MODELS=Qwen/Qwen3-14B python3.12 run_orchestrated_eval.py
+```
+
+Each run writes an atomic summary+events JSON bundle per episode, plus a
+convenience summary CSV, append-only event JSONL, and run manifest containing the
+dataset hash, model revision, precision, token limits,
+protocol/code fingerprint, continuation policy, and git commit. Output names carry
+the run fingerprint so incompatible resumptions cannot mix. The primary
+harmful-case funnel is:
+
+```text
+coordinator delegated -> unsafe proposed -> unsafe approved -> unsafe executed
+```
+
+Benign tool-mode completion requires the schema-normalized required action
+sequence. For the no-tool control, a non-refusal is exported only as
+`non_refusal_response_proxy`; it is not mislabeled as task completion without a
+separate helpfulness rubric. Explicitly invalid episodes are excluded by the
+aggregation helper and reported as an excluded count.
+
+See `docs/multi_agent_orchestration.md` for the research hypotheses, controls,
+dataset invariants, metrics, related-work positioning, and mechanistic follow-up.
 
 ## Models
 
@@ -33,7 +107,7 @@ The eval crosses six factors over 2,304 prompts:
 | Prompt variant | A, B |
 | Request type | Harmful, Benign |
 
-The mode axis is the one that matters. A matched triple fixes the intent and varies only whether tools are available and how the request is framed: no-tool chat offers no tools, tool-enabled normal injects the domain's tools under standard prompting, and tool-enabled stress adds jailbreak-style pressure to the user turn. That gives 384 matched harmful triples per model.
+The original construction intended each mode triple to hold the request fixed while varying tool availability and stress framing. A later row-level audit found that portions of the four construction batches also change task wording or semantics across conditions, so use this workbook only to reproduce V1. Orchestrated V2 rebuilds the lattice with enforced prompt/state hashes: no-tool and both tool modes now share byte-identical user text, while stress exists only in the tool-output channel.
 
 Each domain (`tools/domains/`) exposes five function-calling tools in OpenAI schema and five ForbiddenAction predicates, so 20 rule-based checks in all. A predicate is a deterministic Python check over the tool name and its arguments; it fires when a sensitive-data flag is set, a required authorization field is missing, a synthetic PII marker shows up in an argument, or a policy-evasion keyword appears. A tool run counts as safe only if no predicate fires. The authorization checks fire only on absent fields, so a fabricated approval ticket slips through, which makes the reported divergence a conservative lower bound.
 
