@@ -66,14 +66,45 @@ Two things to separate here.
 refusal, the projection predicts the refusal decision better.
 
 *The "vs unsafe" column is not relabel-dependent* — it is the same kind of predicate-scored
-quantity as patching. It reproduces the published AUC for Qwen, Mistral and Command-R, but not
-for Gemma or Llama, both well outside their bootstrap CIs. The published AUCs were computed on
-freshly generated responses inside `run_scaled_evaluation.py`; the numbers here are computed
-against the stored behavioural generations. Same prompts, different completions, and with only
-~50 unsafe rows in 384 the AUC is sensitive to which ones. Notably the two that fail are exactly
-the two whose interp artifacts were produced later than their behavioural runs. This does not
-touch the relabel story, but it does mean the paper's AUC column and its Table 1 divergence
-numbers rest on different generations of the same prompts — worth reconciling independently.
+quantity as patching. It reproduces the published AUC for Qwen, Mistral and Command-R.
+
+**The Gemma and Llama "vs unsafe" figures above are withdrawn** — see the chat-template
+problem below. Their tool-mode prompts contained no tool definitions, so those two rows measure
+something other than what the column claims. The no-tool columns ("vs refusal") are unaffected.
+
+## The chat-template problem (Gemma-3 and Llama-3.1)
+
+`apply_chat_template(..., tools=...)` silently drops the tools when a model's template has no
+tool-handling block: the variable is simply unused, no error is raised. Checking the templates
+directly:
+
+| model | template length | handles tools |
+|---|---|---|
+| Qwen3-14B | 4168 | yes |
+| Mistral-7B-Instruct-v0.3 | — | yes (verified by rendering) |
+| gemma-3-27b-it | 1532 | **no** |
+| NousResearch/Meta-Llama-3.1-70B-Instruct | 348 | **no** |
+| unsloth/Meta-Llama-3.1-70B-Instruct | 4614 | yes |
+
+The consequence is silent and severe: a tool-enabled prompt renders as a plain chat prompt, the
+model has nothing to call, and every response scores as "made no unsafe tool call" — perfectly
+safe. Llama scored 0/100 unsafe at every steering coefficient before this was caught, with all
+100 responses being clean verbal refusals.
+
+For Llama this is a mirror artifact: the NousResearch reupload carries a stripped 348-character
+template. `unsloth/Meta-Llama-3.1-70B-Instruct` has the real 4614-character template and renders
+tools correctly, so Llama's tool-mode results are rerun from there.
+
+Gemma-3 is different: **no** Gemma-3 mirror carries a tool-handling template — `google/` and
+`unsloth/` are byte-identical at 1532 characters. That leaves an open question about the
+committed Gemma behavioural data, which contains 666 rows of tool calls using 100% real tool
+names (models cannot invent 20 exact names, so tools demonstrably reached those prompts
+somehow). Whatever produced them is not the `render_prompt` path in
+`run_behavioral_batched.py` as it behaves today. Worth tracing before the Gemma tool-mode
+numbers are relied on.
+
+A cheap guard for the future: assert that a tool name appears in the rendered prompt whenever
+tools are supposed to be attached. `_render_check.py` does exactly this.
 
 ## Patching — unaffected by definition
 
