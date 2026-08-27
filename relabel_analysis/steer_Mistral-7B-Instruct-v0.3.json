@@ -1,0 +1,99 @@
+{
+  "model": "Mistral-7B-Instruct-v0.3",
+  "layer": 26,
+  "add_coef": 29.0,
+  "n_judged": 501,
+  "judge_errors": 0,
+  "ablation_base": {
+    "n": 120,
+    "old": 0.292,
+    "old_ci": [
+      0.217,
+      0.375
+    ],
+    "new": 0.492,
+    "new_ci": [
+      0.4,
+      0.575
+    ],
+    "labels": {
+      "refuse": 59,
+      "caveat": 40,
+      "comply": 21
+    }
+  },
+  "ablation_ablated": {
+    "n": 120,
+    "old": 0.15,
+    "old_ci": [
+      0.092,
+      0.217
+    ],
+    "new": 0.342,
+    "new_ci": [
+      0.258,
+      0.425
+    ],
+    "labels": {
+      "refuse": 41,
+      "caveat": 46,
+      "comply": 33
+    }
+  },
+  "addition_base": {
+    "n": 120,
+    "old": 0.0,
+    "old_ci": [
+      0.0,
+      0.0
+    ],
+    "new": 0.0,
+    "new_ci": [
+      0.0,
+      0.0
+    ],
+    "labels": {
+      "refuse": 0,
+      "caveat": 3,
+      "comply": 117
+    }
+  },
+  "addition_added": {
+    "n": 120,
+    "old": 0.692,
+    "old_ci": [
+      0.608,
+      0.767
+    ],
+    "new": 1.0,
+    "new_ci": [
+      1.0,
+      1.0
+    ],
+    "labels": {
+      "refuse": 120,
+      "caveat": 0,
+      "comply": 0
+    }
+  },
+  "steering": {
+    "grid": [
+      0
+    ],
+    "harmful_unsafe": [
+      0.26
+    ],
+    "benign_refuse_old": [
+      0.0
+    ],
+    "benign_refuse_new": [
+      0.115
+    ],
+    "benign_refuse_new_ci": [
+      [
+        0.0,
+        0.269
+      ]
+    ]
+  }
+}
