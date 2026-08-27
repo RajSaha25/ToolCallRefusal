@@ -27,31 +27,53 @@ cosine against the request-type direction. No such code existed; the only cosine
 was `cos(r_text, r_tool) = 0.735` in notebook 02, which is a different quantity. Computed at
 each model's own layer, with the new labels:
 
-| model | layer | cos(r_text, r_behav) | caveats folded in | cos(r_text, r_tool) | cos(r_behav old, new) |
-|---|---|---|---|---|---|
-| Qwen3-14B | 33/40 | 0.859 | 0.857 | 0.741 | 0.975 |
-| Mistral-7B-Instruct-v0.3 | 26/32 | 0.711 | 0.675 | 0.773 | 0.978 |
-| c4ai-command-r7b-12-2024 | 26/32 | 0.746 | 0.791 | 0.394 | 0.978 |
+| model | layer | cos(r_text, r_behav) | caveats folded in | cos(r_text, r_tool) | cos(r_behav old, new) | n/class |
+|---|---|---|---|---|---|---|
+| Qwen3-14B | 33/40 | 0.859 | 0.857 | 0.741 | 0.975 | 42 |
+| Mistral-7B-Instruct-v0.3 | 26/32 | 0.711 | 0.675 | 0.773 | 0.978 | 84 |
+| c4ai-command-r7b-12-2024 | 26/32 | 0.746 | 0.791 | 0.394 | 0.978 | 59 |
+| gemma-3-27b-it | 51/62 | 0.822 | 0.817 | 0.939 | 0.958 | 25 |
+| Meta-Llama-3.1-70B-Instruct | 67/80 | 0.699 | 0.727 | 0.914 | 0.982 | 59 |
 
-The claim holds: request harmfulness and the refusal decision occupy substantially the same
-axis. The old-vs-new behaviour direction agrees at ~0.98 everywhere, so this result does not
-depend on the relabel. Rebuilt `r_text` matches the committed `refusal_dirs.pt` at 0.997.
+The claim holds for all five: request harmfulness and the refusal decision occupy substantially
+the same axis. The old-vs-new behaviour direction agrees at 0.96–0.98 everywhere, so this result
+does not depend on the relabel. Rebuilt `r_text` matches the committed `refusal_dirs.pt` at 0.997
+for Qwen (the only model whose directions were committed), and Gemma's rebuilt projection gap
+(18944) matches the original run's (18715).
 
-Caveat: models rarely comply with harmful requests, so the complied side is small — n=42/class
-for Qwen, 84 for Mistral, 59 for Command-R. The "caveats folded in" column roughly doubles that
-side and moves the answer very little.
+Caveat: models rarely comply with harmful requests, so the complied side is small — as few as
+25/class for Gemma. The "caveats folded in" column folds CAVEAT in with compliance, roughly
+doubling that side, and moves the answer very little in every model.
+
+Llama and Gemma were run from a single B200 (183GB); Llama-70B needs ~135GB in bf16 and fits
+without model parallelism. Llama used `NousResearch/Meta-Llama-3.1-70B-Instruct`, an ungated
+bf16 mirror with identical config, because the `meta-llama` repos are gated to this account.
 
 ## AUC — reproduces on old labels, rises under the corrected scorer
 
-| model | vs unsafe (old) | vs unsafe (fixed) | published | vs refusal (old) | vs refusal (new) |
-|---|---|---|---|---|---|
-| Qwen3-14B | 0.722 | 0.808 | 0.724 | 0.972 | 0.945 |
-| Mistral-7B-Instruct-v0.3 | 0.698 | 0.760 | 0.689 | 0.868 | 0.869 |
-| c4ai-command-r7b-12-2024 | 0.713 | 0.768 | 0.751 | 0.923 | 0.901 |
+| model | vs unsafe (old) | vs unsafe (fixed) | published | in CI? | vs refusal (old) | vs refusal (new) |
+|---|---|---|---|---|---|---|
+| Qwen3-14B | 0.722 | 0.808 | 0.724 | yes | 0.972 | 0.945 |
+| Mistral-7B-Instruct-v0.3 | 0.698 | 0.760 | 0.689 | yes | 0.868 | 0.869 |
+| c4ai-command-r7b-12-2024 | 0.713 | 0.768 | 0.751 | yes | 0.923 | 0.901 |
+| gemma-3-27b-it | 0.497 | 0.629 | 0.791 | **no** | 0.903 | 0.946 |
+| Meta-Llama-3.1-70B-Instruct | 0.591 | 0.681 | 0.881 | **no** | 0.950 | 0.977 |
 
-Command-R is the one that drifts from the published value, but only 17/300 of its baseline
-rows are unsafe and the CI is 0.611–0.811, which contains 0.751. The projection predicts the
-unsafe action *better* once the scorer stops missing unsafe calls.
+Two things to separate here.
+
+*The relabel-dependent column* is "vs refusal", and it improves for the two large models
+(Gemma 0.903 → 0.946, Llama 0.950 → 0.977): once hedged compliance stops being scored as
+refusal, the projection predicts the refusal decision better.
+
+*The "vs unsafe" column is not relabel-dependent* — it is the same kind of predicate-scored
+quantity as patching. It reproduces the published AUC for Qwen, Mistral and Command-R, but not
+for Gemma or Llama, both well outside their bootstrap CIs. The published AUCs were computed on
+freshly generated responses inside `run_scaled_evaluation.py`; the numbers here are computed
+against the stored behavioural generations. Same prompts, different completions, and with only
+~50 unsafe rows in 384 the AUC is sensitive to which ones. Notably the two that fail are exactly
+the two whose interp artifacts were produced later than their behavioural runs. This does not
+touch the relabel story, but it does mean the paper's AUC column and its Table 1 divergence
+numbers rest on different generations of the same prompts — worth reconciling independently.
 
 ## Patching — unaffected by definition
 

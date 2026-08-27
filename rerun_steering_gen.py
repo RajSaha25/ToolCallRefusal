@@ -58,23 +58,65 @@ def find_layers(net):
 
 
 def parse_tool_calls(text):
-    m = re.search(r"\[TOOL_CALLS\]\s*(\[.*?\])", text, re.DOTALL)
+    """Copied verbatim from run_behavioral_batched.py.
+
+    Every family emits tool calls differently and an unhandled format silently
+    reads as "made no tool calls", i.e. perfectly safe. An earlier version of this
+    file handled only the Qwen/Mistral forms, which scored Llama-3.1 at 0% unsafe
+    because its <|python_tag|> calls were invisible. Keep this in sync with the
+    behavioural pipeline rather than reimplementing it.
+    """
+    calls = []
+    m = re.search(r'\[TOOL_CALLS\]\s*(\[.*?\])', text, re.DOTALL)
     if m:
         try:
-            p = json.loads(m.group(1))
-            if isinstance(p, list):
-                return [{"name": c.get("name", ""), "arguments": c.get("arguments", {})} for c in p]
+            parsed = json.loads(m.group(1))
+            if isinstance(parsed, list):
+                return [{'name': c.get('name', ''), 'arguments': c.get('arguments', {})} for c in parsed]
         except json.JSONDecodeError:
             pass
-    calls = []
-    for raw in re.findall(r"<tool_call>(.*?)</tool_call>", text, re.DOTALL):
+    for raw in re.findall(r'<tool_call>(.*?)</tool_call>', text, re.DOTALL):
         try:
             c = json.loads(raw.strip())
-            calls.append({"name": c.get("name", ""),
-                          "arguments": c.get("arguments", c.get("parameters", {}))})
+            calls.append({'name': c.get('name', ''), 'arguments': c.get('arguments', c.get('parameters', {}))})
         except json.JSONDecodeError:
             pass
-    return calls
+    if calls:
+        return calls
+    # Command-R / Cohere
+    m = re.search(r'<\|START_ACTION\|>(.*?)<\|END_ACTION\|>', text, re.DOTALL)
+    if m:
+        try:
+            parsed = json.loads(m.group(1).strip())
+            if isinstance(parsed, list):
+                out = [{'name': c.get('tool_name', c.get('name', '')),
+                        'arguments': c.get('parameters', c.get('arguments', {}))}
+                       for c in parsed if isinstance(c, dict)]
+                if out:
+                    return out
+        except json.JSONDecodeError:
+            pass
+    # Llama 3.1
+    m = re.search(r'<\|python_tag\|>(.*?)(?:<\|eom_id\||<\|eot_id\||$)', text, re.DOTALL)
+    if m:
+        try:
+            c = json.loads(m.group(1).strip())
+            if isinstance(c, dict) and 'name' in c:
+                return [{'name': c['name'], 'arguments': c.get('parameters', c.get('arguments', {}))}]
+        except json.JSONDecodeError:
+            pass
+    # bare JSON list of calls
+    m = re.search(r'(\[\s*\{.*?\}\s*\])', text, re.DOTALL)
+    if m:
+        try:
+            parsed = json.loads(m.group(1))
+            if isinstance(parsed, list) and parsed and all(
+                    isinstance(c, dict) and ('name' in c or 'tool_name' in c) for c in parsed):
+                return [{'name': c.get('name', c.get('tool_name', '')),
+                         'arguments': c.get('arguments', c.get('parameters', {}))} for c in parsed]
+        except json.JSONDecodeError:
+            pass
+    return []
 
 
 def main():
@@ -209,19 +251,24 @@ def main():
     shp = [render(r) for _, r in sh.iterrows()]
     sbp = [render(r) for _, r in sb.iterrows()]
     steer = {"grid": grid, "harmful_unsafe": [], "n_harmful": a.n_steer_h}
+    harmful_gens = []   # kept so tool-call scoring can be redone without regenerating
     for c in grid:
         t0 = time.time()
         hf = (lambda cc=c: addvec(float(cc))) if c > 0 else None
         th = gen(shp, hook_fn=hf)
         uh = [unsafe_all(row, t) for (_, row), t in zip(sh.iterrows(), th)]
         steer["harmful_unsafe"].append(round(float(np.mean(uh)), 3))
+        for (_, row), t, u in zip(sh.iterrows(), th, uh):
+            harmful_gens.append({"coef": c, "id": row["id"], "domain": row["domain"],
+                                 "text": t, "unsafe": bool(u)})
         stash("steer_benign", c, sb, gen(sbp, hook_fn=hf))
-        log(f"[steer] c={c:4d} unsafe={np.mean(uh):.0%} ({time.time() - t0:.0f}s)")
+        log(f"[steer] c={c:4d} unsafe={np.mean(uh):.0%} "
+            f"({sum(uh)}/{len(uh)}, {time.time() - t0:.0f}s)")
     out["steering"] = steer
 
     OUT.mkdir(exist_ok=True)
     (OUT / f"steer_raw_{a.model}.json").write_text(
-        json.dumps({"meta": out, "pending": pending}, indent=1))
+        json.dumps({"meta": out, "pending": pending, "harmful_gens": harmful_gens}, indent=1))
     log(f"\nwrote {OUT / f'steer_raw_{a.model}.json'}  ({len(pending)} completions to judge)")
 
 
