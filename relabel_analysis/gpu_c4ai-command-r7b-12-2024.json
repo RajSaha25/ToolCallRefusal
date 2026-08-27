@@ -1,0 +1,51 @@
+{
+  "model": "c4ai-command-r7b-12-2024",
+  "layer": 26,
+  "n_dir": 128,
+  "n_behav_strict": 59,
+  "n_behav_loose": 128,
+  "n_behav_old": 69,
+  "cos_rtext_rtool": 0.394,
+  "cos_rtext_rbehav_strict": 0.746,
+  "cos_rtool_rbehav_strict": 0.35,
+  "cos_rtext_rbehav_loose": 0.791,
+  "cos_rtool_rbehav_loose": 0.367,
+  "cos_rtext_rbehav_old": 0.768,
+  "cos_rbehav_old_new": 0.978,
+  "auc_unsafe_old": {
+    "auc": 0.713,
+    "ci": [
+      0.611,
+      0.811
+    ],
+    "n_safe": 283,
+    "n_unsafe": 17
+  },
+  "auc_unsafe_fixed": {
+    "auc": 0.768,
+    "ci": [
+      0.68,
+      0.853
+    ],
+    "n_safe": 274,
+    "n_unsafe": 26
+  },
+  "auc_refusal_old": {
+    "auc": 0.923,
+    "ci": [
+      0.894,
+      0.95
+    ],
+    "n_ref": 315,
+    "n_comp": 69
+  },
+  "auc_refusal_new": {
+    "auc": 0.901,
+    "ci": [
+      0.867,
+      0.931
+    ],
+    "n_ref": 256,
+    "n_comp": 128
+  }
+}

@@ -1,0 +1,2 @@
+model,ref_old,ref_new,overref_old,overref_new,div_n_old,div_n_new,div_n_fix,div_s_old,div_s_new,div_s_fix,R_old,R_new
+Hermes-3-Llama-3.1-8B,0.693,0.599,0.544,0.003,0.297,0.339,0.409,0.312,0.326,0.452,266,230

@@ -1,0 +1,51 @@
+{
+  "model": "Mistral-7B-Instruct-v0.3",
+  "layer": 26,
+  "n_dir": 128,
+  "n_behav_strict": 84,
+  "n_behav_loose": 128,
+  "n_behav_old": 114,
+  "cos_rtext_rtool": 0.773,
+  "cos_rtext_rbehav_strict": 0.711,
+  "cos_rtool_rbehav_strict": 0.563,
+  "cos_rtext_rbehav_loose": 0.675,
+  "cos_rtool_rbehav_loose": 0.523,
+  "cos_rtext_rbehav_old": 0.678,
+  "cos_rbehav_old_new": 0.978,
+  "auc_unsafe_old": {
+    "auc": 0.698,
+    "ci": [
+      0.636,
+      0.757
+    ],
+    "n_safe": 239,
+    "n_unsafe": 61
+  },
+  "auc_unsafe_fixed": {
+    "auc": 0.76,
+    "ci": [
+      0.704,
+      0.811
+    ],
+    "n_safe": 212,
+    "n_unsafe": 88
+  },
+  "auc_refusal_old": {
+    "auc": 0.868,
+    "ci": [
+      0.831,
+      0.903
+    ],
+    "n_ref": 270,
+    "n_comp": 114
+  },
+  "auc_refusal_new": {
+    "auc": 0.869,
+    "ci": [
+      0.833,
+      0.901
+    ],
+    "n_ref": 167,
+    "n_comp": 217
+  }
+}

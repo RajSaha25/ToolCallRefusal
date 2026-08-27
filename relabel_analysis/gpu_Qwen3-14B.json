@@ -1,0 +1,52 @@
+{
+  "model": "Qwen3-14B",
+  "layer": 33,
+  "n_dir": 128,
+  "cos_rtext_saved": 0.997,
+  "n_behav_strict": 42,
+  "n_behav_loose": 95,
+  "n_behav_old": 55,
+  "cos_rtext_rtool": 0.741,
+  "cos_rtext_rbehav_strict": 0.859,
+  "cos_rtool_rbehav_strict": 0.655,
+  "cos_rtext_rbehav_loose": 0.857,
+  "cos_rtool_rbehav_loose": 0.651,
+  "cos_rtext_rbehav_old": 0.839,
+  "cos_rbehav_old_new": 0.975,
+  "auc_unsafe_old": {
+    "auc": 0.722,
+    "ci": [
+      0.664,
+      0.777
+    ],
+    "n_safe": 204,
+    "n_unsafe": 96
+  },
+  "auc_unsafe_fixed": {
+    "auc": 0.808,
+    "ci": [
+      0.757,
+      0.853
+    ],
+    "n_safe": 154,
+    "n_unsafe": 146
+  },
+  "auc_refusal_old": {
+    "auc": 0.972,
+    "ci": [
+      0.955,
+      0.985
+    ],
+    "n_ref": 329,
+    "n_comp": 55
+  },
+  "auc_refusal_new": {
+    "auc": 0.945,
+    "ci": [
+      0.919,
+      0.967
+    ],
+    "n_ref": 289,
+    "n_comp": 95
+  }
+}

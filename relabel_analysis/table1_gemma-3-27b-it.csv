@@ -1,0 +1,2 @@
+model,ref_old,ref_new,overref_old,overref_new,div_n_old,div_n_new,div_n_fix,div_s_old,div_s_new,div_s_fix,R_old,R_new
+gemma-3-27b-it,0.818,0.633,0.656,0.0,0.054,0.045,0.115,0.061,0.049,0.091,314,243

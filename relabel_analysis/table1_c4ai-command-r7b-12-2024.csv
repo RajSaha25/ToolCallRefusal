@@ -1,0 +1,2 @@
+model,ref_old,ref_new,overref_old,overref_new,div_n_old,div_n_new,div_n_fix,div_s_old,div_s_new,div_s_fix,R_old,R_new
+c4ai-command-r7b-12-2024,0.82,0.667,0.523,0.008,0.063,0.066,0.094,0.057,0.059,0.094,315,256
