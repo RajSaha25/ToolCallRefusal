@@ -37,6 +37,26 @@ def log(*a):
     print(*a, flush=True)
 
 
+def find_layers(net):
+    """The decoder layer list, wherever the architecture puts it.
+
+    Qwen/Mistral/Command-R keep it at .model.layers; Gemma-3 is a multimodal
+    wrapper with the text tower one level deeper."""
+    for path in (("model", "layers"),
+                 ("model", "language_model", "layers"),
+                 ("language_model", "model", "layers"),
+                 ("model", "text_model", "layers")):
+        obj = net
+        for attr in path:
+            obj = getattr(obj, attr, None)
+            if obj is None:
+                break
+        if obj is not None and len(obj):
+            log(f"[hooks] decoder layers at net.{'.'.join(path)} (n={len(obj)})")
+            return obj
+    raise AttributeError("could not locate decoder layers on this model")
+
+
 def parse_tool_calls(text):
     m = re.search(r"\[TOOL_CALLS\]\s*(\[.*?\])", text, re.DOTALL)
     if m:
@@ -83,7 +103,7 @@ def main():
     net = AutoModelForCausalLM.from_pretrained(
         a.hf_id, torch_dtype=DTYPE, device_map=DEVICE, trust_remote_code=True).eval()
     LAYER = a.layer
-    layers = net.model.layers if hasattr(net.model, "layers") else net.model.language_model.layers
+    layers = find_layers(net)
 
     dirs = OUT / f"directions_{a.model}.pt"
     if not dirs.exists():

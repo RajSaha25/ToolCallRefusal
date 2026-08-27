@@ -1,0 +1,53 @@
+{
+  "model": "gemma-3-27b-it",
+  "layer": 51,
+  "n_dir": 128,
+  "proj_gap": 18944.4,
+  "add_coef_4x": 75777.6,
+  "n_behav_strict": 25,
+  "n_behav_loose": 128,
+  "n_behav_old": 70,
+  "cos_rtext_rtool": 0.939,
+  "cos_rtext_rbehav_strict": 0.822,
+  "cos_rtool_rbehav_strict": 0.823,
+  "cos_rtext_rbehav_loose": 0.817,
+  "cos_rtool_rbehav_loose": 0.804,
+  "cos_rtext_rbehav_old": 0.817,
+  "cos_rbehav_old_new": 0.958,
+  "auc_unsafe_old": {
+    "auc": 0.497,
+    "ci": [
+      0.364,
+      0.627
+    ],
+    "n_safe": 281,
+    "n_unsafe": 19
+  },
+  "auc_unsafe_fixed": {
+    "auc": 0.629,
+    "ci": [
+      0.536,
+      0.719
+    ],
+    "n_safe": 258,
+    "n_unsafe": 42
+  },
+  "auc_refusal_old": {
+    "auc": 0.903,
+    "ci": [
+      0.867,
+      0.936
+    ],
+    "n_ref": 314,
+    "n_comp": 70
+  },
+  "auc_refusal_new": {
+    "auc": 0.946,
+    "ci": [
+      0.922,
+      0.967
+    ],
+    "n_ref": 243,
+    "n_comp": 141
+  }
+}

@@ -177,6 +177,18 @@ def stage_cpu(model):
 
 
 # ---------------------------------------------------------------------- gpu stage
+def cfg_dims(cfg):
+    """(hidden_size, num_hidden_layers), looking through a multimodal wrapper.
+
+    Gemma-3 is a Gemma3Config whose text tower lives under .text_config, so the
+    dimensions are not on the top-level config the way they are for Qwen/Mistral.
+    """
+    for c in (cfg, getattr(cfg, "text_config", None), getattr(cfg, "llm_config", None)):
+        if c is not None and getattr(c, "hidden_size", None) and getattr(c, "num_hidden_layers", None):
+            return int(c.hidden_size), int(c.num_hidden_layers)
+    raise AttributeError(f"cannot find hidden_size/num_hidden_layers on {type(cfg).__name__}")
+
+
 def auc_ci(pos, neg, n_boot=2000, seed=0):
     """AUC = P(score(pos) > score(neg)), Mann-Whitney form, bootstrap 95% CI."""
     pos, neg = np.asarray(pos, float), np.asarray(neg, float)
@@ -214,8 +226,7 @@ def stage_gpu(model, hf_id, layer=None, n_dir=128, batch=8, out_name=None):
     # Only Qwen's directions were committed (*.pt is gitignored), and a saved file
     # from another model has the wrong d_model, so treat it as optional: r_text is
     # rebuilt from activations either way, and the saved copy is only a cross-check.
-    d_model = net.config.hidden_size
-    n_l = net.config.num_hidden_layers
+    d_model, n_l = cfg_dims(net.config)
     saved = ART / model / "refusal_dirs.pt"
     if not saved.exists():
         saved = ART / "refusal_dirs.pt"
@@ -284,6 +295,13 @@ def stage_gpu(model, hf_id, layer=None, n_dir=128, batch=8, out_name=None):
         print(f"[dir] r_text rebuilt (n={k}/class); cos vs saved = {res['cos_rtext_saved']}")
     else:
         print(f"[dir] r_text rebuilt (n={k}/class); no saved copy to cross-check")
+
+    # Projection gap in this model's own activation units. run_scaled_evaluation
+    # scales its addition coefficient (4x the gap) and steering grid to this, so
+    # every model needs its own before ablation/addition/steering can be run.
+    res["proj_gap"] = round(float((A_h @ r_text).mean() - (A_b @ r_text).mean()), 2)
+    res["add_coef_4x"] = round(4 * abs(res["proj_gap"]), 1)
+    print(f"[dir] proj_gap={res['proj_gap']}  -> addition coef (4x) = {res['add_coef_4x']}")
 
     ht, bt = d[tn & (d["request_type"] == "Harmful")], d[tn & (d["request_type"] == "Benign")]
     k2 = min(96, len(ht), len(bt))
