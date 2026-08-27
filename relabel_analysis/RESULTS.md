@@ -32,8 +32,8 @@ each model's own layer, with the new labels:
 | Qwen3-14B | 33/40 | 0.859 | 0.857 | 0.741 | 0.975 | 42 |
 | Mistral-7B-Instruct-v0.3 | 26/32 | 0.711 | 0.675 | 0.773 | 0.978 | 84 |
 | c4ai-command-r7b-12-2024 | 26/32 | 0.746 | 0.791 | 0.394 | 0.978 | 59 |
-| gemma-3-27b-it | 51/62 | 0.822 | 0.817 | 0.939 | 0.958 | 25 |
-| Meta-Llama-3.1-70B-Instruct | 67/80 | 0.699 | 0.727 | 0.914 | 0.982 | 59 |
+| gemma-3-27b-it | 51/62 | 0.822 | 0.817 | withdrawn | 0.958 | 25 |
+| Meta-Llama-3.1-70B-Instruct | 67/80 | 0.693 | 0.715 | 0.213 | 0.979 | 59 |
 
 The claim holds for all five: request harmfulness and the refusal decision occupy substantially
 the same axis. The old-vs-new behaviour direction agrees at 0.96–0.98 everywhere, so this result
@@ -45,9 +45,19 @@ Caveat: models rarely comply with harmful requests, so the complied side is smal
 25/class for Gemma. The "caveats folded in" column folds CAVEAT in with compliance, roughly
 doubling that side, and moves the answer very little in every model.
 
+The `cos(r_text, r_tool)` column needs care. It is withdrawn for Gemma (no tool-capable
+template) and, for Llama, the correct value is 0.213 — the earlier 0.914 came from a run whose
+"tool" prompts had no tools in them, which made `r_tool` a near-copy of `r_text`. Read on its own
+merits, Llama's 0.213 is a genuine outlier against Qwen's 0.741 and Mistral's 0.773, and it sits
+alongside the paper's own observation that Llama is the one model where tool context does not
+suppress the refusal signal (t = 0.4). Worth a look: the paper's claim that "the text-derived and
+tool-derived directions remain aligned" is well supported for Qwen and Mistral but weak for
+Llama and Command-R (0.394).
+
 Llama and Gemma were run from a single B200 (183GB); Llama-70B needs ~135GB in bf16 and fits
-without model parallelism. Llama used `NousResearch/Meta-Llama-3.1-70B-Instruct`, an ungated
-bf16 mirror with identical config, because the `meta-llama` repos are gated to this account.
+without model parallelism. Llama used `unsloth/Meta-Llama-3.1-70B-Instruct`, an ungated bf16
+mirror, because the `meta-llama` repos are gated to this account — see the chat-template note
+for why the mirror choice matters.
 
 ## AUC — reproduces on old labels, rises under the corrected scorer
 
@@ -56,8 +66,8 @@ bf16 mirror with identical config, because the `meta-llama` repos are gated to t
 | Qwen3-14B | 0.722 | 0.808 | 0.724 | yes | 0.972 | 0.945 |
 | Mistral-7B-Instruct-v0.3 | 0.698 | 0.760 | 0.689 | yes | 0.868 | 0.869 |
 | c4ai-command-r7b-12-2024 | 0.713 | 0.768 | 0.751 | yes | 0.923 | 0.901 |
-| gemma-3-27b-it | 0.497 | 0.629 | 0.791 | **no** | 0.903 | 0.946 |
-| Meta-Llama-3.1-70B-Instruct | 0.591 | 0.681 | 0.881 | **no** | 0.950 | 0.977 |
+| gemma-3-27b-it | withdrawn | withdrawn | 0.791 | n/a | 0.903 | 0.946 |
+| Meta-Llama-3.1-70B-Instruct | 0.761 | 0.864 | 0.881 | yes | 0.949 | 0.966 |
 
 Two things to separate here.
 
@@ -66,11 +76,15 @@ Two things to separate here.
 refusal, the projection predicts the refusal decision better.
 
 *The "vs unsafe" column is not relabel-dependent* — it is the same kind of predicate-scored
-quantity as patching. It reproduces the published AUC for Qwen, Mistral and Command-R.
+quantity as patching. It reproduces the published AUC for all four models where the tool-mode
+prompt can be built correctly. Llama needed the right tokenizer to get there: on the mirror
+whose template drops tools it scored 0.591, and with tools actually rendered it scores 0.864
+under the fixed scorer, whose CI (0.813–0.908) contains the published 0.881.
 
-**The Gemma and Llama "vs unsafe" figures above are withdrawn** — see the chat-template
-problem below. Their tool-mode prompts contained no tool definitions, so those two rows measure
-something other than what the column claims. The no-tool columns ("vs refusal") are unaffected.
+**Gemma's "vs unsafe" figure is withdrawn** — see the chat-template problem below. Its tool-mode
+prompts contain no tool definitions, so the number measures something other than what the column
+claims. Gemma's no-tool columns ("vs refusal") are unaffected, as are all its direction cosines
+against `r_text` and `r_behav`.
 
 ## The chat-template problem (Gemma-3 and Llama-3.1)
 

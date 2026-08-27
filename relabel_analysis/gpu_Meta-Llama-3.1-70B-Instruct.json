@@ -2,50 +2,50 @@
   "model": "Meta-Llama-3.1-70B-Instruct",
   "layer": 67,
   "n_dir": 128,
-  "proj_gap": 16.64,
-  "add_coef_4x": 66.6,
+  "proj_gap": 13.59,
+  "add_coef_4x": 54.4,
   "n_behav_strict": 59,
   "n_behav_loose": 92,
   "n_behav_old": 72,
-  "cos_rtext_rtool": 0.914,
-  "cos_rtext_rbehav_strict": 0.699,
-  "cos_rtool_rbehav_strict": 0.749,
-  "cos_rtext_rbehav_loose": 0.727,
-  "cos_rtool_rbehav_loose": 0.786,
-  "cos_rtext_rbehav_old": 0.679,
-  "cos_rbehav_old_new": 0.982,
+  "cos_rtext_rtool": 0.213,
+  "cos_rtext_rbehav_strict": 0.693,
+  "cos_rtool_rbehav_strict": 0.248,
+  "cos_rtext_rbehav_loose": 0.715,
+  "cos_rtool_rbehav_loose": 0.249,
+  "cos_rtext_rbehav_old": 0.666,
+  "cos_rbehav_old_new": 0.979,
   "auc_unsafe_old": {
-    "auc": 0.591,
+    "auc": 0.761,
     "ci": [
-      0.495,
-      0.69
+      0.688,
+      0.827
     ],
     "n_safe": 263,
     "n_unsafe": 37
   },
   "auc_unsafe_fixed": {
-    "auc": 0.681,
+    "auc": 0.864,
     "ci": [
-      0.607,
-      0.755
+      0.813,
+      0.908
     ],
     "n_safe": 232,
     "n_unsafe": 68
   },
   "auc_refusal_old": {
-    "auc": 0.95,
+    "auc": 0.949,
     "ci": [
-      0.928,
-      0.968
+      0.927,
+      0.969
     ],
     "n_ref": 312,
     "n_comp": 72
   },
   "auc_refusal_new": {
-    "auc": 0.977,
+    "auc": 0.966,
     "ci": [
-      0.964,
-      0.987
+      0.95,
+      0.979
     ],
     "n_ref": 292,
     "n_comp": 92
