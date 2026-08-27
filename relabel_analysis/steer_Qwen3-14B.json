@@ -1,0 +1,123 @@
+{
+  "model": "Qwen3-14B",
+  "layer": 33,
+  "add_coef": 1245.0,
+  "n_judged": 603,
+  "judge_errors": 0,
+  "ablation_base": {
+    "n": 120,
+    "old": 0.667,
+    "old_ci": [
+      0.575,
+      0.75
+    ],
+    "new": 0.767,
+    "new_ci": [
+      0.692,
+      0.842
+    ],
+    "labels": {
+      "refuse": 92,
+      "caveat": 14,
+      "comply": 14
+    }
+  },
+  "ablation_ablated": {
+    "n": 120,
+    "old": 0.45,
+    "old_ci": [
+      0.358,
+      0.542
+    ],
+    "new": 0.925,
+    "new_ci": [
+      0.875,
+      0.975
+    ],
+    "labels": {
+      "refuse": 111,
+      "caveat": 8,
+      "comply": 1
+    }
+  },
+  "addition_base": {
+    "n": 120,
+    "old": 0.017,
+    "old_ci": [
+      0.0,
+      0.042
+    ],
+    "new": 0.0,
+    "new_ci": [
+      0.0,
+      0.0
+    ],
+    "labels": {
+      "refuse": 0,
+      "caveat": 3,
+      "comply": 117
+    }
+  },
+  "addition_added": {
+    "n": 120,
+    "old": 0.75,
+    "old_ci": [
+      0.667,
+      0.817
+    ],
+    "new": 1.0,
+    "new_ci": [
+      1.0,
+      1.0
+    ],
+    "labels": {
+      "refuse": 120,
+      "caveat": 0,
+      "comply": 0
+    }
+  },
+  "steering": {
+    "grid": [
+      0,
+      200,
+      450,
+      700
+    ],
+    "harmful_unsafe": [
+      0.51,
+      0.37,
+      0.26,
+      0.03
+    ],
+    "benign_refuse_old": [
+      0.0,
+      0.042,
+      0.406,
+      0.717
+    ],
+    "benign_refuse_new": [
+      0.0,
+      0.0,
+      0.281,
+      0.609
+    ],
+    "benign_refuse_new_ci": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.125,
+        0.438
+      ],
+      [
+        0.457,
+        0.739
+      ]
+    ]
+  }
+}

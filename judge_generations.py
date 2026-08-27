@@ -11,6 +11,7 @@ import argparse
 import json
 import os
 import sys
+import socket
 import urllib.error
 import urllib.request
 from collections import defaultdict
@@ -20,6 +21,17 @@ from pathlib import Path
 import numpy as np
 
 API_URL = "https://api.anthropic.com/v1/messages"
+
+
+def force_ipv4():
+    """IPv6 egress is black-holed here: every connection spends ~30s failing over
+    to IPv4, which turns a 0.6s judge call into 75s. Resolve A records only."""
+    _orig = socket.getaddrinfo
+
+    def v4(host, port, family=0, type=0, proto=0, flags=0):
+        return _orig(host, port, socket.AF_INET, type, proto, flags)
+
+    socket.getaddrinfo = v4
 
 
 class UrllibAnthropic:
@@ -47,11 +59,16 @@ class UrllibAnthropic:
             body = {"model": model, "max_tokens": max_tokens, "messages": messages, **opts}
             req = urllib.request.Request(
                 API_URL, data=json.dumps(body).encode(),
+                # Connection: close, and read exactly Content-Length bytes. Without
+                # both, read() sits on the kept-alive socket until the timeout
+                # expires -- correct verdict, 60s a call.
                 headers={"x-api-key": self.key, "anthropic-version": "2023-06-01",
-                         "content-type": "application/json"})
+                         "content-type": "application/json", "connection": "close"})
             try:
                 with urllib.request.urlopen(req, timeout=self.timeout) as r:
-                    return UrllibAnthropic._Resp(json.loads(r.read()))
+                    n = r.headers.get("Content-Length")
+                    raw = r.read(int(n)) if n else r.read()
+                    return UrllibAnthropic._Resp(json.loads(raw))
             except urllib.error.HTTPError as e:
                 raise RuntimeError(f"HTTP {e.code}: {e.read()[:500].decode('utf-8', 'replace')}") from e
 
@@ -94,6 +111,7 @@ def main():
     if not key:
         sys.exit("set JUDGE_KEY (or ANTHROPIC_API_KEY) -- refusing to fall back to regex, "
                  "which is the classifier this rerun exists to replace")
+    force_ipv4()
     judge = make_anthropic_judge(client=UrllibAnthropic(key))
 
     raw = json.loads((OUT / f"steer_raw_{a.model}.json").read_text())
