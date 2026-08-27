@@ -1,0 +1,53 @@
+{
+  "model": "Meta-Llama-3.1-70B-Instruct",
+  "layer": 67,
+  "n_dir": 128,
+  "proj_gap": 16.64,
+  "add_coef_4x": 66.6,
+  "n_behav_strict": 59,
+  "n_behav_loose": 92,
+  "n_behav_old": 72,
+  "cos_rtext_rtool": 0.914,
+  "cos_rtext_rbehav_strict": 0.699,
+  "cos_rtool_rbehav_strict": 0.749,
+  "cos_rtext_rbehav_loose": 0.727,
+  "cos_rtool_rbehav_loose": 0.786,
+  "cos_rtext_rbehav_old": 0.679,
+  "cos_rbehav_old_new": 0.982,
+  "auc_unsafe_old": {
+    "auc": 0.591,
+    "ci": [
+      0.495,
+      0.69
+    ],
+    "n_safe": 263,
+    "n_unsafe": 37
+  },
+  "auc_unsafe_fixed": {
+    "auc": 0.681,
+    "ci": [
+      0.607,
+      0.755
+    ],
+    "n_safe": 232,
+    "n_unsafe": 68
+  },
+  "auc_refusal_old": {
+    "auc": 0.95,
+    "ci": [
+      0.928,
+      0.968
+    ],
+    "n_ref": 312,
+    "n_comp": 72
+  },
+  "auc_refusal_new": {
+    "auc": 0.977,
+    "ci": [
+      0.964,
+      0.987
+    ],
+    "n_ref": 292,
+    "n_comp": 92
+  }
+}
