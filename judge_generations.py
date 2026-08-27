@@ -150,18 +150,29 @@ def main():
     if errs:
         print(f"[judge] WARNING {errs} judge errors; those rows are dropped")
 
-    # old label = the regex classifier the published numbers used
+    # Match tools.refusal.classify_refusal exactly: a response with no real prose
+    # (a bare tool call, say) is NOT a refusal and still counts in the denominator.
+    # Dropping those rows silently inflates the rate -- benign tool-mode prompts are
+    # mostly bare tool calls, so it made over-refusal look like 100%.
+    n_no_text = 0
     for p in pending:
+        short = len(p["clean"]) < MIN_TEXT_CHARS
         v = cache.get(p["key"])
-        p["new_refused"] = (v == "refuse")
-        p["new_label"] = v
-        p["old_refused"] = regex_refused(p["clean"]) if len(p["clean"]) >= MIN_TEXT_CHARS else False
-        p["usable"] = not (isinstance(v, str) and v.startswith("error:")) and v is not None
+        if short:
+            n_no_text += 1
+            p["new_label"], p["new_refused"] = "no_text", False
+        elif isinstance(v, str) and v.startswith("error:"):
+            p["new_label"], p["new_refused"] = "judge_error", False
+        else:
+            p["new_label"], p["new_refused"] = v, (v == "refuse")
+        p["old_refused"] = (not short) and regex_refused(p["clean"])
+        p["usable"] = True
 
     groups = defaultdict(list)
     for p in pending:
-        if p["usable"]:
-            groups[(p["exp"], p["coef"])].append(p)
+        groups[(p["exp"], p["coef"])].append(p)
+    print(f"[judge] {n_no_text}/{len(pending)} responses had no prose "
+          f"(bare tool calls etc.) -> counted as not-refused")
 
     res = {"model": a.model, "layer": meta["layer"], "add_coef": meta["add_coef"],
            "n_judged": len(todo), "judge_errors": errs}
@@ -176,7 +187,7 @@ def main():
                 "old": round(float(np.mean(old)), 3), "old_ci": boot_ci(old),
                 "new": round(float(np.mean(new)), 3), "new_ci": boot_ci(new),
                 "labels": {k: sum(1 for x in g if x["new_label"] == k)
-                           for k in ("refuse", "caveat", "comply")}}
+                           for k in ("refuse", "caveat", "comply", "no_text", "judge_error")}}
 
     for name in ("ablation_base", "ablation_ablated", "addition_base"):
         res[name] = rate(name)
