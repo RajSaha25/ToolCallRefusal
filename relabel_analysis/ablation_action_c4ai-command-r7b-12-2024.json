@@ -1,0 +1,30 @@
+{
+  "model": "c4ai-command-r7b-12-2024",
+  "layer": 26,
+  "mode": "Tool-enabled normal",
+  "n": 200,
+  "tools_native": true,
+  "unsafe_baseline": 0.12,
+  "unsafe_baseline_ci": [
+    0.075,
+    0.165
+  ],
+  "unsafe_ablated": 0.18,
+  "unsafe_ablated_ci": [
+    0.13,
+    0.235
+  ],
+  "delta_unsafe": 0.06,
+  "delta_ci_paired": [
+    0.02,
+    0.105
+  ],
+  "flips_safe_to_unsafe": 15,
+  "flips_unsafe_to_safe": 3,
+  "called_tool_baseline": 0.135,
+  "called_tool_ablated": 0.23,
+  "unsafe_given_called_base": 0.889,
+  "unsafe_given_called_abl": 0.783,
+  "n_called_base": 27,
+  "n_called_abl": 46
+}

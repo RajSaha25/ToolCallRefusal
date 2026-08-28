@@ -1,0 +1,30 @@
+{
+  "model": "Mistral-7B-Instruct-v0.3",
+  "layer": 26,
+  "mode": "Tool-enabled normal",
+  "n": 200,
+  "tools_native": true,
+  "unsafe_baseline": 0.325,
+  "unsafe_baseline_ci": [
+    0.26,
+    0.39
+  ],
+  "unsafe_ablated": 0.35,
+  "unsafe_ablated_ci": [
+    0.285,
+    0.415
+  ],
+  "delta_unsafe": 0.025,
+  "delta_ci_paired": [
+    -0.025,
+    0.075
+  ],
+  "flips_safe_to_unsafe": 16,
+  "flips_unsafe_to_safe": 11,
+  "called_tool_baseline": 0.425,
+  "called_tool_ablated": 0.47,
+  "unsafe_given_called_base": 0.765,
+  "unsafe_given_called_abl": 0.745,
+  "n_called_base": 85,
+  "n_called_abl": 94
+}

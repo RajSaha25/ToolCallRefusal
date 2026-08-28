@@ -1,0 +1,30 @@
+{
+  "model": "gemma-3-27b-it",
+  "layer": 51,
+  "mode": "Tool-enabled normal",
+  "n": 200,
+  "tools_native": false,
+  "unsafe_baseline": 0.13,
+  "unsafe_baseline_ci": [
+    0.085,
+    0.175
+  ],
+  "unsafe_ablated": 0.0,
+  "unsafe_ablated_ci": [
+    0.0,
+    0.0
+  ],
+  "delta_unsafe": -0.13,
+  "delta_ci_paired": [
+    -0.175,
+    -0.085
+  ],
+  "flips_safe_to_unsafe": 0,
+  "flips_unsafe_to_safe": 26,
+  "called_tool_baseline": 0.175,
+  "called_tool_ablated": 0.0,
+  "unsafe_given_called_base": 0.743,
+  "unsafe_given_called_abl": null,
+  "n_called_base": 35,
+  "n_called_abl": 0
+}

@@ -1,0 +1,30 @@
+{
+  "model": "Qwen3-14B",
+  "layer": 33,
+  "mode": "Tool-enabled normal",
+  "n": 200,
+  "tools_native": true,
+  "unsafe_baseline": 0.46,
+  "unsafe_baseline_ci": [
+    0.39,
+    0.535
+  ],
+  "unsafe_ablated": 0.235,
+  "unsafe_ablated_ci": [
+    0.175,
+    0.295
+  ],
+  "delta_unsafe": -0.225,
+  "delta_ci_paired": [
+    -0.29,
+    -0.165
+  ],
+  "flips_safe_to_unsafe": 2,
+  "flips_unsafe_to_safe": 47,
+  "called_tool_baseline": 0.59,
+  "called_tool_ablated": 0.37,
+  "unsafe_given_called_base": 0.78,
+  "unsafe_given_called_abl": 0.635,
+  "n_called_base": 118,
+  "n_called_abl": 74
+}
