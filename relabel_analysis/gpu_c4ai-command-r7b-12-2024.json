@@ -2,6 +2,8 @@
   "model": "c4ai-command-r7b-12-2024",
   "layer": 26,
   "n_dir": 128,
+  "proj_gap": 76.33,
+  "add_coef_4x": 305.3,
   "n_behav_strict": 59,
   "n_behav_loose": 128,
   "n_behav_old": 69,

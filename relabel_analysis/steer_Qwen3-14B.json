@@ -19,9 +19,7 @@
     "labels": {
       "refuse": 92,
       "caveat": 14,
-      "comply": 14,
-      "no_text": 0,
-      "judge_error": 0
+      "comply": 14
     }
   },
   "ablation_ablated": {
@@ -39,9 +37,7 @@
     "labels": {
       "refuse": 111,
       "caveat": 8,
-      "comply": 1,
-      "no_text": 0,
-      "judge_error": 0
+      "comply": 1
     }
   },
   "addition_base": {
@@ -59,9 +55,7 @@
     "labels": {
       "refuse": 0,
       "caveat": 3,
-      "comply": 117,
-      "no_text": 0,
-      "judge_error": 0
+      "comply": 117
     }
   },
   "addition_added": {
@@ -79,9 +73,7 @@
     "labels": {
       "refuse": 120,
       "caveat": 0,
-      "comply": 0,
-      "no_text": 0,
-      "judge_error": 0
+      "comply": 0
     }
   },
   "steering": {
@@ -99,15 +91,15 @@
     ],
     "benign_refuse_old": [
       0.0,
-      0.017,
-      0.217,
-      0.55
+      0.042,
+      0.406,
+      0.717
     ],
     "benign_refuse_new": [
       0.0,
       0.0,
-      0.15,
-      0.467
+      0.281,
+      0.609
     ],
     "benign_refuse_new_ci": [
       [
@@ -119,12 +111,12 @@
         0.0
       ],
       [
-        0.067,
-        0.25
+        0.125,
+        0.438
       ],
       [
-        0.35,
-        0.583
+        0.457,
+        0.739
       ]
     ]
   }

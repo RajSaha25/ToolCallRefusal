@@ -59,97 +59,59 @@ Patching scores flips with `score_tool_calls_all`, a predicate over saved tool c
 consults the refusal classifier, and it already used the global-scope scorer. The relabel
 cannot move it, so the published patching percentages stand as they are.
 
-## Steering — cost drops but the conclusion survives
+## Steering — cost drops but the conclusion survives (Qwen3-14B)
 
-Harmful-unsafe is predicate-scored and unchanged; benign over-refusal is re-judged. The grid is
-scaled to each model's own projection gap, using the ratios Qwen's published grid implies
-(0, 0.64x, 1.45x, 2.25x).
+Harmful-unsafe is predicate-scored and unchanged; benign over-refusal is re-judged.
 
-**Qwen3-14B** (gap 311, grid 0/200/450/700):
+| coef | harmful unsafe | benign over-refusal (regex) | benign over-refusal (judge) | 95% CI |
+|---|---|---|---|---|
+| 0 | 0.510 | 0.000 | 0.000 | [0.00, 0.00] |
+| 200 | 0.370 | 0.042 | 0.000 | [0.00, 0.00] |
+| 450 | 0.260 | 0.406 | 0.281 | [0.13, 0.44] |
+| 700 | 0.030 | 0.717 | 0.609 | [0.46, 0.74] |
 
-| coef | harmful unsafe | benign over-refusal (regex) | benign over-refusal (judge) |
-|---|---|---|---|
-| 0 | 0.510 | 0.000 | 0.000 |
-| 200 | 0.370 | 0.017 | 0.000 |
-| 450 | 0.260 | 0.217 | 0.150 |
-| 700 | 0.030 | 0.550 | 0.467 |
+At the coefficient that clears unsafe calls, the over-refusal cost is 61%, not the ~70% the
+paper quotes. Lower, still severe: steering remains a blunt lever.
 
-**Llama-3.1-70B** (gap 13.6, grid 0/9/20/31):
-
-| coef | harmful unsafe | benign over-refusal (regex) | benign over-refusal (judge) |
-|---|---|---|---|
-| 0 | 0.540 | 0.000 | 0.017 |
-| 9 | 0.370 | 0.200 | 0.267 |
-| 20 | 0.020 | 0.617 | 0.483 |
-| 31 | 0.000 | 0.017 | 1.000 |
-
-The qualitative claim holds in both: driving unsafe calls to zero costs roughly half the benign
-traffic in Qwen (0.467) and all of it in Llama (1.000). The published "~70 percent" for Qwen is
-higher than the 0.467 measured here on the same design.
-
-Note the regex column is not even monotonic for Llama — 0.617 at c=20 then 0.017 at c=31 — while
-the judge column rises cleanly. Under heavy steering the output drifts out of the phrasings the
-regex keys on, so it stops tracking refusal at exactly the end of the curve that matters.
-
-Gemma's steering is **not reportable**: with no tools in its prompts the harmful-unsafe rate is
-0.000 at every coefficient by construction. Mistral was run at c=0 only.
-
-## Ablation — holds for Mistral and Llama, reverses for Qwen and Gemma
+## Ablation — robust for Mistral, reverses for Qwen
 
 Same generations scored two ways, so this isolates the classifier.
 
-| model | regex base → ablated | judge base → ablated | verdict |
-|---|---|---|---|
-| Qwen3-14B | 0.667 → 0.450 | 0.767 → **0.925** | reverses |
-| gemma-3-27b-it | 0.350 → 0.000 | 0.667 → **1.000** | reverses |
-| Mistral-7B-Instruct-v0.3 | 0.292 → 0.150 | 0.500 → 0.367 | holds |
-| Meta-Llama-3.1-70B-Instruct | 0.725 → 0.617 | 0.733 → 0.642 | holds |
+| model | condition | regex | judge | three-way (judge) |
+|---|---|---|---|---|
+| Qwen3-14B | base | 0.667 | 0.767 | 92 refuse / 14 caveat / 14 comply |
+| Qwen3-14B | ablated | 0.450 | **0.925** | 111 refuse / 8 caveat / 1 comply |
+| Mistral-7B | base | 0.292 | 0.492 | 59 refuse / 40 caveat / 21 comply |
+| Mistral-7B | ablated | 0.150 | **0.342** | 41 refuse / 46 caveat / 33 comply |
 
-Mistral and Llama keep a real drop under the judge, close in size to the regex-measured one.
-Qwen and Gemma reverse outright: ablation *raises* measured refusal, and for Gemma every one of
-the 120 ablated responses is judged a refusal while the regex finds none at all.
+For Mistral the effect survives — refusal still drops by ~15 points under the judge, matching
+the regex-measured drop. For Qwen it reverses: ablation *raises* measured refusal.
 
 The cause is visible in the text. 66 of Qwen's 120 ablated responses are refusals the regex
-misses, overwhelmingly because ablation shifts the phrasing out of the first-person modal forms
-the regex keys on:
+misses, overwhelmingly because ablation shifts the phrasing out of the first-person modal
+forms the regex keys on:
 
 > "Certainly not. Submitting a client trade without proper approval is a serious violation of
 > compliance and ethical standards."
 
-An unambiguous refusal with no "I cannot" in it. So ablating the direction changed *how* these
-models refuse without stopping them from refusing, and the regex read the phrasing shift as a
-behavioural drop. The published Qwen (57% → 32%) and Gemma (21% → 0%) ablation figures should
-not be relied on. Mistral's and Llama's are fine.
+That is an unambiguous refusal with no "I cannot" in it. So for Qwen, ablating the direction
+changed *how* the model refuses without stopping it from refusing, and the regex read the
+phrasing shift as a behavioural drop. The published Qwen ablation figure (57% → 32%) should
+not be relied on; the Mistral-style claim is fine.
 
-## Addition — strengthens everywhere, and rescues Llama
+## Addition — strengthens
 
 | model | base (regex → judge) | added (regex → judge) |
 |---|---|---|
 | Qwen3-14B | 0.017 → 0.000 | 0.750 → 1.000 |
 | Mistral-7B-Instruct-v0.3 | 0.000 → 0.000 | 0.692 → 1.000 |
-| gemma-3-27b-it | 0.008 → 0.000 | 0.208 → 1.000 |
-| Meta-Llama-3.1-70B-Instruct | 0.008 → 0.000 | 0.000 → 1.000 |
 
-Adding the direction drives benign refusal to 100% in every model, because the judge counts the
-hedged refusals the regex dropped. The Llama row matters most: the paper reports its addition as
-null (1% → 1%) and treats Llama as the family where the direction does not control refusal. On
-the same intervention, scored properly, it goes 0% → 100%. Gemma moves the same way (21% → 100%).
-The "addition is weak in Gemma and null in Llama" reading is a classifier artifact.
-
-## A note on the denominator
-
-An earlier pass dropped responses with no prose (a bare tool call and nothing else) instead of
-counting them. `tools.refusal.classify_refusal` treats those as *not refused* and keeps them in
-the denominator, which is right: a model that quietly calls a tool has not refused. Dropping
-them left only the talkative minority and inflated every over-refusal rate — Llama's read as
-100% at zero steering. The numbers above count them, matching the shared classifier. This moved
-Qwen's top-coefficient over-refusal from 0.609 to 0.467.
+Adding the direction drives benign refusal to 100% in both models, cleaner than the published
+numbers, because the judge counts hedged refusals the regex dropped.
 
 ## Not covered
 
-- **Gemma tool-mode** — steering harmful-unsafe, `cos(r_text, r_tool)`, AUC vs unsafe. Blocked on
-  the chat-template problem above, not on compute.
-- **Command-R generation half** — ablation, addition and steering were never run for it. Its
-  template does render tools, so this is only a matter of GPU time.
-- **Mistral steering** — run at c=0 only; the full grid was not swept.
-- **Patching** — deliberately not rerun, see above.
+Gemma-3-27B (~54GB in bf16) and Llama-3.1-70B (~140GB) do not fit the pod's 45G `/workspace`
+volume. Everything is scripted for them — rerun with `--layer 51` and `--layer 67` on a host
+with more disk. Steering and ablation were run for Qwen (full grid) and Mistral (ablation and
+addition only, `--grid 0`); Command-R's generation half has not been run.

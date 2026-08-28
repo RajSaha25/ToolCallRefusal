@@ -247,20 +247,9 @@ def stage_gpu(model, hf_id, layer=None, n_dir=128, batch=8, out_name=None):
     print(f"[gpu] {model} layer={layer}/{n_l} d_model={d_model} "
           f"saved_dirs={'yes' if r_text_saved is not None else 'no'}")
 
-    DM = {"Finance": "finance", "Healthcare": "healthcare",
-          "Education / Academic Integrity": "education", "Legal / Compliance": "legal"}
-
-    def render(row):
-        msgs = [{"role": "system", "content": row["system_prompt"]},
-                {"role": "user", "content": row["user_prompt"]}]
-        tools = None if row["mode"] == "No-tool chat" else list(get_domain(DM[row["domain"]]).tools_for_llm)
-        kw = dict(tokenize=False, add_generation_prompt=True)
-        for extra in ({"enable_thinking": False}, {}):
-            try:
-                return tok.apply_chat_template(msgs, tools=tools, **kw, **extra) if tools \
-                    else tok.apply_chat_template(msgs, **kw, **extra)
-            except TypeError:
-                continue
+    from render_utils import make_renderer
+    render = make_renderer(tok, get_domain, log=print)
+    res_native_tools = render.native_tools
 
     def resid(frame):
         """Last-token residual stream at `layer` (left padding, so index -1)."""
@@ -282,7 +271,8 @@ def stage_gpu(model, hf_id, layer=None, n_dir=128, batch=8, out_name=None):
 
     nt = d["mode"] == "No-tool chat"
     tn = d["mode"] == "Tool-enabled normal"
-    res = {"model": model, "layer": layer, "n_dir": n_dir}
+    res = {"model": model, "layer": layer, "n_dir": n_dir,
+           "tools_native": bool(res_native_tools)}
 
     # -- directions ------------------------------------------------------------
     hn = d[nt & (d["request_type"] == "Harmful")]

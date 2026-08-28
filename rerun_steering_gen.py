@@ -127,12 +127,27 @@ def main():
     ap.add_argument("--bs", type=int, default=24)
     ap.add_argument("--grid", default="0,200,450,700")
     ap.add_argument("--add-coef", type=float, default=1245.0)
+    ap.add_argument("--auto-grid", action="store_true",
+                    help="derive --grid and --add-coef from this model's proj_gap in "
+                         "relabel_analysis/gpu_<model>.json, using the ratios Qwen's "
+                         "published grid implies (0, 0.642x, 1.445x, 2.248x) and 4x for "
+                         "addition. Coefficients are only comparable across models when "
+                         "scaled to each model's own activation magnitude.")
     ap.add_argument("--n-abl", type=int, default=120)
     ap.add_argument("--n-add", type=int, default=120)
     ap.add_argument("--n-steer-h", type=int, default=100)
     ap.add_argument("--n-steer-b", type=int, default=60)
     ap.add_argument("--max-new", type=int, default=200)
     a = ap.parse_args()
+
+    if a.auto_grid:
+        p = OUT / f"gpu_{a.model}.json"
+        if not p.exists():
+            sys.exit(f"--auto-grid needs {p}; run rerun_against_relabels.py --stage gpu first")
+        gap = abs(float(json.loads(p.read_text())["proj_gap"]))
+        a.grid = ",".join(str(int(round(r * gap))) for r in (0, 0.642, 1.445, 2.248))
+        a.add_coef = round(4 * gap, 1)
+        log(f"[auto-grid] proj_gap={gap:.4g} -> grid={a.grid} add_coef={a.add_coef}")
 
     from transformers import AutoTokenizer, AutoModelForCausalLM
     torch.set_grad_enabled(False)
@@ -188,17 +203,8 @@ def main():
         hk.h.append(layers[LAYER - 1].register_forward_hook(hook))
         return hk
 
-    def render(row):
-        msgs = [{"role": "system", "content": row["system_prompt"]},
-                {"role": "user", "content": row["user_prompt"]}]
-        tools = None if row["mode"] == "No-tool chat" else list(get_domain(DM[row["domain"]]).tools_for_llm)
-        kw = dict(tokenize=False, add_generation_prompt=True)
-        for extra in ({"enable_thinking": False}, {}):
-            try:
-                return tok.apply_chat_template(msgs, tools=tools, **kw, **extra) if tools \
-                    else tok.apply_chat_template(msgs, **kw, **extra)
-            except TypeError:
-                continue
+    from render_utils import make_renderer
+    render = make_renderer(tok, get_domain, log=log)
 
     @torch.no_grad()
     def gen(prompts, hook_fn=None):
@@ -220,7 +226,8 @@ def main():
 
     nt, tn = d["mode"] == "No-tool chat", d["mode"] == "Tool-enabled normal"
     H, B = d["request_type"] == "Harmful", d["request_type"] == "Benign"
-    out = {"model": a.model, "layer": LAYER, "add_coef": a.add_coef}
+    out = {"model": a.model, "layer": LAYER, "add_coef": a.add_coef,
+           "tools_native": bool(render.native_tools)}
     pending = []   # completions that need a refusal label
 
     def stash(exp, coef, frame, texts):

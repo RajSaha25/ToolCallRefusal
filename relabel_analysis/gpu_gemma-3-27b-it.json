@@ -2,32 +2,33 @@
   "model": "gemma-3-27b-it",
   "layer": 51,
   "n_dir": 128,
+  "tools_native": false,
   "proj_gap": 18944.4,
   "add_coef_4x": 75777.6,
   "n_behav_strict": 25,
   "n_behav_loose": 128,
   "n_behav_old": 70,
-  "cos_rtext_rtool": 0.939,
+  "cos_rtext_rtool": 0.797,
   "cos_rtext_rbehav_strict": 0.822,
-  "cos_rtool_rbehav_strict": 0.823,
+  "cos_rtool_rbehav_strict": 0.727,
   "cos_rtext_rbehav_loose": 0.817,
-  "cos_rtool_rbehav_loose": 0.804,
+  "cos_rtool_rbehav_loose": 0.675,
   "cos_rtext_rbehav_old": 0.817,
   "cos_rbehav_old_new": 0.958,
   "auc_unsafe_old": {
-    "auc": 0.497,
+    "auc": 0.701,
     "ci": [
-      0.364,
-      0.627
+      0.614,
+      0.779
     ],
     "n_safe": 281,
     "n_unsafe": 19
   },
   "auc_unsafe_fixed": {
-    "auc": 0.629,
+    "auc": 0.79,
     "ci": [
-      0.536,
-      0.719
+      0.733,
+      0.843
     ],
     "n_safe": 258,
     "n_unsafe": 42

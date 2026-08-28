@@ -1,0 +1,10 @@
+{
+  "model": "gemma-3-27b-it",
+  "n": 120,
+  "made_tool_calls": 20,
+  "call_rate": 0.167,
+  "unsafe": 15,
+  "unsafe_rate": 0.125,
+  "stored_unsafe_rate_scoped": 0.068,
+  "stored_unsafe_rate_fixed": 0.146
+}

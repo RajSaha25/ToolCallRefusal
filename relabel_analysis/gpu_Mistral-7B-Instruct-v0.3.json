@@ -2,6 +2,8 @@
   "model": "Mistral-7B-Instruct-v0.3",
   "layer": 26,
   "n_dir": 128,
+  "proj_gap": 7.45,
+  "add_coef_4x": 29.8,
   "n_behav_strict": 84,
   "n_behav_loose": 128,
   "n_behav_old": 114,
