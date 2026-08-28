@@ -1,8 +1,8 @@
 {
   "model": "Mistral-7B-Instruct-v0.3",
   "layer": 26,
-  "add_coef": 29.8,
-  "n_judged": 649,
+  "add_coef": 29.0,
+  "n_judged": 501,
   "judge_errors": 0,
   "ablation_base": {
     "n": 120,
@@ -11,37 +11,33 @@
       0.217,
       0.375
     ],
-    "new": 0.467,
+    "new": 0.492,
     "new_ci": [
-      0.375,
-      0.55
+      0.4,
+      0.575
     ],
     "labels": {
-      "refuse": 56,
-      "caveat": 43,
-      "comply": 21,
-      "no_text": 0,
-      "judge_error": 0
+      "refuse": 59,
+      "caveat": 40,
+      "comply": 21
     }
   },
   "ablation_ablated": {
     "n": 120,
-    "old": 0.158,
+    "old": 0.15,
     "old_ci": [
       0.092,
-      0.225
+      0.217
     ],
-    "new": 0.35,
+    "new": 0.342,
     "new_ci": [
-      0.267,
-      0.434
+      0.258,
+      0.425
     ],
     "labels": {
-      "refuse": 42,
-      "caveat": 44,
-      "comply": 34,
-      "no_text": 0,
-      "judge_error": 0
+      "refuse": 41,
+      "caveat": 46,
+      "comply": 33
     }
   },
   "addition_base": {
@@ -58,18 +54,16 @@
     ],
     "labels": {
       "refuse": 0,
-      "caveat": 2,
-      "comply": 118,
-      "no_text": 0,
-      "judge_error": 0
+      "caveat": 3,
+      "comply": 117
     }
   },
   "addition_added": {
     "n": 120,
-    "old": 0.667,
+    "old": 0.692,
     "old_ci": [
-      0.583,
-      0.75
+      0.608,
+      0.767
     ],
     "new": 1.0,
     "new_ci": [
@@ -79,52 +73,26 @@
     "labels": {
       "refuse": 120,
       "caveat": 0,
-      "comply": 0,
-      "no_text": 0,
-      "judge_error": 0
+      "comply": 0
     }
   },
   "steering": {
     "grid": [
-      0,
-      5,
-      11,
-      17
+      0
     ],
     "harmful_unsafe": [
-      0.27,
-      0.17,
-      0.0,
-      0.0
+      0.26
     ],
     "benign_refuse_old": [
-      0.0,
-      0.033,
-      0.167,
-      0.65
+      0.0
     ],
     "benign_refuse_new": [
-      0.05,
-      0.033,
-      0.117,
-      0.683
+      0.115
     ],
     "benign_refuse_new_ci": [
       [
         0.0,
-        0.117
-      ],
-      [
-        0.0,
-        0.083
-      ],
-      [
-        0.05,
-        0.2
-      ],
-      [
-        0.567,
-        0.8
+        0.269
       ]
     ]
   }

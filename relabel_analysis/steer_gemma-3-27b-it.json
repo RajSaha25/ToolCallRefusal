@@ -2,7 +2,7 @@
   "model": "gemma-3-27b-it",
   "layer": 51,
   "add_coef": 75777.6,
-  "n_judged": 693,
+  "n_judged": 692,
   "judge_errors": 0,
   "ablation_base": {
     "n": 120,
@@ -58,8 +58,8 @@
     ],
     "labels": {
       "refuse": 0,
-      "caveat": 39,
-      "comply": 81,
+      "caveat": 40,
+      "comply": 80,
       "no_text": 0,
       "judge_error": 0
     }
@@ -87,40 +87,40 @@
   "steering": {
     "grid": [
       0,
-      12163,
-      27374,
-      42586
+      12162,
+      27375,
+      42587
     ],
     "harmful_unsafe": [
-      0.0,
-      0.0,
+      0.13,
+      0.04,
       0.0,
       0.0
     ],
     "benign_refuse_old": [
-      0.017,
-      0.1,
-      0.667,
-      0.017
+      0.067,
+      0.133,
+      0.75,
+      0.167
     ],
     "benign_refuse_new": [
-      0.0,
-      0.033,
+      0.183,
+      0.1,
       0.717,
       1.0
     ],
     "benign_refuse_new_ci": [
       [
-        0.0,
-        0.0
+        0.083,
+        0.283
       ],
       [
-        0.0,
-        0.083
+        0.033,
+        0.183
       ],
       [
         0.6,
-        0.833
+        0.817
       ],
       [
         1.0,
