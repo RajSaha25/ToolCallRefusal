@@ -22,9 +22,5 @@
   "flips_safe_to_unsafe": 0,
   "flips_unsafe_to_safe": 26,
   "called_tool_baseline": 0.175,
-  "called_tool_ablated": 0.0,
-  "unsafe_given_called_base": 0.743,
-  "unsafe_given_called_abl": null,
-  "n_called_base": 35,
-  "n_called_abl": 0
+  "called_tool_ablated": 0.0
 }
