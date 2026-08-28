@@ -72,7 +72,10 @@ class UrllibAnthropic:
             except urllib.error.HTTPError as e:
                 raise RuntimeError(f"HTTP {e.code}: {e.read()[:500].decode('utf-8', 'replace')}") from e
 
-    def __init__(self, api_key, timeout=60):
+    def __init__(self, api_key, timeout=25):
+        # Short timeout on purpose. A call that hangs blocks its worker, and with
+        # the judge's own retry loop on top a single stuck request can stall the
+        # whole pool for minutes. Failing fast and retrying is much cheaper.
         self.messages = self._Messages(api_key, timeout)
 
 REPO = Path(__file__).resolve().parent
@@ -126,10 +129,35 @@ def main():
         if p["key"] not in cache:
             cache[p["key"]] = None
             order.append(p["key"])
-    todo = [k for k in order if len(k[1]) >= MIN_TEXT_CHARS]
-    print(f"[judge] {len(todo)} unique pairs (of {len(order)}) need the judge")
+    # Persistent cache: verdicts are deterministic (temperature 0), so a rerun
+    # should never re-pay for a pair already judged. Restarts are common enough
+    # here -- a stalled pool, an interrupted session -- that losing 1000 calls to
+    # one is worth avoiding.
+    import hashlib
+    cache_path = OUT / "judge_cache_local.json"
+    disk = {}
+    if cache_path.exists():
+        try:
+            disk = json.loads(cache_path.read_text())
+        except json.JSONDecodeError:
+            disk = {}
+
+    def ckey(k):
+        return hashlib.sha1(f"{k[0]}\x00{k[1]}".encode()).hexdigest()
+
+    hits = 0
+    for k in order:
+        v = disk.get(ckey(k))
+        if v is not None and not str(v).startswith("error:"):
+            cache[k] = v
+            hits += 1
+    todo = [k for k in order
+            if len(k[1]) >= MIN_TEXT_CHARS and cache.get(k) is None]
+    print(f"[judge] {len(order)} unique pairs; {hits} already cached; "
+          f"{len(todo)} need the judge")
 
     done = [0]
+    lock = __import__("threading").Lock()
 
     def run(k):
         up, txt = k
@@ -137,14 +165,22 @@ def main():
             v = judge(txt, up)
         except Exception as e:                      # noqa: BLE001
             v = f"error:{type(e).__name__}"
-        done[0] += 1
-        if done[0] % 50 == 0:
-            print(f"[judge] {done[0]}/{len(todo)}", flush=True)
+        with lock:
+            done[0] += 1
+            disk[ckey(k)] = v
+            n = done[0]
+            if n % 100 == 0:
+                cache_path.write_text(json.dumps(disk))   # checkpoint
+        if n % 50 == 0:
+            print(f"[judge] {n}/{len(todo)}", flush=True)
         return k, v
 
-    with ThreadPoolExecutor(max_workers=a.workers) as ex:
-        for k, v in ex.map(run, todo):
-            cache[k] = v
+    if todo:
+        with ThreadPoolExecutor(max_workers=a.workers) as ex:
+            for k, v in ex.map(run, todo):
+                cache[k] = v
+        cache_path.write_text(json.dumps(disk))
+        print(f"[judge] cache saved ({len(disk)} entries)")
 
     errs = sum(1 for v in cache.values() if isinstance(v, str) and v.startswith("error:"))
     if errs:
