@@ -17,7 +17,8 @@ Inputs (all regenerable):
   relabel_out/summary_three_way.csv    — per-model text label rates (new classifier)
   relabel_out/fabricated_auth_audit.csv — extra unsafe calls (fabricated auth)
 
-Usage: python figures/make_fig1.py [plain|stacked]
+Usage: python figures/make_fig1.py [divergence|plain|stacked]
+  divergence -> figures/fig1_conditioned_divergence.png  (the paper's metric; default)
   plain   -> figures/fig1_text_vs_tool_compliance.png          (two bars, matched denominators)
   stacked -> figures/fig1_text_vs_tool_compliance_stacked.png  (red bar split: unsafe + called-no-violation)
 """
@@ -43,7 +44,8 @@ MODELS = [  # (results model id, display name)
     ("c4ai-command-r7b-12-2024", "Command-R-7B"),
 ]
 TOOL_MODE = "Tool-enabled normal"
-VARIANT = sys.argv[1] if len(sys.argv) > 1 else "plain"   # "plain" | "stacked"
+VARIANT = sys.argv[1] if len(sys.argv) > 1 else "divergence"   # "divergence" | "plain" | "stacked"
+TRIPLE = ["batch", "domain", "scenario_id", "system_condition", "prompt_variant"]
 
 
 def load_runs():
@@ -52,8 +54,50 @@ def load_runs():
     return apply_fabricated_auth_overlay(df)
 
 
+def divergence_fig(df):
+    """Conditioned divergence per model: of the triples the model strictly
+    refused in no-tool chat, the fraction whose matched tool run is unsafe."""
+    idnum = df["id"].astype(str).str.extract(r"(\d+)")[0].astype(int)
+    df = df.assign(batch=((idnum - 1) // 576) + 1)
+    names, dn, ds, Rs = [], [], [], []
+    for mid, disp in MODELS:
+        rl = pd.read_csv(REPO / "relabel_out" / f"relabel_{mid}.csv")
+        ref = rl[rl["request_type"] == "Harmful"].groupby(TRIPLE)["new_refused"].first().rename("ref")
+        h = df[(df["model"] == mid) & (df["request_type"] == "Harmful")]
+        un = h[h["mode"] == "Tool-enabled normal"].groupby(TRIPLE)["unsafe"].first().rename("un")
+        us = h[h["mode"] == "Tool-enabled stress"].groupby(TRIPLE)["unsafe"].first().rename("us")
+        t = pd.concat([ref, un, us], axis=1).dropna()
+        R = int(t["ref"].sum())
+        names.append(disp); Rs.append(R)
+        dn.append(100 * (t["ref"] & t["un"]).sum() / R)
+        ds.append(100 * (t["ref"] & t["us"]).sum() / R)
+    x = np.arange(len(names)); w = 0.38
+    fig, ax = plt.subplots(figsize=(10, 5.2))
+    ax.bar(x - w / 2, dn, w, color="#d7301f", label="Tool-enabled normal")
+    ax.bar(x + w / 2, ds, w, color="#7f0000", label="Tool-enabled stress")
+    for i in range(len(names)):
+        ax.text(x[i] - w / 2, dn[i] + 1, f"{dn[i]:.0f}", ha="center", va="bottom", fontsize=10)
+        ax.text(x[i] + w / 2, ds[i] + 1, f"{ds[i]:.0f}", ha="center", va="bottom", fontsize=10)
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{n}\n(R={r})" for n, r in zip(names, Rs)], fontsize=9)
+    ax.set_ylim(0, 100)
+    ax.set_ylabel("Refused in chat, yet unsafe tool call (%)")
+    ax.set_title("Conditioned divergence: requests refused in chat that become unsafe tool calls")
+    ax.legend(loc="upper right", fontsize=9)
+    ax.grid(axis="y", alpha=0.3); ax.set_axisbelow(True)
+    fig.tight_layout()
+    out = REPO / "figures" / "fig1_conditioned_divergence.png"
+    fig.savefig(out, dpi=160)
+    print(f"wrote {out}")
+    for n, a, b, r in zip(names, dn, ds, Rs):
+        print(f"{n:14} normal {a:4.1f} | stress {b:4.1f} | R={r}")
+
+
 def main():
     df = load_runs()
+    if VARIANT == "divergence":
+        divergence_fig(df)
+        return
     text = pd.read_csv(REPO / "relabel_out" / "summary_three_way.csv").set_index("model")
     harm = df[df["request_type"] == "Harmful"]
 
