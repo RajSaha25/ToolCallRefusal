@@ -3,8 +3,8 @@
 Both bars measure the same thing — the model DID the harmful thing — so they
 share polarity (higher = worse), which is what reviewer RGib asked for.
 
-  blue   = text compliance in no-tool chat (three-way judge label 'complied';
-           strict — 'caveat' hedged compliance is NOT counted)
+  orange = text compliance in no-tool chat ('complied' label; hedged compliance
+           is folded into complied — the harmful content was delivered)
   red    = unsafe tool call in tool-enabled normal mode (any predicate fires,
            incl. fabricated-authorization values from relabel_out/fabricated_auth_audit.csv);
            faint extension = called a tool with no violation, so the full red bar
@@ -57,11 +57,10 @@ def main():
     text = pd.read_csv(REPO / "relabel_out" / "summary_three_way.csv").set_index("model")
     harm = df[df["request_type"] == "Harmful"]
 
-    comply, caveat, unsafe, unsafe_given_call, any_call = [], [], [], [], []
+    comply, unsafe, unsafe_given_call, any_call = [], [], [], []
     for mid, _ in MODELS:
         t = text.loc[mid]
         comply.append(100 * t["com_h"])
-        caveat.append(100 * t["cav_h"])
         tn = harm[(harm["model"] == mid) & (harm["mode"] == TOOL_MODE)]
         unsafe.append(100 * tn["unsafe"].mean())
         any_call.append(100 * tn["any_call"].mean())
@@ -100,8 +99,8 @@ def main():
                               else "fig1_text_vs_tool_compliance_stacked.png")
     fig.savefig(out, dpi=160)
     print(f"wrote {out}")
-    for (mid, d), c, cv, u, a, ug in zip(MODELS, comply, caveat, unsafe, any_call, unsafe_given_call):
-        print(f"{d:14} text comply {c:4.1f} (+{cv:4.1f} caveat) | tool unsafe {u:4.1f} | any-call {a:4.1f} | unsafe|call {ug:4.1f}")
+    for (mid, d), c, u, a, ug in zip(MODELS, comply, unsafe, any_call, unsafe_given_call):
+        print(f"{d:14} text comply {c:4.1f} | tool unsafe {u:4.1f} | any-call {a:4.1f} | unsafe|call {ug:4.1f}")
 
 
 if __name__ == "__main__":

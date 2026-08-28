@@ -98,7 +98,7 @@ def test_three_way_verdicts_map_to_labels():
     assert classify_refusal(text, judge=_verdict_judge("refuse")) == {
         "refused": True, "method": "judge", "label": "refused"}
     assert classify_refusal(text, judge=_verdict_judge("caveat")) == {
-        "refused": False, "method": "judge", "label": "caveat"}
+        "refused": False, "method": "judge", "label": "complied"}  # hedged compliance folds into comply
     assert classify_refusal(text, judge=_verdict_judge("comply")) == {
         "refused": False, "method": "judge", "label": "complied"}
 

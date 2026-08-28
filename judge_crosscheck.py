@@ -54,7 +54,7 @@ def main():
         df["source_model"] = Path(f).stem.replace("relabel_", "")
         frames.append(df)
     allrows = pd.concat(frames, ignore_index=True)
-    pool = allrows[allrows["new_label"].isin(["refused", "caveat", "complied"])].copy()
+    pool = allrows[allrows["new_label"].isin(["refused", "complied"])].copy()
     # shuffle + groupby.head keeps all columns (groupby.apply drops the
     # grouping columns on pandas 3, which broke the stratification fields)
     sample = (
@@ -90,26 +90,28 @@ def main():
                 print(f"[xcheck] {done}/{len(pending)}", flush=True)
     CACHE_PATH.write_text(json.dumps(cache))
 
-    v2l = {"refuse": "refused", "caveat": "caveat", "comply": "complied"}
-    sample["label2"] = sample["k2"].map(lambda k: v2l.get(cache.get(k), "judge_error"))
+    v2l = {"refuse": "refused", "caveat": "complied", "comply": "complied"}  # same fold as scoring
+    sample["verdict2"] = sample["k2"].map(lambda k: cache.get(k) or "judge_error")
+    sample["label2"] = sample["verdict2"].map(lambda v: v2l.get(v, "judge_error"))
     ok = sample[sample["label2"] != "judge_error"].copy()
     a, b = ok["new_label"], ok["label2"]
     bin_a, bin_b = a == "refused", b == "refused"
+    va, vb = ok["new_verdict"], ok["verdict2"]
 
     report = {
         "n": len(ok),
         "judge_errors": int((sample["label2"] == "judge_error").sum()),
-        "three_way_agreement": round(float((a == b).mean()), 3),
-        "three_way_kappa": round(kappa(a, b), 3),
+        "verdict_agreement": round(float((va == vb).mean()), 3),
+        "verdict_kappa": round(kappa(va, vb), 3),
         "binary_agreement": round(float((bin_a == bin_b).mean()), 3),
         "binary_kappa": round(kappa(bin_a, bin_b), 3),
-        "confusion": ok.groupby(["new_label", "label2"]).size().to_dict(),
+        "confusion": ok.groupby(["new_verdict", "verdict2"]).size().to_dict(),
     }
     for rt in ("Harmful", "Benign"):
         s = ok[ok["request_type"] == rt]
         report[f"binary_agreement_{rt.lower()}"] = round(float(((s["new_label"] == "refused") == (s["label2"] == "refused")).mean()), 3)
 
-    dis = ok[a != b][["source_model", "id", "request_type", "user_prompt", "response_text", "new_label", "label2"]]
+    dis = ok[va != vb][["source_model", "id", "request_type", "user_prompt", "response_text", "new_verdict", "verdict2", "new_label", "label2"]]
     dis.to_csv(OUT_DIR / "crosscheck_disagreements.csv", index=False)
     (OUT_DIR / "crosscheck_report.json").write_text(json.dumps({k: str(v) if isinstance(v, dict) else v for k, v in report.items()}, indent=2))
     print(json.dumps({k: v for k, v in report.items() if k != "confusion"}, indent=2))
