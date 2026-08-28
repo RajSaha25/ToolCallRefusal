@@ -1,47 +1,51 @@
 {
   "model": "Mistral-7B-Instruct-v0.3",
   "layer": 26,
-  "add_coef": 29.0,
-  "n_judged": 501,
+  "add_coef": 29.8,
+  "n_judged": 87,
   "judge_errors": 0,
   "ablation_base": {
-    "n": 120,
-    "old": 0.292,
+    "n": 240,
+    "old": 0.271,
     "old_ci": [
       0.217,
-      0.375
+      0.333
     ],
-    "new": 0.492,
+    "new": 0.463,
     "new_ci": [
       0.4,
-      0.575
+      0.529
     ],
     "labels": {
-      "refuse": 59,
-      "caveat": 40,
-      "comply": 21
+      "refuse": 111,
+      "caveat": 79,
+      "comply": 50,
+      "no_text": 0,
+      "judge_error": 0
     }
   },
   "ablation_ablated": {
-    "n": 120,
-    "old": 0.15,
+    "n": 240,
+    "old": 0.121,
     "old_ci": [
-      0.092,
-      0.217
+      0.079,
+      0.163
     ],
-    "new": 0.342,
+    "new": 0.338,
     "new_ci": [
-      0.258,
-      0.425
+      0.279,
+      0.4
     ],
     "labels": {
-      "refuse": 41,
-      "caveat": 46,
-      "comply": 33
+      "refuse": 81,
+      "caveat": 86,
+      "comply": 73,
+      "no_text": 0,
+      "judge_error": 0
     }
   },
   "addition_base": {
-    "n": 120,
+    "n": 240,
     "old": 0.0,
     "old_ci": [
       0.0,
@@ -54,16 +58,18 @@
     ],
     "labels": {
       "refuse": 0,
-      "caveat": 3,
-      "comply": 117
+      "caveat": 4,
+      "comply": 236,
+      "no_text": 0,
+      "judge_error": 0
     }
   },
   "addition_added": {
-    "n": 120,
-    "old": 0.692,
+    "n": 240,
+    "old": 0.65,
     "old_ci": [
-      0.608,
-      0.767
+      0.592,
+      0.708
     ],
     "new": 1.0,
     "new_ci": [
@@ -71,28 +77,54 @@
       1.0
     ],
     "labels": {
-      "refuse": 120,
+      "refuse": 240,
       "caveat": 0,
-      "comply": 0
+      "comply": 0,
+      "no_text": 0,
+      "judge_error": 0
     }
   },
   "steering": {
     "grid": [
-      0
+      0,
+      5,
+      11,
+      17
     ],
     "harmful_unsafe": [
-      0.26
-    ],
-    "benign_refuse_old": [
+      0.27,
+      0.175,
+      0.005,
       0.0
     ],
+    "benign_refuse_old": [
+      0.0,
+      0.033,
+      0.158,
+      0.658
+    ],
     "benign_refuse_new": [
-      0.115
+      0.033,
+      0.025,
+      0.083,
+      0.683
     ],
     "benign_refuse_new_ci": [
       [
+        0.008,
+        0.067
+      ],
+      [
         0.0,
-        0.269
+        0.058
+      ],
+      [
+        0.033,
+        0.133
+      ],
+      [
+        0.6,
+        0.767
       ]
     ]
   }

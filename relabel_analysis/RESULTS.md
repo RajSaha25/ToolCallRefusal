@@ -116,13 +116,16 @@ model's own projection gap via `--auto-grid`, using the ratios Qwen's published 
 against a projection gap of 18944, roughly 60x too small, which is why its published steering
 curve is flat.
 
+All figures below are the n=200 harmful / 120 benign pass. A first pass at n=100/60 gave the
+same curves throughout, so these conclusions are not sample-size artifacts.
+
 | model | grid | harmful unsafe | benign over-refusal (regex) | benign over-refusal (judge) |
 |---|---|---|---|---|
-| Qwen3-14B | 0 → 700 | 0.510 → 0.030 | 0.000 → 0.550 | 0.000 → **0.467** |
-| Mistral-7B-Instruct-v0.3 | 0 → 17 | 0.270 → 0.000 | 0.000 → 0.650 | 0.050 → **0.683** |
-| c4ai-command-r7b-12-2024 | 0 → 172 | 0.080 → 0.000 | 0.000 → 1.000 | 0.033 → **1.000** |
-| gemma-3-27b-it | 0 → 42587 | 0.130 → 0.000 | 0.067 → 0.167 | 0.183 → **1.000** |
-| Meta-Llama-3.1-70B-Instruct | 0 → 31 | 0.540 → 0.000 | 0.000 → 0.017 | 0.017 → **1.000** |
+| Qwen3-14B | 0 → 700 | 0.535 → 0.030 | 0.025 → 0.533 | 0.000 → **0.442** |
+| Mistral-7B-Instruct-v0.3 | 0 → 17 | 0.270 → 0.000 | 0.000 → 0.658 | 0.033 → **0.683** |
+| c4ai-command-r7b-12-2024 | 0 → 172 | 0.115 → 0.000 | 0.000 → 1.000 | 0.025 → **1.000** |
+| gemma-3-27b-it | 0 → 42587 | 0.120 → 0.000 | 0.042 → 0.142 | 0.217 → **1.000** |
+| Meta-Llama-3.1-70B-Instruct | 0 → 31 | 0.515 → 0.000 | 0.008 → 0.033 | 0.025 → **1.000** |
 
 The qualitative claim holds everywhere and is if anything stronger than published: driving
 unsafe calls to zero costs roughly half the benign traffic in Qwen and *all* of it in Command-R,
@@ -137,13 +140,15 @@ column rises cleanly in every model.
 
 Same generations scored two ways, so this isolates the classifier.
 
+n=240 per condition (a first pass at n=120 gave the same picture).
+
 | model | regex base → ablated | judge base → ablated | verdict |
 |---|---|---|---|
-| Qwen3-14B | 0.667 → 0.450 | 0.767 → **0.925** | reverses |
-| gemma-3-27b-it | 0.350 → 0.000 | 0.667 → **1.000** | reverses |
-| Mistral-7B-Instruct-v0.3 | 0.292 → 0.158 | 0.467 → 0.350 | holds |
-| Meta-Llama-3.1-70B-Instruct | 0.725 → 0.617 | 0.733 → 0.642 | holds |
-| c4ai-command-r7b-12-2024 | 0.675 → 0.008 | 0.667 → 0.342 | holds, much weaker |
+| Qwen3-14B | 0.637 → 0.375 | 0.775 → **0.925** | reverses |
+| gemma-3-27b-it | 0.358 → 0.000 | 0.654 → **1.000** | reverses |
+| Mistral-7B-Instruct-v0.3 | 0.271 → 0.121 | 0.463 → 0.338 | holds |
+| Meta-Llama-3.1-70B-Instruct | 0.704 → 0.567 | 0.713 → 0.592 | holds |
+| c4ai-command-r7b-12-2024 | 0.654 → 0.008 | 0.671 → 0.338 | holds, much weaker |
 
 Mistral and Llama keep a real drop close in size to the regex-measured one. Command-R keeps a
 drop but nothing like the published collapse: 72% → 2% becomes 0.667 → 0.342. Qwen and Gemma
@@ -163,13 +168,15 @@ ablation figures should not be relied on.**
 
 ## Addition — strengthens everywhere, and rescues Llama
 
+n=240 per condition.
+
 | model | base (regex → judge) | added (regex → judge) |
 |---|---|---|
-| Qwen3-14B | 0.017 → 0.000 | 0.750 → 1.000 |
-| Mistral-7B-Instruct-v0.3 | 0.000 → 0.000 | 0.667 → 1.000 |
-| c4ai-command-r7b-12-2024 | 0.000 → 0.000 | 0.975 → 1.000 |
-| gemma-3-27b-it | 0.008 → 0.000 | 0.208 → 1.000 |
-| Meta-Llama-3.1-70B-Instruct | 0.008 → 0.000 | 0.000 → 1.000 |
+| Qwen3-14B | 0.008 → 0.000 | 0.787 → 1.000 |
+| Mistral-7B-Instruct-v0.3 | 0.000 → 0.000 | 0.650 → 1.000 |
+| c4ai-command-r7b-12-2024 | 0.004 → 0.000 | 0.988 → 1.000 |
+| gemma-3-27b-it | 0.008 → 0.000 | 0.200 → 1.000 |
+| Meta-Llama-3.1-70B-Instruct | 0.004 → 0.000 | 0.000 → 1.000 |
 
 Adding the direction drives benign refusal to 100% in every model, because the judge counts the
 hedged refusals the regex dropped. The Llama row matters most: the paper reports its addition as
@@ -233,5 +240,7 @@ top-coefficient over-refusal from 0.609 to 0.467.
 ## Not covered
 
 - **Patching** — deliberately not rerun; predicate-scored and classifier-independent.
-- Ablation/addition/steering use n=120/120/100+60 per model, matching
-  `run_scaled_evaluation.py`. The bootstrap CIs are in the per-model JSON.
+- Ablation/addition/steering were run twice: once at `run_scaled_evaluation.py`'s sample sizes
+  (120/120/100+60) and once at double that (240/240/200+120). The tables report the larger pass;
+  the two agree throughout, so nothing here rests on sample size. Bootstrap CIs are in the
+  per-model JSON.
