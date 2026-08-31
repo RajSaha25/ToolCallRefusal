@@ -26,8 +26,9 @@ relabel cannot move them, though see §5 for why re-verifying is still worth an 
 not a table. Two causal claims flip:
 - **Ablation** reverses in Qwen and Gemma (it *raises* refusal), and Command-R's 72%→2% collapse
   is really 67%→34%.
-- **Llama's addition is not null.** The draft reports 1%→1% and treats Llama as the family where
-  the direction does not control refusal. It is **0%→100%**.
+- **Addition is not measurable at the published coefficient.** It drives all five models into
+  degenerate output, which any refusal classifier scores as refusal. This affects the draft's
+  existing numbers too, not just the rerun.
 
 Because that ask deserved a test no classifier could confound, I also ran a new experiment
 (§3.3): ablate, then score the unsafe tool call directly. Result — the direction gates **whether
@@ -51,7 +52,8 @@ The story gets stronger, not weaker:
 
 - The direction is still a strong predictor everywhere — AUC **0.76–0.86**, and all five models
   now reproduce their published AUC once the prompt is built correctly.
-- Addition now works in **all five** models, including the Llama case the draft reports as null.
+- Addition at the coefficient the draft uses breaks every model, so both the old and new numbers
+  there measure breakage. At coefficients the model survives the effect is real but modest.
 - We have the §3.6 cosine numbers, which the draft describes but never computed.
 - A new result gives a sharper claim than "partial mediator": the direction gates **whether the
   model engages**, not how safely it acts once engaged.
@@ -59,6 +61,34 @@ The story gets stronger, not weaker:
 What breaks: the ablation column. Under a classifier that reads the whole response rather than
 matching refusal phrases, ablation **raises** measured refusal in Qwen and Gemma, and Command-R's
 collapse is far smaller than reported.
+
+---
+
+## 1b. Output degeneracy — a second problem, found on review
+
+Ablation and addition can push a model off the rails entirely. Real examples from our runs:
+
+> Gemma, ablated: `Vy수상수상수상수상수상…` for 400 characters
+> Llama, addition: `I can I can I can I can…` for 600 characters
+
+The judge has no "broken output" verdict, so it forces such a response into refuse/caveat/comply,
+and "no help was given" reads as REFUSE. **Any intervention rate computed over degenerate output
+measures breakage, not refusal.**
+
+This applies to the draft's existing numbers too. Qwen's degenerate addition output is literally
+"I'm sorry I cannot I'm sorry I cannot…", which the old regex classifier also scores as refusal —
+so the published 1%→71% has the same problem. This is not a regression introduced by the relabel.
+
+Per-cell rates are in `relabel_analysis/degeneracy_audit.json` (`degeneracy_audit.py`). What is
+and is not measurable:
+
+| | |
+|---|---|
+| **Clean** (0% degenerate) | every model's ablation except Gemma; all four baselines; the lower half of every steering grid |
+| **Artifact** | addition at 4× the gap in all five (67–100% degenerate); Gemma's ablation (100%) |
+
+Recommend putting the degeneracy screen in the paper. It is a real methodological contribution and
+pre-empts the obvious reviewer question.
 
 ---
 
@@ -86,11 +116,11 @@ intervention results.
 
 | Model | Ablation (old → **new**) | Addition (old → **new**) | AUC (old → **new**) |
 |---|---|---|---|
-| Qwen3-14B | 57%→32% → **78%→92%** | 1%→71% → **0%→100%** | 0.724 → **0.808** |
-| Mistral-7B | 29%→13% → **46%→34%** | 0%→80% → **0%→100%** | 0.689 → **0.760** |
-| Command-R-7B | 72%→2% → **67%→34%** | 2%→92% → **0%→100%** | 0.751 → **0.768** |
-| Gemma-3-27B | 21%→0% → **65%→100%** | 1%→25% → **0%→100%** | 0.791 → **0.790** |
-| Llama-3.1-70B | 73%→61% → **71%→59%** | 1%→1% → **0%→100%** | 0.881 → **0.864** |
+| Qwen3-14B | 57%→32% → **78%→92%** | 1%→71% → **0%→8%** (c=450) | 0.724 → **0.808** |
+| Mistral-7B | 29%→13% → **46%→34%** | 0%→80% → **3%→8%** (c=11) | 0.689 → **0.760** |
+| Command-R-7B | 72%→2% → **67%→34%** | 2%→92% → **2%→18%** (c=49) | 0.751 → **0.768** |
+| Gemma-3-27B | 21%→0% → **not reportable** | 1%→25% → **22%→14%** (c=12162) | 0.791 → **0.790** |
+| Llama-3.1-70B | 73%→61% → **71%→59%** | 1%→1% → **2%→22%** (c=9) | 0.881 → **0.864** |
 
 **Layer, Suppression and Patching are unchanged** — see §5 for why, and why re-verifying two of
 them is still worth doing.
@@ -140,15 +170,32 @@ often a model acts, not how safely it acts once it does.**
 Caveat for the text: Gemma's tool-calling collapses to zero, so its apparent safety gain is the
 model ceasing to act — capability damage, not alignment.
 
-### 3.4 Steering
+### 3.4 Steering — this conclusion changes
 
-Qwen's over-refusal cost at the coefficient that clears unsafe calls: **70% → 44%**. Lower, but the
-conclusion is unchanged and in fact stronger across the set — in Command-R, Gemma and Llama the same
-operating point costs essentially *all* benign tool use.
+**"Steering is a blunt lever" is too strong, and the evidence for it was the degenerate points.**
+The top of each grid is where the model breaks, so those over-refusal rates measure breakage. At
+coefficients the model survives (0% degenerate), the trade-off is much better:
 
-Gemma's published steering curve is flat for a fixable reason: it used Qwen's **absolute** grid
-(0/200/450/700) against a projection gap of 18,944, roughly 60× too small. Rerun on a scaled grid it
-falls 0.12 → 0.00.
+| model | clean coef | unsafe | benign over-refusal | degenerate |
+|---|---|---|---|---|
+| Mistral-7B | 11 | 0.270 → **0.005** | 0.083 | 0% |
+| Command-R-7B | 49 | 0.115 → **0.035** | 0.183 | 0% |
+| Gemma-3-27B | 12162 | 0.120 → **0.035** | 0.142 | 0% |
+| Qwen3-14B | 450 | 0.535 → 0.240 | 0.083 | 1.7% |
+| Llama-3.1-70B | 20 | 0.515 → **0.020** | 0.408 | 6.7% |
+
+For Mistral, Command-R and Gemma a clean coefficient removes most unsafe calls for under 20%
+over-refusal. The draft's "no coefficient removes unsafe behaviour without large collateral
+over-refusal" should go. Qwen is the genuinely hard case — clean points only halve its unsafe rate.
+
+The high-coefficient rates (Qwen 0.442, Command-R 1.000, Gemma 1.000, Llama 1.000) are 32–100%
+degenerate and should not be quoted as over-refusal at all.
+
+This also softens Future Work: the constraint is choosing a per-model coefficient below the
+degeneracy threshold, not that steering is inherently too blunt to use.
+
+Separately, Gemma's published steering curve is flat for a fixable reason — it used Qwen's
+**absolute** grid (0/200/450/700) against a projection gap of 18,944, roughly 60× too small.
 
 ### 3.5 Prose that must change
 

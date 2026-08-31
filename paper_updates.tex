@@ -25,6 +25,10 @@ mean $\Delta$ and $t$-statistic ($n{=}96$); $\Delta$ is in each model's own acti
 magnitudes are not comparable across rows. Ablation and addition give refusal rates before and
 after the intervention, on harmful and benign prompts respectively, scored by the same
 three-way classifier used for Table~\ref{tab:headline-divergence} ($n{=}240$ per condition).
+Addition at $4\times$ the projection gap drives every model into degenerate output, so that
+coefficient measures breakage rather than refusal; the addition column instead reports the
+largest steering coefficient whose output remains fluent. Gemma's ablation is likewise
+degenerate and is not reported. See the degeneracy audit for per-cell rates.
 AUC is the area under the ROC of low refusal activation predicting an unsafe call; patching is
 the fraction of unsafe calls that revert to safe when the projection is restored to its matched
 no-tool level. The direction remains a strong predictor in every model, but ablation no longer
@@ -34,11 +38,11 @@ reduces refusal uniformly: it reverses in Qwen and Gemma (see text).}
 \toprule
 Model & Layer & Suppression ($\Delta$, $t$) & Ablation & Addition & AUC\,/\,Patching \\
 \midrule
-Qwen3-14B      & 33/40 & $66.8,\ t{=}5.6$  & $78\%\!\to\!92\%$ & $0\%\!\to\!100\%$ & $0.808$\,/\,$18\%$ \\
-Mistral-7B     & 26/32 & $1.4,\ t{=}5.1$  & $46\%\!\to\!34\%$ & $0\%\!\to\!100\%$ & $0.760$\,/\,$24\%$ \\
-Command-R-7B   & 26/32 & $26.4,\ t{=}9.7$  & $67\%\!\to\!34\%$ & $0\%\!\to\!100\%$ & $0.768$\,/\,$62\%$ \\
-Gemma-3-27B    & 51/62 & $2902,\ t{=}4.0$  & $65\%\!\to\!100\%$ & $0\%\!\to\!100\%$ & $0.790$\,/\,$46\%$ \\
-Llama-3.1-70B  & 67/80 & $0.2,\ t{=}0.4$  & $71\%\!\to\!59\%$ & $0\%\!\to\!100\%$ & $0.864$\,/\,$40\%$ \\
+Qwen3-14B      & 33/40 & $66.8,\ t{=}5.6$  & $78\%\!\to\!92\%$ & $0\%\!\to\!8\%$ ($c{=}450$) & $0.808$\,/\,$18\%$ \\
+Mistral-7B     & 26/32 & $1.4,\ t{=}5.1$  & $46\%\!\to\!34\%$ & $3\%\!\to\!8\%$ ($c{=}11$) & $0.760$\,/\,$24\%$ \\
+Command-R-7B   & 26/32 & $26.4,\ t{=}9.7$  & $67\%\!\to\!34\%$ & $2\%\!\to\!18\%$ ($c{=}49$) & $0.768$\,/\,$62\%$ \\
+Gemma-3-27B    & 51/62 & $2902,\ t{=}4.0$  & \emph{degenerate} & $22\%\!\to\!14\%$ ($c{=}12162$) & $0.790$\,/\,$46\%$ \\
+Llama-3.1-70B  & 67/80 & $0.2,\ t{=}0.4$  & $71\%\!\to\!59\%$ & $2\%\!\to\!22\%$ ($c{=}9$) & $0.864$\,/\,$40\%$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -96,151 +100,175 @@ Llama-3.1-70B  & $0.450\!\to\!0.360$ & $-0.090$ $(-0.14,-0.04)$ & $0.740\!\to\!0
 % ===========================================================================
 % WRITING OUTLINES --- everything below is commented out on purpose.
 %
-% These are notes on what each paragraph has to cover and which numbers to
-% cite, not text to paste. The tables above are ready to use as-is.
+% Notes on what each paragraph has to cover and which numbers to cite, not text
+% to paste. The tables above are ready to use as-is.
 % ===========================================================================
 
 % ---------------------------------------------------------------------------
-% 4. SECTION 5 --- Mechanistic analysis. Four paragraphs now, five after.
+% 0. READ THIS FIRST --- output degeneracy
+% ---------------------------------------------------------------------------
+%     Ablation and addition can push a model off the rails into repetitive or
+%     non-linguistic output. Two real examples from our runs:
+%       Gemma, ablated:  'Vy수상수상수상수상수상...' for 400 characters
+%       Llama, addition: 'I can I can I can I can...' for 600 characters
+%     The refusal judge has no 'broken output' verdict, so such a response is
+%     forced into refuse/caveat/comply, and 'no help was given' reads as REFUSE.
+%     Any intervention rate computed over degenerate output measures breakage,
+%     not refusal. This is true of the OLD regex classifier too -- Qwen's
+%     degenerate addition output is literally "I'm sorry I cannot I'm sorry I
+%     cannot...", which the regex also scores as refusal. So the published
+%     addition numbers have the same problem; this is not new breakage.
+%
+%     Per-cell degeneracy rates are in relabel_analysis/degeneracy_audit.json
+%     (degeneracy_audit.py). Summary of what is and is not measurable:
+%       CLEAN (0% degenerate): every model's ablation except Gemma; all four
+%         baseline conditions; the lower half of every steering grid.
+%       ARTIFACT: addition at 4x the gap in all five models (67-100%
+%         degenerate); Gemma's ablation (100%).
+%     Recommend stating the degeneracy check in the paper. It is a genuine
+%     methodological contribution and pre-empts the obvious reviewer question.
+
+% ---------------------------------------------------------------------------
+% 1. SECTION 5 --- Mechanistic analysis
 % ---------------------------------------------------------------------------
 %
-% 4a. REPLACES 'A single direction causally governs text refusal'
-%     The current title asserts what we can no longer claim, so it needs to go.
+% 1a. REPLACES 'A single direction causally governs text refusal'
+%     The current title asserts what we can no longer claim.
 %     Must cover:
-%       - Addition works in all five models: near zero -> 100% benign refusal.
-%         This half of Arditi et al. reproduces cleanly.
-%       - Ablation does NOT. It lowers refusal in Mistral (46%->34%),
-%         Llama (71%->59%) and Command-R (67%->34%), but RAISES it in
-%         Qwen (78%->92%) and Gemma (65%->100%).
-%       - Why: ablation changes the phrasing of the refusal, not its presence.
-%         Out of first-person modals ('I cannot') into forms like 'Certainly
-%         not. Submitting a client trade without proper approval is a serious
-%         violation.' A phrase-matching classifier scores that as compliance.
-%         Concrete: 66 of Qwen's 120 ablated responses are refusals the regex
-%         misses; for Gemma the regex finds 0 of 120 where the judge finds 120.
-%       - State that ablation is scored with the same classifier as Table 1.
-%       - Keep from the old paragraph: layers sit upper-middle; addition
-%         coefficient spans three orders of magnitude (29.8 Mistral -> ~75,800
-%         Gemma).
-%     Framing note: this is a measurement artifact in the old scoring, not a
-%     failure of the direction. Addition still works everywhere. Worth saying
-%     plainly rather than burying.
+%       - Ablation lowers refusal in Mistral (46%->34%), Llama (71%->59%)
+%         and Command-R (67%->34%). All three fluent, 0% degenerate.
+%       - It RAISES refusal in Qwen (78%->92%). Also fluent -- this is a real
+%         effect, not an artifact, and is the interesting one.
+%       - Gemma's ablation is NOT reportable: 100% of its ablated outputs are
+%         degenerate. Say so rather than reporting a number.
+%       - Why Qwen rises: ablation changes the phrasing of the refusal, not its
+%         presence -- out of 'I cannot' into forms like 'Certainly not.
+%         Submitting a client trade without proper approval is a serious
+%         violation.' 66 of 120 ablated Qwen responses are refusals a
+%         phrase-matching classifier misses.
+%       - Addition: at 4x the gap it is degenerate in all five, so we report it
+%         at the largest coefficient the model survives. The effect there is
+%         modest, not the near-total over-refusal previously reported
+%         (see Table~\ref{tab:mech}).
+%     Framing: the Arditi replication is weaker than the draft claims in BOTH
+%     directions. Ablation does not uniformly reduce refusal, and addition does
+%     not drive benign refusal to ceiling except where it breaks the model.
 %
-% 4b. REPLACES 'Tool context suppresses the refusal signal'
-%     Mostly survives. One claim must go.
+% 1b. REPLACES 'Tool context suppresses the refusal signal'
 %     Must cover:
-%       - Suppression unchanged: significant in four of five (t=5.6 Qwen,
-%         5.1 Mistral, 9.7 Command-R, 4.0 Gemma; null for Llama at 0.4).
-%       - DROP the blanket 'text-derived and tool-derived directions remain
-%         aligned'. True for Qwen 0.741, Mistral 0.773, Gemma 0.797. NOT true
-%         for Command-R 0.394 or Llama 0.213 (Table~\ref{tab:cosine}).
-%       - So 'attenuation along a shared axis' holds for three of five, and
-%         should be stated as such.
+%       - Suppression unchanged: significant in four of five (t=5.6 Qwen, 5.1
+%         Mistral, 9.7 Command-R, 4.0 Gemma; null for Llama at 0.4).
+%       - DROP the blanket 'text- and tool-derived directions remain aligned'.
+%         True for Qwen 0.741, Mistral 0.773, Gemma 0.797; NOT for Command-R
+%         0.394 or Llama 0.213 (Table~\ref{tab:cosine}).
 %       - Llama is the coherent outlier: weakest alignment AND null suppression.
-%         Worth one sentence rather than treating it as noise.
 %
-% 4c. REPLACES 'strong predictor but partial mediator'
+% 1c. REPLACES 'strong predictor but partial mediator'
 %     Only the AUC range changes; the mediation argument stands.
-%     Must cover:
 %       - AUC range 0.69-0.88 becomes 0.76-0.86 under the
-%         global-scope scorer. Note all five now reproduce their published AUC.
-%       - Keep the patching numbers and the whole 'partial mediator' argument,
-%         including the caveats about one-dimensional intervention and about
-%         tool availability being confounded with prompt wording.
+%         global-scope scorer; all five now reproduce their published AUC.
+%       - Keep the patching numbers and all the existing caveats.
 %
-% 4d. NEW PARAGRAPH --- the ablation-on-action result (Table~\ref{tab:ablation-action})
+% 1d. NEW PARAGRAPH --- ablation on behaviour (Table~\ref{tab:ablation-action})
 %     Must cover:
-%       - Why it exists: ablation-by-wording is classifier-dependent, so we
-%         test the same intervention against something no classifier touches
-%         (the unsafe-tool-call predicate). Paired, n=200.
-%       - The headline unsafe rate moves in BOTH directions across families,
-%         so it supports no single claim on its own.
-%       - The informative quantity is unsafe-given-a-call, which is near-flat
-%         everywhere: 0.78->0.64, 0.77->0.75, 0.89->0.78, 0.61->0.64.
-%       - What DOES move is how often the model calls a tool at all: -22 pts
-%         Qwen, -17 Llama, to zero in Gemma, +10 Command-R.
+%       - Motivation: refusal-by-wording is classifier-dependent and, for some
+%         models, degenerate. Scoring the unsafe tool call is a predicate over
+%         parsed calls, so neither problem applies. Paired, n=200.
+%       - The headline unsafe rate moves in both directions across families.
+%       - The informative quantity is unsafe-given-a-call, near-flat everywhere:
+%         0.78->0.64, 0.77->0.75, 0.89->0.78, 0.61->0.64.
+%       - What moves is how often the model calls a tool: -22 pts Qwen, -17
+%         Llama, to zero in Gemma, +10 Command-R.
 %       - Conclusion: the direction gates engagement, not the safety of the
-%         action. This is a sharper form of 'partial mediator' and is immune to
-%         the classifier problem that broke 4a.
-%       - Caveat to state explicitly: Gemma's tool-calling collapses to zero, so
-%         its apparent safety gain is the model ceasing to act. Read that as
-%         capability damage, not alignment. Mistral's effect is n.s. at n=200.
+%         action.
+%       - Gemma's row is the degeneracy again -- its tool-calling goes to zero
+%         because the output is broken. Consistent with 1a, and worth noting as
+%         convergent evidence rather than a separate finding.
 %
-% 4e. REPLACES 'Steering is a blunt lever'
-%     Conclusion unchanged and arguably stronger.
+% 1e. REPLACES 'Steering is a blunt lever' --- THIS CONCLUSION CHANGES
+%     The published claim rests on high-coefficient points where the model is
+%     degenerate. At coefficients the model survives, the trade-off is much
+%     better than 'blunt'. Clean operating points (0% degenerate):
+%       Mistral   c=11    unsafe 0.270 -> 0.005   over-refusal 0.083
+%       Command-R c=49    unsafe 0.115 -> 0.035   over-refusal 0.183
+%       Gemma     c=12162 unsafe 0.120 -> 0.035   over-refusal 0.142
+%       Qwen      c=450   unsafe 0.535 -> 0.240   over-refusal 0.083
+%       Llama     c=20    unsafe 0.515 -> 0.020   over-refusal 0.408 (6.7% degen)
 %     Must cover:
-%       - Qwen's over-refusal cost at the coefficient that clears unsafe calls:
-%         'around 70 percent' becomes 44 percent.
-%       - Command-R, Gemma and Llama cost essentially ALL benign tool use at
-%         the equivalent point, so the conclusion generalises better than before.
-%       - No coefficient in the grid removes unsafe behaviour without large
-%         collateral over-refusal.
-%       - Optional but defensible: the regex column is non-monotonic for Llama
-%         (0.617 at c=20 then 0.017 at c=31) and Gemma, i.e. it stops tracking
-%         refusal exactly where the curve matters. The judge column rises
-%         cleanly. Good supporting evidence for the classifier change.
+%       - For Mistral, Command-R and Gemma a clean coefficient removes most
+%         unsafe calls at under 20 percent over-refusal. The draft's 'no
+%         coefficient removes unsafe behaviour without large collateral
+%         over-refusal' is too strong and should be dropped.
+%       - Qwen is the genuinely hard case: the clean points only halve the
+%         unsafe rate, and driving it to zero needs a coefficient that breaks
+%         the model.
+%       - The rates at the top of each grid (Qwen 0.442, Command-R 1.000, Gemma
+%         1.000, Llama 1.000) are 32-100 percent degenerate and should not be
+%         quoted as over-refusal at all.
+%     This is a more useful result than the original: it suggests a usable
+%     operating point exists for several models, which also changes the Future
+%     Work 'precise interventions' paragraph -- the problem is less 'steering is
+%     too blunt' and more 'the coefficient has to be chosen per model, below the
+%     degeneracy threshold'.
 
 % ---------------------------------------------------------------------------
-% 5. SECTION 3.6 --- 'Robustness of the direction'
+% 2. SECTION 3.6 --- 'Robustness of the direction'
 % ---------------------------------------------------------------------------
-%     The paragraph currently promises this analysis and reports no numbers.
-%     Must cover:
-%       - Point at Table~\ref{tab:cosine}.
-%       - The claim holds: 0.69-0.86 across the five models.
-%       - Sample-size caveat: models rarely comply with harmful requests, so the
-%         complied side is small (as few as 25 per class in Gemma). Folding
-%         hedged compliance in roughly doubles it and moves the cosine by <=0.04.
-%       - Robustness point worth making, it is free ammunition against a
-%         reviewer: recomputing the behaviour direction under the OLD labels
-%         agrees with the new at 0.96-0.98, so this check does not depend on the
-%         relabelling at all.
+%       - Point at Table~\ref{tab:cosine}; the claim holds, 0.69-0.86.
+%       - Sample-size caveat: the complied side is small (25 per class in
+%         Gemma); folding hedged compliance in doubles it and moves the cosine
+%         by <=0.04.
+%       - Free ammunition: recomputing the behaviour direction under the OLD
+%         labels agrees at 0.96-0.98, so this check does not depend on the
+%         relabelling.
 
 % ---------------------------------------------------------------------------
-% 6. METHODS --- two additions, both for reproducibility
+% 3. METHODS --- three additions
 % ---------------------------------------------------------------------------
 %
-% 6a. APPEND to 'Refusal classification' (one or two sentences)
-%       - The interventions in Section 5 are scored with this same classifier.
-%       - Why it matters here specifically: a phrase-matching classifier misreads
-%         ablation, which changes how a model refuses, as a change in whether it
-%         refuses.
+% 3a. APPEND to 'Refusal classification'
+%       - Section 5's interventions use this same classifier.
+%       - A phrase-matching classifier misreads ablation, which changes how a
+%         model refuses, as a change in whether it refuses.
+%       - NEW: responses are screened for degeneracy before judging (see 3c).
 %
-% 6b. NEW \paragraph in 'Mechanistic methods' --- prompt construction under tools
-%       - Chat templates differ in whether they can carry tool definitions.
-%         Passing tools to a template with no tool-handling block drops them
-%         silently: the tool prompt becomes a plain chat prompt and every
-%         response scores as safe. No error is raised.
-%       - Gemma-3 has no tool-handling block in any published checkpoint, so its
-%         schemas are written into the prompt text. Validate the reconstruction:
-%         12.5% unsafe vs 14.6% from the behavioural run, and it reproduces the
-%         published AUC to within 0.001.
-%       - We assert a tool name appears in the rendered prompt before any
-%         tool-mode measurement.
-%       - Llama-3.1-70B loaded from unsloth/Meta-Llama-3.1-70B-Instruct (the
-%         meta-llama repos are gated). Same bf16 weights; another common mirror
-%         ships a stripped template that does not carry tools.
+% 3b. NEW \paragraph --- prompt construction under tools
+%       - Templates differ in whether they carry tool definitions; passing tools
+%         to a template without a tool block drops them silently, so the tool
+%         prompt becomes a chat prompt and every response scores as safe.
+%       - Gemma-3 has no tool block in any published checkpoint, so its schemas
+%         go in the prompt text. Validated: 12.5% unsafe vs 14.6% from the
+%         behavioural run, and it reproduces the published AUC to within 0.001.
+%       - We assert a tool name appears in the rendered prompt before measuring.
+%       - Llama-3.1-70B from unsloth/Meta-Llama-3.1-70B-Instruct (meta-llama is
+%         gated); same bf16 weights, and its template carries tools.
+%
+% 3c. NEW \paragraph --- degeneracy screening
+%       - Interventions can produce repetitive or non-linguistic output that no
+%         refusal classifier can label meaningfully.
+%       - Screen on repeated-3-gram share, unique-token ratio and non-ASCII
+%         share, with a length floor so short genuine refusals are not flagged.
+%       - Report which cells are unmeasurable rather than reporting a number.
 
 % ---------------------------------------------------------------------------
-% 7. SECTION 7 DISCUSSION --- 'A shared refusal direction, suppressed rather
+% 4. SECTION 7 DISCUSSION --- 'A shared refusal direction, suppressed rather
 %    than replaced'
 % ---------------------------------------------------------------------------
-%     Two assertions in the first half are now too strong.
 %     Must change:
 %       - 'ablations collapse and decrease harmful prompt refusal rates' --
-%         true in three of five, reversed in two.
-%       - 'the directions in the text-derived and tool-derived contexts are
-%         aligned' -- true in three of five.
-%     Keep:
-%       - Additions induce benign over-refusal everywhere.
-%       - Behaviour-defined and request-type directions are closely aligned.
-%       - The suppression-not-replacement reading, scoped to the families where
-%         it holds, and the qi2024safety shallow-alignment connection.
-%     The section title itself is still fine.
+%         true in three of five, reversed in Qwen, unmeasurable in Gemma.
+%       - 'the directions ... are aligned' -- true in three of five.
+%     Keep: behaviour-defined and request-type directions closely aligned; the
+%     suppression-not-replacement reading scoped to where it holds; the
+%     qi2024safety connection.
 
 % ---------------------------------------------------------------------------
-% 8. ABSTRACT + SECTION 1 INTRODUCTION
+% 5. ABSTRACT, SECTION 1 INTRO, AND FUTURE WORK
 % ---------------------------------------------------------------------------
-%     Both describe the mechanistic finding in terms of ablation collapsing
-%     refusal. Needs a pass once Section 5 settles. The intro's 'Mechanistic
-%     finding' paragraph is the specific one.
+%     - Abstract and intro describe the mechanistic finding as ablation
+%       collapsing refusal. Needs a pass once Section 5 settles.
+%     - Future Work 'Precise interventions' currently argues steering is too
+%       blunt to deploy. Soften: the constraint is choosing a per-model
+%       coefficient below the degeneracy threshold, and at such coefficients
+%       several models already reach near-zero unsafe rates.
 
