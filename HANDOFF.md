@@ -2,9 +2,10 @@
 
 Everything below was produced by re-running the label-dependent mechanism analyses on top of
 `relabel_out/` and the global-scope tool-call scorer. Branch: `relabel-rerun`. Ready-to-paste
-LaTeX: **`paper_updates.tex`** (generated from the result JSON by `make_paper_updates.py`, so no
-number is hand-transcribed; compile-tested, and every citation key it uses is already in
-`refs.bib`).
+LaTeX: **`paper_updates.tex`** — three ready-to-paste tables, plus a commented outline for each
+paragraph that needs rewriting (what to cover and which numbers to cite, not drafted prose).
+Generated from the result JSON by `make_paper_updates.py`, so no number is hand-transcribed;
+compile-tested, and every citation key it uses is already in `refs.bib`.
 
 ---
 
@@ -161,11 +162,13 @@ falls 0.12 → 0.00.
 | §7 Discussion ¶"A shared refusal direction…" | "ablations collapse and decrease harmful prompt refusal rates" — needs softening. |
 | Abstract + §1 Introduction | Still describe the mechanistic finding in terms of ablation collapsing refusal. Needs a pass once §5 settles. |
 
-Replacement text for all of these is in `paper_updates.tex`.
+`paper_updates.tex` has an outline for each of these — what the paragraph must cover and which
+numbers to cite — rather than drafted prose, so the writing stays in your voice. The three tables
+in that file are ready to paste as-is.
 
 ### 3.6 Methods additions (reproducibility)
 
-Two things a reviewer could reasonably ask about, both with text in `paper_updates.tex`:
+Two things a reviewer could reasonably ask about, both outlined in `paper_updates.tex`:
 
 - **Gemma tool prompts.** Gemma-3 has no tool-handling block in its chat template, in any published
   checkpoint. Its tool schemas have to be written into the prompt text. Validated: 12.5% unsafe
@@ -223,7 +226,7 @@ merits. Two reasons to re-verify anyway (~1 hour of GPU):
 | | |
 |---|---|
 | Branch | `relabel-rerun` (pushed) |
-| Paste-ready LaTeX | `paper_updates.tex` |
+| Tables to paste + writing outlines | `paper_updates.tex` |
 | Full results write-up | `relabel_analysis/RESULTS.md` |
 | Per-model numbers | `relabel_analysis/gpu_*.json`, `steer_*.json`, `ablation_action_*.json` |
 | Raw generations | `relabel_analysis/steer_raw_*.json` (rescore without regenerating) |
