@@ -19,16 +19,22 @@ It also turned up something: the behaviour-direction claim holds everywhere (0.6
 Discussion repeats it. Both need softening.
 
 **2. "Rerun mech and update results."** Done. Table 2's ablation, addition and AUC columns all
-change (§3.1). Suppression and Patching are carried over — they have no classifier in them, so the
-relabel cannot move them, though see §5 for why re-verifying is still worth an hour.
+change (§3.1). Suppression and Patching are carried over unrewritten — see §5, where patching is
+now the priority rather than a nice-to-have.
 
 **3. "Double-check the causal claims."** Done, and this is the largest change — it is narrative,
-not a table. Two causal claims flip:
-- **Ablation** reverses in Qwen and Gemma (it *raises* refusal), and Command-R's 72%→2% collapse
-  is really 67%→34%.
+not a table. Checking them turned up a second problem beyond the classifier, described in §1b:
+some interventions push a model into broken output, which any refusal classifier scores as
+refusal. What that leaves:
+- **Ablation** reverses in Qwen (0.775→0.925, fluent output — a real effect). It still lowers
+  refusal in Mistral, Llama and Command-R, though Command-R's 72%→2% collapse is really 67%→34%.
+  Gemma's is **not reportable**: 100% of its ablated output is degenerate.
 - **Addition is not measurable at the published coefficient.** It drives all five models into
-  degenerate output, which any refusal classifier scores as refusal. This affects the draft's
-  existing numbers too, not just the rerun.
+  degenerate output. This affects the draft's existing numbers too, not just the rerun — the old
+  regex scores "I'm sorry I cannot I'm sorry I cannot…" as refusal just as the judge does.
+- **Steering is less blunt than claimed** (§3.4). The "no coefficient works" conclusion rested on
+  the degenerate high-coefficient points; at clean coefficients three models remove most unsafe
+  calls for under 20% over-refusal.
 
 Because that ask deserved a test no classifier could confound, I also ran a new experiment
 (§3.3): ablate, then score the unsafe tool call directly. Result — the direction gates **whether
@@ -36,9 +42,9 @@ the model engages**, not how safely it acts once engaged. That is a sharper clai
 "partial mediator" framing, and it is defensible against exactly the objection that sank the
 ablation numbers.
 
-**Scope of edits this implies:** 2 new tables, 1 rewritten table, 6 prose locations, 2 methods
-additions, and a pass over the abstract and introduction (both still describe ablation as
-collapsing refusal).
+**Scope of edits this implies:** 2 new tables, 1 rewritten table, 6 prose locations, 3 methods
+additions (the third being the degeneracy screen), and a pass over the abstract, the introduction
+and Future Work.
 
 ---
 
@@ -58,9 +64,10 @@ The story gets stronger, not weaker:
 - A new result gives a sharper claim than "partial mediator": the direction gates **whether the
   model engages**, not how safely it acts once engaged.
 
-What breaks: the ablation column. Under a classifier that reads the whole response rather than
-matching refusal phrases, ablation **raises** measured refusal in Qwen and Gemma, and Command-R's
-collapse is far smaller than reported.
+What breaks: the ablation and addition columns, for two separate reasons. Under a classifier that
+reads the whole response rather than matching refusal phrases, ablation **raises** measured refusal
+in Qwen, and Command-R's collapse is far smaller than reported. Separately, some interventions
+produce broken output that no classifier can score — see §1b.
 
 ---
 
@@ -102,11 +109,12 @@ Ablation changes *how* a model refuses without stopping it:
 
 That is an unmistakable refusal with no "I cannot" in it. The regex counts it as compliance, so a
 phrasing shift reads as a behavioural drop. For Qwen, 66 of 120 ablated responses are refusals the
-regex missed. For Gemma the regex finds **zero** refusals among 120 ablated responses where the
-judge finds **120**.
+regex missed — and Qwen's ablated output is fluent throughout, so this is a real effect, not the
+degeneracy problem in §1b.
 
 This is the same failure mode the relabel fixed for Table 1 — it just was never applied to the
-intervention results.
+intervention results. Gemma looks similar on the surface (regex 0, judge 120) but is a different
+problem: there the output is degenerate, so neither number means anything.
 
 ---
 
@@ -122,8 +130,7 @@ intervention results.
 | Gemma-3-27B | 21%→0% → **not reportable** | 1%→25% → **22%→14%** (c=12162) | 0.791 → **0.790** |
 | Llama-3.1-70B | 73%→61% → **71%→59%** | 1%→1% → **2%→22%** (c=9) | 0.881 → **0.864** |
 
-**Layer, Suppression and Patching are unchanged** — see §5 for why, and why re-verifying two of
-them is still worth doing.
+**Layer, Suppression and Patching are unchanged.** Patching is now the priority — see §5.
 
 n = 240 per condition. A first pass at n = 120 gave the same picture throughout, so none of this
 rests on sample size.
@@ -242,14 +249,29 @@ should confirm which scorer it used.
 
 ## 5. What is not settled
 
-**Suppression (Δ, t) and Patching are carried over unchanged.** Neither has a refusal classifier
-anywhere in it, so the relabel genuinely cannot move them, and the published values stand on the
-merits. Two reasons to re-verify anyway (~1 hour of GPU):
+**Patching needs rerunning, and it is now the priority.** It is the load-bearing evidence for the
+"partial mediator" claim, and it is the one Table 2 column that has never been regenerated. Three
+reasons it matters more than it did a week ago:
 
-1. They are the only Table 2 cells still resting on runs from before we found the chat-template
-   problem, and suppression is measured on *tool-mode prompts* — exactly what that bug corrupted.
-2. Three other columns in the table changed. "Did you regenerate the whole table" is a question
-   worth being able to answer yes to.
+1. Its numbers predate the chat-template fix. Patching runs on *tool-mode prompts* — exactly what
+   that bug corrupted for Gemma and Llama.
+2. It has never been screened for degeneracy. Every other intervention in the table has, and two
+   of them failed. Patching perturbs less aggressively (it sets the projection to a matched no-tool
+   value rather than 4× the gap), so it will probably come back clean — but "probably" is not what
+   you want under the sentence a reviewer will read.
+3. No generations were kept from the original run, so unlike ablation and steering — which I
+   audited from saved files with no GPU — this cannot be checked without rerunning.
+
+`patching_rerun.py` is written and ready: predicate-scored, prompts built through `render_utils` so
+Gemma keeps its tools, degeneracy screened on both baseline and patched output, flip rate reported
+over clean responses as well as all, and every generation saved so it never needs regenerating
+again. `run_patching_all.sh` drives all five. About 75–90 minutes.
+
+**Suppression (Δ, t) is also carried over.** Same chat-template exposure, but it is forward-passes
+only, so it is cheap to add while each model is already loaded.
+
+If patching comes back clean, the mediation argument survives intact and Table 2 is fully
+regenerated. If it does not, that is something to know before submitting rather than after.
 
 ---
 
