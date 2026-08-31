@@ -8,6 +8,38 @@ number is hand-transcribed; compile-tested, and every citation key it uses is al
 
 ---
 
+## 0. Your three asks, answered
+
+**1. "Add the missing cosine values."** Done, all five models — and it is a *new table*
+(§3.2 below), since §3.6 describes the analysis but no number appears anywhere in the draft.
+It also turned up something: the behaviour-direction claim holds everywhere (0.69–0.86), but the
+**other** cosine in that section — text-derived vs. tool-derived — **fails for two models**
+(Command-R 0.394, Llama 0.213). §5 currently says those directions "remain aligned", and the
+Discussion repeats it. Both need softening.
+
+**2. "Rerun mech and update results."** Done. Table 2's ablation, addition and AUC columns all
+change (§3.1). Suppression and Patching are carried over — they have no classifier in them, so the
+relabel cannot move them, though see §5 for why re-verifying is still worth an hour.
+
+**3. "Double-check the causal claims."** Done, and this is the largest change — it is narrative,
+not a table. Two causal claims flip:
+- **Ablation** reverses in Qwen and Gemma (it *raises* refusal), and Command-R's 72%→2% collapse
+  is really 67%→34%.
+- **Llama's addition is not null.** The draft reports 1%→1% and treats Llama as the family where
+  the direction does not control refusal. It is **0%→100%**.
+
+Because that ask deserved a test no classifier could confound, I also ran a new experiment
+(§3.3): ablate, then score the unsafe tool call directly. Result — the direction gates **whether
+the model engages**, not how safely it acts once engaged. That is a sharper claim than the current
+"partial mediator" framing, and it is defensible against exactly the objection that sank the
+ablation numbers.
+
+**Scope of edits this implies:** 2 new tables, 1 rewritten table, 6 prose locations, 2 methods
+additions, and a pass over the abstract and introduction (both still describe ablation as
+collapsing refusal).
+
+---
+
 ## 1. TL;DR
 
 Table 1 in the current draft has already been updated with the new labels. **Table 2 has not** —
