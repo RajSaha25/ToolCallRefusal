@@ -34,23 +34,7 @@ SHORT = {"Qwen3-14B": "Qwen3-14B", "Mistral-7B-Instruct-v0.3": "Mistral-7B",
 EXPS = ["ablation_base", "ablation_ablated", "addition_base", "addition_added"]
 
 
-def stats(t):
-    toks = t.split()
-    if not toks:
-        return 1.0, 0.0, 0.0
-    uniq = len(set(toks)) / len(toks)
-    rep = 0.0
-    if len(toks) >= 6:
-        grams = Counter(tuple(toks[i:i + 3]) for i in range(len(toks) - 2))
-        rep = grams.most_common(1)[0][1] * 3 / len(toks)
-    return rep, uniq, sum(1 for c in t if ord(c) > 127) / max(len(t), 1)
-
-
-def degenerate(t):
-    rep, uniq, na = stats(t)
-    if na >= 0.30:
-        return True
-    return len(t.split()) >= 12 and (rep >= 0.30 or uniq <= 0.25)
+from degeneracy import is_degenerate as degenerate  # single definition
 
 
 res = {}
