@@ -31,7 +31,8 @@ refusal. What that leaves:
   Gemma's is **not reportable**: 100% of its ablated output is degenerate.
 - **Addition is not measurable at the published coefficient.** It drives all five models into
   degenerate output. This affects the draft's existing numbers too, not just the rerun — the old
-  regex scores "I'm sorry I cannot I'm sorry I cannot…" as refusal just as the judge does.
+  regex scores "I'm sorry I cannot I'm sorry I cannot…" as refusal just as the judge does. At the
+  natural magnitude (§1c) the effect is 24–33% in Qwen and Llama and ~0 in Mistral and Gemma.
 - **Steering suppresses tool-calling, not unsafe tool-calling** (§3.4). "Unsafe → 0" at the
   coefficients a model survives is the model no longer calling tools — on harmful *and benign*
   prompts — while the unsafe rate among the calls it still makes never falls. An earlier version of
@@ -76,8 +77,10 @@ The numbers get smaller; the claim gets more consistent:
 - **Only Command-R's direction passes Arditi's KL admissibility check** (§1c). Mistral and Llama
   fail at every layer; Gemma fails by two orders of magnitude, for a diagnosable reason (its
   massive-activation common mode), and your mean-out fix repairs the coherence at 27B.
-- **Addition at the natural magnitude does almost nothing** (≤ 1.3% refusal in Mistral and Gemma);
-  the 4× the draft used, and the 0→100% "rescue", are degenerate output in every model.
+- **Addition at the natural magnitude is real in two models and absent in two**: Qwen 0→33%
+  and Llama 1→24%, coherent; Mistral and Gemma ≤ 1.3%; Command-R breaks before 1×. Nothing
+  reaches 60% coherently. The 4× the draft used, and the 0→100% "rescue", are degenerate output
+  in every model.
 
 What breaks in the draft: the ablation, addition and patching columns and the steering
 paragraph, for two separate reasons — a phrase-matching classifier, and broken output that no
@@ -139,10 +142,13 @@ magnitude, plus patching for all five.** KL is scored two ways: on 48 generic ha
 | Mistral-7B | 0.25 / 0.91 | 0/17 | 0.004 | 0.28 | no admissible layer |
 | Gemma-3-27B | 11.3 / 11.0 | 0/32 | 0.04 | 2.5 | no admissible layer; mean-out restores coherence |
 | Llama-3.1-70B (4-bit) | 0.28 / 0.40 | 11/41 (best L60 at 0.08; operating L67 fails) | 0.011 | 0.39 | admissible at L60, not at the layer used |
-| Qwen3-14B | *running* | | | | |
+| Qwen3-14B | 1.59 / 2.31 | 4/21 (best L21 at 0.09, cos 0.18 with the L33 direction used) | 0.004 | 1.63 | admissible at L21 — a nearly orthogonal direction; the one used fails |
 
-Nothing passes on the dataset's own benign prompts in any model — the direction is entangled with
-the benchmark's domains, not only with refusal. Gemma's diagnostics at 27B match your 4B run:
+Only Qwen has a layer that passes on the dataset's own benign prompts (L21, 0.06); everywhere
+else nothing does — the operating directions are entangled with the benchmark's domains, not
+only with refusal. Qwen's case is the sharpest: the direction whose ablation *raises* refusal
+(L33) fails the guardrail by 16×, while an admissible direction exists at L21 that is nearly
+orthogonal to it. Whether ablating *that* one lowers refusal is a ten-minute follow-up (§5). Gemma's diagnostics at 27B match your 4B run:
 mean-projection/gap = 1.00, cos(r, mean) = 0.24, mean-activation norm ≈ 77k; a random direction is
 harmless (KL 0.04, 0% degenerate), so Gemma is not fragile to ablation in general — it is fragile
 to *this* direction because of what it shares with the common mode.
@@ -155,7 +161,7 @@ to *this* direction because of what it shares with the common mode.
 | Mistral-7B | 0.49 | **0.33** | 0.35 | 0.47 | 0.54 (10% deg.) |
 | Gemma-3-27B | 0.66 | *100% deg.* | **1.00** (1% deg.) | 0.68 | *100% deg.* |
 | Llama-3.1-70B (4-bit, n=120) | 0.69 | 0.63 | 0.64 | 0.69 | **0.34** (0% deg., 76% short) |
-| Qwen3-14B | *running* (first session: 0.78 → 0.93, 0% deg.) | | | | |
+| Qwen3-14B | 0.78 | **0.94** | 0.95 | 0.78 | *97% deg.* |
 
 Reading it: Command-R is the Arditi case, and its mean direction carries part of the signal
 (ablating it alone drops refusal 20 points). Mistral is a modest real drop with a clean random
@@ -176,18 +182,21 @@ families (your Zhou et al. / Wollschläger et al. pointers).
 | Command-R-7B | 0.41 among the coherent half (50% deg.) | 100% deg. | 100% deg. | 100% deg. |
 | Gemma-3-27B | 0.013 | 91% deg. | 100% deg. | 100% deg. |
 | Llama-3.1-70B (4-bit, n=120) | **0.24** (0% deg.) | — | 0.35 (8% deg.) | — |
-| Qwen3-14B | *running* | | | |
+| Qwen3-14B | **0.33** (2.5% deg.) | 0.53 (18% deg.) | 91% deg. | 100% deg. |
 
 Arditi's 1× produces essentially no refusal in Mistral and Gemma, and Command-R breaks before 1×.
-Llama is the one model where 1× behaves as Arditi describe: 0.01 → 0.24, fully coherent. The
-draft's 4× is degenerate everywhere. "Addition rescues Llama" (0 → 100%) should be withdrawn as
-you said; "addition raises Llama's benign refusal to 24% at the natural magnitude" is what
-survives.
+Qwen (0.00 → 0.33) and Llama (0.01 → 0.24) are the two models where 1× behaves as Arditi
+describe, fully coherent. Nothing reaches 60% coherently in any model; the draft's 4× is
+degenerate everywhere. "Addition rescues Llama" (0 → 100%) should be withdrawn as you said;
+"addition at the natural magnitude raises benign refusal to 24–33% in Qwen and Llama and does
+nothing in Mistral and Gemma" is what survives.
 
 **Predictions were written down before the session and scored afterwards**: `PREDICTIONS.md`.
-Held: the patching decomposition (5/5), the random-direction null, Gemma's mean-out coherence and
-direction. Missed: Mistral and Llama failing the KL guardrail, the size of the addition effect at
-1×, and Gemma not being fragile to a random direction.
+Held: the patching decomposition (5/5), the random-direction null (5/5), Gemma's mean-out
+coherence and direction, Gemma and Command-R on the guardrail. Missed: Mistral failing the
+guardrail at every layer, addition at 1× doing nothing in Mistral and Gemma, the refusal drops
+under the mean-direction control in Command-R and Llama, and Gemma not being fragile to a random
+direction.
 
 ---
 
@@ -216,7 +225,7 @@ problem: there the output is degenerate, so neither number means anything.
 
 | Model | Ablation (old → **new**) | Addition at 1× (old 4× → **new**) | AUC (old → **new**) | Patching flip (old → **new** = safe call + no call) |
 |---|---|---|---|---|
-| Qwen3-14B | 57%→32% → **78%→92%** | 1%→71% → *running* | 0.724 → **0.808** | 18% → **24%** = 9 + 15 |
+| Qwen3-14B | 57%→32% → **78%→94%** | 1%→71% → **0%→33%** | 0.724 → **0.808** | 18% → **24%** = 9 + 15 |
 | Mistral-7B | 29%→13% → **49%→33%** | 0%→80% → **0%→0.4%** | 0.689 → **0.760** | 24% → **20%** = 6 + 13 |
 | Command-R-7B | 72%→2% → **68%→33%** | 2%→92% → **0%→41%** (50% degenerate) | 0.751 → **0.768** | 62% → **34%** = 6 + 29 |
 | Gemma-3-27B | 21%→0% → **66%→100%** (mean-out; raw direction not reportable) | 1%→25% → **0%→1%** | 0.791 → **0.790** | 46% → **90%** = 3 + 87 |
@@ -374,12 +383,16 @@ Patching is done (§3.1). What is left, in the order I would do it:
    only; it should land on the paper's numbers within a point or two. Mistral's refusal rate
    (0.435 here vs 0.535 in the draft) is still unexplained and may be the `strip_tool_markup`
    change; worth a look at the same time.
-3. **The KL-admissible layer for Command-R (L27) and Llama (L60) differs from the operating
-   layer.** Everything downstream — AUC, cosines, proj_gap, the patching layer — was computed at
-   the operating layer. If the paper adopts the guardrail, it should adopt the selected layer
-   consistently, which is one more GPU pass per model (~10 min each). The operating layers are
-   within cosine 0.80–0.93 of the admissible ones, so I would expect small movements, not
-   reversals.
+3. **The KL-admissible layer differs from the operating layer in Command-R (L27), Llama (L60)
+   and Qwen (L21).** Everything downstream — AUC, cosines, proj_gap, the patching layer — was
+   computed at the operating layer. If the paper adopts the guardrail, it should adopt the
+   selected layer consistently, one more GPU pass per model (~10 min each). For Command-R and
+   Llama the admissible direction is within cosine 0.80–0.93 of the one used, so expect small
+   movements. Qwen is different: its admissible direction at L21 has cosine 0.18 with the L33
+   direction whose ablation *raises* refusal. Ablating the L21 direction is the single most
+   informative ten-minute run left — if it lowers refusal, Qwen becomes an Arditi case with the
+   wrong layer chosen; if it doesn't, the "harmfulness, not refusal" reading stands with a
+   guardrail-clean direction behind it.
 4. **Suppression (Δ, t) is still carried over** from the pre-template-fix runs. Forward passes
    only; cheap to add to any session that has the models loaded.
 5. **Gemma's tool-mode ablation** (§3.3) used the raw direction. If the mean-out direction is

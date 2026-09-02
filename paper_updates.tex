@@ -202,11 +202,11 @@ mean-dir ablates the mean-activation direction itself.}
  & \multicolumn{2}{c|}{KL of $r_\text{text}$} & & \multicolumn{5}{c}{Refusal after ablating} \\
 Model & generic & dataset & Layers & none & $r_\text{text}$ & mean-out & random & mean-dir \\
 \midrule
-Qwen3-14B      & \multicolumn{8}{c}{not run} \\
+Qwen3-14B      & 1.59 & 2.31 & 4/21 & 0.78 & 0.94 & 0.95 & 0.78 & 0.00$^\ddagger$ \\
 Mistral-7B     & 0.25 & 0.91 & 0/17 & 0.49 & 0.33 & 0.35 & 0.47 & 0.50 \\
 Command-R-7B   & 0.04 & 0.14 & 8/17 & 0.68 & 0.33 & 0.48 & 0.69 & 0.47 \\
 Gemma-3-27B    & 11.34 & 10.95 & 0/32 & 0.66 & --$^\ddagger$ & 1.00 & 0.68 & --$^\ddagger$ \\
-Llama-3.1-70B  & \multicolumn{8}{c}{not run} \\
+Llama-3.1-70B $^\dagger$ & 0.28 & 0.40 & 11/41 & 0.69 & 0.62 & 0.64 & 0.69 & 0.34 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -226,11 +226,11 @@ can be pushed to before its output breaks is far below the draft's 100\%.}
 \toprule
 Model & $0\times$ & $1\times$ & $1.5\times$ & $2\times$ & $3\times$ \\
 \midrule
-Qwen3-14B      & \multicolumn{5}{c}{not run} \\
+Qwen3-14B      & 0.00 & 0.33 (2\%) & 0.53 (18\%) & 0.62 (91\%) & -- (100\% deg.) \\
 Mistral-7B     & 0.00 & 0.00 (0\%) & 0.01 (0\%) & 0.06 (5\%) & 1.00 (98\%) \\
 Command-R-7B   & 0.00 & 0.41 (50\%) & -- (100\% deg.) & -- (100\% deg.) & -- (100\% deg.) \\
 Gemma-3-27B    & 0.00 & 0.01 (1\%) & 0.19 (91\%) & -- (100\% deg.) & -- (100\% deg.) \\
-Llama-3.1-70B  & \multicolumn{5}{c}{not run} \\
+Llama-3.1-70B $^\dagger$ & 0.01 & 0.24 (0\%) & -- & 0.34 (8\%) & -- \\
 \bottomrule
 \end{tabular}
 \end{table}

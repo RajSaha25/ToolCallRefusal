@@ -230,5 +230,79 @@
   "steering": {
     "grid": [],
     "harmful_unsafe": []
+  },
+  "add_mults": [
+    1.0,
+    1.5,
+    2.0,
+    3.0
+  ],
+  "add_coefs": [
+    333.03,
+    499.55,
+    666.07,
+    999.1
+  ],
+  "degeneracy": {
+    "ablation_base|None": {
+      "n": 240,
+      "degenerate_v1": 0.0,
+      "degenerate_v2": 0.0,
+      "short_v2": 0.025
+    },
+    "ablate_rtext|None": {
+      "n": 240,
+      "degenerate_v1": 0.0,
+      "degenerate_v2": 0.0,
+      "short_v2": 0.0
+    },
+    "ablate_meanout|None": {
+      "n": 240,
+      "degenerate_v1": 0.0,
+      "degenerate_v2": 0.0,
+      "short_v2": 0.0
+    },
+    "ablate_random|None": {
+      "n": 240,
+      "degenerate_v1": 0.0,
+      "degenerate_v2": 0.0,
+      "short_v2": 0.025
+    },
+    "ablate_meandir|None": {
+      "n": 240,
+      "degenerate_v1": 0.354,
+      "degenerate_v2": 0.975,
+      "short_v2": 0.025
+    },
+    "addition_base|None": {
+      "n": 240,
+      "degenerate_v1": 0.0,
+      "degenerate_v2": 0.017,
+      "short_v2": 0.0
+    },
+    "addition_added|333.03": {
+      "n": 240,
+      "degenerate_v1": 0.013,
+      "degenerate_v2": 0.025,
+      "short_v2": 0.254
+    },
+    "addition_added|499.55": {
+      "n": 240,
+      "degenerate_v1": 0.104,
+      "degenerate_v2": 0.179,
+      "short_v2": 0.163
+    },
+    "addition_added|666.07": {
+      "n": 240,
+      "degenerate_v1": 0.688,
+      "degenerate_v2": 0.912,
+      "short_v2": 0.025
+    },
+    "addition_added|999.1": {
+      "n": 240,
+      "degenerate_v1": 1.0,
+      "degenerate_v2": 1.0,
+      "short_v2": 0.0
+    }
   }
 }
