@@ -57,6 +57,10 @@ def main():
     ap.add_argument("--n", type=int, default=300, help="harmful tool-normal baseline")
     ap.add_argument("--bs", type=int, default=16)
     ap.add_argument("--max-new", type=int, default=200)
+    ap.add_argument("--load-4bit", action="store_true",
+                    help="NF4 weights with bf16 compute, for a 70B on an 80GB card. "
+                         "Activations are then not identical to the bf16 run the "
+                         "directions were extracted from; the result is flagged.")
     a = ap.parse_args()
 
     from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -67,8 +71,16 @@ def main():
     tok.padding_side = "left"
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
-    net = AutoModelForCausalLM.from_pretrained(
-        a.hf_id, torch_dtype=torch.bfloat16, device_map="cuda", trust_remote_code=True).eval()
+    if a.load_4bit:
+        from transformers import BitsAndBytesConfig
+        q = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
+                               bnb_4bit_compute_dtype=torch.bfloat16)
+        net = AutoModelForCausalLM.from_pretrained(
+            a.hf_id, quantization_config=q, device_map="cuda", trust_remote_code=True).eval()
+        log("[load] 4-bit NF4 weights (bf16 compute)")
+    else:
+        net = AutoModelForCausalLM.from_pretrained(
+            a.hf_id, torch_dtype=torch.bfloat16, device_map="cuda", trust_remote_code=True).eval()
     layers = find_layers(net)
     render = make_renderer(tok, get_domain, log=log)
 
@@ -219,8 +231,12 @@ def main():
     log(f"  flipped to safe      {res['flip_rate_all']:.3f} {res['flip_rate_all_ci']}  (all patched)")
     log(f"    via a safe call    {res['flip_via_safe_call']:.3f}")
     log(f"    via no call        {res['flip_via_no_call']:.3f}")
-    log(f"  any-call rate        {res['baseline_any_call_rate']:.3f} -> {res['patched_any_call_rate']:.3f}"
-        f"   unsafe|call after patch: {res['unsafe_given_call_patched']}")
+    # every patched row had a call at baseline (that is how it was selected), so the
+    # patched-subset call rate starts at 1.0 by construction
+    log(f"  any-call, patched rows  1.000 -> {res['patched_any_call_rate']:.3f}"
+        f"   unsafe|call after patch: {res['unsafe_given_call_patched']}"
+        f"   (baseline any-call over all {res['n_baseline']}: {res['baseline_any_call_rate']:.3f})")
+    res["quantized_4bit"] = bool(a.load_4bit)
     log(f"  patched degenerate   {res['patched_degenerate']:.1%}   -> {verdict}")
     if res["flip_rate_clean"] is not None:
         log(f"  flipped to safe      {res['flip_rate_clean']:.3f} {res['flip_rate_clean_ci']}"

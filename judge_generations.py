@@ -98,6 +98,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True)
     ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--raw-file", default=None,
+                    help="judge a different generations file in the steer_raw format "
+                         "(e.g. controls_raw_<model>.json) and write generic per-condition "
+                         "rates to <name minus raw_>_judged.json")
     a = ap.parse_args()
 
     key = os.environ.get("JUDGE_KEY") or os.environ.get("ANTHROPIC_API_KEY", "")
@@ -117,9 +121,10 @@ def main():
     force_ipv4()
     judge = make_anthropic_judge(client=UrllibAnthropic(key))
 
-    raw = json.loads((OUT / f"steer_raw_{a.model}.json").read_text())
+    raw_name = a.raw_file or f"steer_raw_{a.model}.json"
+    raw = json.loads((OUT / raw_name).read_text())
     pending, meta = raw["pending"], raw["meta"]
-    print(f"[load] {len(pending)} completions from steer_raw_{a.model}.json")
+    print(f"[load] {len(pending)} completions from {raw_name}")
 
     # judge each unique (prompt, cleaned response) once
     cache, order = {}, []
@@ -209,6 +214,42 @@ def main():
         groups[(p["exp"], p["coef"])].append(p)
     print(f"[judge] {n_no_text}/{len(pending)} responses had no prose "
           f"(bare tool calls etc.) -> counted as not-refused")
+
+    if a.raw_file:
+        # Generic per-condition report: refusal over all rows, and over rows that
+        # pass the v2 degeneracy screen. A degenerate response has no behaviour to
+        # label, so the clean-only number is the one that means anything.
+        from degeneracy import classify_v2, is_degenerate
+        out = {"model": a.model, "source": raw_name, "n_judged": len(todo),
+               "judge_errors": errs, "meta": {k: v for k, v in meta.items()
+                                              if k not in ("steering",)},
+               "conditions": {}}
+        for (exp, coef), g in sorted(groups.items(), key=lambda kv: (kv[0][0], kv[0][1] or 0)):
+            v2 = [classify_v2(x["clean"]) for x in g]
+            clean = [x for x, c in zip(g, v2) if c != "degenerate"]
+            new = [x["new_refused"] for x in g]
+            newc = [x["new_refused"] for x in clean]
+            out["conditions"][f"{exp}|{coef}"] = {
+                "n": len(g),
+                "refuse_all": round(float(np.mean(new)), 3), "refuse_all_ci": boot_ci(new),
+                "degenerate_v1": round(float(np.mean([is_degenerate(x["clean"]) for x in g])), 3),
+                "degenerate_v2": round(float(np.mean([c == "degenerate" for c in v2])), 3),
+                "short_v2": round(float(np.mean([c == "short" for c in v2])), 3),
+                "n_clean": len(clean),
+                "refuse_clean": round(float(np.mean(newc)), 3) if newc else None,
+                "refuse_clean_ci": boot_ci(newc) if len(newc) > 1 else None,
+                "labels": {k: sum(1 for x in g if x["new_label"] == k)
+                           for k in ("refuse", "caveat", "comply", "no_text", "judge_error")},
+                "labels_clean": {k: sum(1 for x in clean if x["new_label"] == k)
+                                 for k in ("refuse", "caveat", "comply", "no_text", "judge_error")},
+            }
+            r = out["conditions"][f"{exp}|{coef}"]
+            print(f"  {exp:16s} coef={str(coef):8s} n={r['n']:4d} refuse={r['refuse_all']:.3f} "
+                  f"degen v2={r['degenerate_v2']:.1%} refuse|clean={r['refuse_clean']} (n={r['n_clean']})")
+        name = raw_name.replace("raw_", "").replace(".json", "_judged.json")
+        (OUT / name).write_text(json.dumps(out, indent=2))
+        print(f"\nwrote {OUT / name}")
+        return
 
     res = {"model": a.model, "layer": meta["layer"], "add_coef": meta["add_coef"],
            "n_judged": len(todo), "judge_errors": errs}
