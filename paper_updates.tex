@@ -122,9 +122,11 @@ Qwen3-14B      & 50\% & 18\% & 24\% (18, 31) & 9\% & 15\% & 89\% \\
 Mistral-7B     & 32\% & 24\% & 20\% (12, 28) & 6\% & 13\% & 93\% \\
 Command-R-7B   & 12\% & 62\% & 34\% (20, 49) & 6\% & 29\% & 92\% \\
 Gemma-3-27B    & 13\% & 46\% & 90\% (79, 97) & 3\% & 87\% & 80\% \\
-Llama-3.1-70B  & -- & 40\% & \multicolumn{4}{c}{not rerun} \\
+Llama-3.1-70B $^\dagger$ & 61\% & 40\% & 13\% (8, 18) & 3\% & 9\% & 96\% \\
 \bottomrule
 \end{tabular}
+\\[2pt] {\footnotesize $^\dagger$ run with 4-bit NF4 weights (bf16 compute) on an 80\,GB card;
+the direction was extracted from the bf16 model.}
 \end{table}
 
 % ---------------------------------------------------------------------------
@@ -203,7 +205,7 @@ Model & generic & dataset & Layers & none & $r_\text{text}$ & mean-out & random 
 Qwen3-14B      & \multicolumn{8}{c}{not run} \\
 Mistral-7B     & 0.25 & 0.91 & 0/17 & 0.49 & 0.33 & 0.35 & 0.47 & 0.50 \\
 Command-R-7B   & 0.04 & 0.14 & 8/17 & 0.68 & 0.33 & 0.48 & 0.69 & 0.47 \\
-Gemma-3-27B    & 11.34 & 10.95 & 0/32 & -- & -- & -- & -- & -- \\
+Gemma-3-27B    & 11.34 & 10.95 & 0/32 & 0.66 & --$^\ddagger$ & 1.00 & 0.68 & --$^\ddagger$ \\
 Llama-3.1-70B  & \multicolumn{8}{c}{not run} \\
 \bottomrule
 \end{tabular}
@@ -227,7 +229,7 @@ Model & $0\times$ & $1\times$ & $1.5\times$ & $2\times$ & $3\times$ \\
 Qwen3-14B      & \multicolumn{5}{c}{not run} \\
 Mistral-7B     & 0.00 & 0.00 (0\%) & 0.01 (0\%) & 0.06 (5\%) & 1.00 (98\%) \\
 Command-R-7B   & 0.00 & 0.41 (50\%) & -- (100\% deg.) & -- (100\% deg.) & -- (100\% deg.) \\
-Gemma-3-27B    & \multicolumn{5}{c}{not run} \\
+Gemma-3-27B    & 0.00 & 0.01 (1\%) & 0.19 (91\%) & -- (100\% deg.) & -- (100\% deg.) \\
 Llama-3.1-70B  & \multicolumn{5}{c}{not run} \\
 \bottomrule
 \end{tabular}
@@ -309,6 +311,7 @@ Llama-3.1-70B  & \multicolumn{5}{c}{not run} \\
 %           Mistral-7B     flip 20\% = safe call 6\% + no call 13\%;  unsafe|call after 93\%
 %           Command-R-7B   flip 34\% = safe call 6\% + no call 29\%;  unsafe|call after 92\%
 %           Gemma-3-27B    flip 90\% = safe call 3\% + no call 87\%;  unsafe|call after 80\%
+%           Llama-3.1-70B  flip 13\% = safe call 3\% + no call 9\%;  unsafe|call after 96\%
 %       - So the projection mediates whether the model ACTS (it flips to a text
 %         refusal), not whether the action it takes is safe: among calls the
 %         patched model still makes, ~90 percent stay unsafe. Say 'partial

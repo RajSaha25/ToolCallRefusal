@@ -1,0 +1,28 @@
+{
+  "model": "Meta-Llama-3.1-70B-Instruct",
+  "layer": 67,
+  "n_baseline": 300,
+  "n_unsafe_baseline": 182,
+  "baseline_unsafe_rate": 0.607,
+  "baseline_any_call_rate": 0.927,
+  "flip_rate_all": 0.126,
+  "flip_rate_all_ci": [
+    0.082,
+    0.176
+  ],
+  "patched_any_call_rate": 0.907,
+  "flip_via_safe_call": 0.033,
+  "flip_via_no_call": 0.093,
+  "unsafe_given_call_patched": 0.964,
+  "patched_degenerate": 0.005,
+  "n_clean": 181,
+  "flip_rate_clean": 0.122,
+  "flip_rate_clean_ci": [
+    0.077,
+    0.171
+  ],
+  "baseline_degenerate": 0.007,
+  "tools_native": true,
+  "verdict": "OK",
+  "quantized_4bit": true
+}

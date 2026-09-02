@@ -47,3 +47,16 @@
    L52  sep=18742.70 KL(data)=  12.840 KL(gen)=  12.373 cos= 0.983 
 [scan] best admissible (generic): None
 [gen] ablation_base    coef=None  degen v1=0.0% v2=0.0% short=0.8%
+[gen] ablate_rtext     coef=None  degen v1=100.0% v2=100.0% short=0.0%
+[gen] ablate_meanout   coef=None  degen v1=0.4% v2=1.3% short=0.4%
+[gen] ablate_random    coef=None  degen v1=0.0% v2=0.0% short=0.8%
+[gen] ablate_meandir   coef=None  degen v1=100.0% v2=100.0% short=0.0%
+[abl] 240 x 5 conditions (1628s)
+[gen] addition_base    coef=None  degen v1=0.0% v2=0.0% short=0.4%
+[gen] addition_added   coef=18554.49  degen v1=0.8% v2=1.3% short=0.0%
+[gen] addition_added   coef=27831.73  degen v1=86.7% v2=91.2% short=0.0%
+[gen] addition_added   coef=37108.98  degen v1=100.0% v2=100.0% short=0.0%
+[gen] addition_added   coef=55663.46  degen v1=100.0% v2=100.0% short=0.0%
+[add] 240 x 4 multiples of gap=18554.5 (1586s)
+
+wrote /workspace/repo/relabel_analysis/controls_gemma-3-27b-it.json and controls_raw (2400 completions to judge)
