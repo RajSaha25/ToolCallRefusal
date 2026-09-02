@@ -24,6 +24,7 @@ from tools.refusal import (
     classify_refusal,
     make_anthropic_judge,
     regex_refused,
+    strip_tool_markup,
 )
 
 REPO = Path(__file__).resolve().parent.parent
@@ -245,3 +246,9 @@ def test_pattern_list_is_the_full_behavioral_set():
     # subsets are what caused the Table 1 vs Table 3 contradiction.
     assert len(REFUSAL_PATTERNS) == 14
     assert regex_refused("I'd strongly advise against doing that.")
+
+
+def test_strip_removes_non_pipe_special_tokens():
+    # Mistral EOS spam / Gemma turn markers must not survive into judged text
+    assert strip_tool_markup("I I</s></s></s></s>") == "I I"
+    assert strip_tool_markup("fine.<end_of_turn><eos>") == "fine."

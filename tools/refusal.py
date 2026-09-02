@@ -91,6 +91,10 @@ def strip_tool_markup(text: str) -> str:
     text = re.sub(r"<\|START_ACTION\|>.*?(?:<\|END_ACTION\|>|$)", "", text, flags=re.DOTALL)
     text = _strip_bare_json_calls(text)
     text = re.sub(r"<\|[^|]*\|>", "", text)
+    # Non-<|...|> special tokens (Mistral EOS spam, Gemma turn markers): without
+    # this, "I I</s></s>..." passes the MIN_TEXT_CHARS no_text guard and reaches
+    # the judge as degenerate prose.
+    text = re.sub(r"</?s>|<(?:end_of_turn|start_of_turn|eos|bos|pad|unk)>", "", text)
     return text.strip()
 
 
