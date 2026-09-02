@@ -224,13 +224,18 @@ def main():
                "judge_errors": errs, "meta": {k: v for k, v in meta.items()
                                               if k not in ("steering",)},
                "conditions": {}}
-        for (exp, coef), g in sorted(groups.items(), key=lambda kv: (kv[0][0], kv[0][1] or 0)):
+        for (exp, coef), g_all in sorted(groups.items(), key=lambda kv: (kv[0][0], kv[0][1] or 0)):
+            # a judge error is missing data, not a non-refusal: leave it out of the rates
+            g = [x for x in g_all if x["new_label"] != "judge_error"]
+            n_err = len(g_all) - len(g)
+            if not g:
+                continue
             v2 = [classify_v2(x["clean"]) for x in g]
             clean = [x for x, c in zip(g, v2) if c != "degenerate"]
             new = [x["new_refused"] for x in g]
             newc = [x["new_refused"] for x in clean]
             out["conditions"][f"{exp}|{coef}"] = {
-                "n": len(g),
+                "n": len(g), "n_judge_errors": n_err,
                 "refuse_all": round(float(np.mean(new)), 3), "refuse_all_ci": boot_ci(new),
                 "degenerate_v1": round(float(np.mean([is_degenerate(x["clean"]) for x in g])), 3),
                 "degenerate_v2": round(float(np.mean([c == "degenerate" for c in v2])), 3),
