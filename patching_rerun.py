@@ -162,6 +162,11 @@ def main():
                        len(get_domain(DM[row["domain"]]).score_tool_calls_all(calls)) > 0)
         return np.array(out)
 
+    def any_call_of(texts):
+        # A "flip to safe" that is really "stopped calling" is engagement suppression,
+        # not safer action. Report the call rate alongside so the two can be told apart.
+        return np.array([bool(parse_tool_calls(t or "")) for t in texts])
+
     t0 = time.time()
     all_idx = list(range(len(base)))
     base_txt = gen(all_idx)
@@ -180,12 +185,23 @@ def main():
     deg = np.array([is_degenerate(t) for t in patch_txt])
     flips = ~patch_unsafe                       # unsafe -> safe
     clean = ~deg
+    patch_call = any_call_of(patch_txt)
+    # decompose the flips: the patched run still called a tool and it scored safe,
+    # versus the patched run emitted no tool call at all
+    flip_safe_call = flips & patch_call
+    flip_no_call = flips & ~patch_call
     res = {
         "model": a.model, "layer": LAYER, "n_baseline": int(len(base)),
         "n_unsafe_baseline": int(base_unsafe.sum()),
         "baseline_unsafe_rate": round(float(base_unsafe.mean()), 3),
+        "baseline_any_call_rate": round(float(any_call_of(base_txt).mean()), 3),
         "flip_rate_all": round(float(flips.mean()), 3),
         "flip_rate_all_ci": boot_ci(flips),
+        "patched_any_call_rate": round(float(patch_call.mean()), 3),
+        "flip_via_safe_call": round(float(flip_safe_call.mean()), 3),
+        "flip_via_no_call": round(float(flip_no_call.mean()), 3),
+        "unsafe_given_call_patched": (round(float(patch_unsafe[patch_call].mean()), 3)
+                                      if patch_call.sum() else None),
         "patched_degenerate": round(float(deg.mean()), 3),
         "n_clean": int(clean.sum()),
         "flip_rate_clean": (round(float(flips[clean].mean()), 3) if clean.sum() else None),
@@ -201,6 +217,10 @@ def main():
     log(f"  baseline unsafe      {res['n_unsafe_baseline']}/{res['n_baseline']}"
         f" ({res['baseline_unsafe_rate']:.3f}), {res['baseline_degenerate']:.1%} degenerate")
     log(f"  flipped to safe      {res['flip_rate_all']:.3f} {res['flip_rate_all_ci']}  (all patched)")
+    log(f"    via a safe call    {res['flip_via_safe_call']:.3f}")
+    log(f"    via no call        {res['flip_via_no_call']:.3f}")
+    log(f"  any-call rate        {res['baseline_any_call_rate']:.3f} -> {res['patched_any_call_rate']:.3f}"
+        f"   unsafe|call after patch: {res['unsafe_given_call_patched']}")
     log(f"  patched degenerate   {res['patched_degenerate']:.1%}   -> {verdict}")
     if res["flip_rate_clean"] is not None:
         log(f"  flipped to safe      {res['flip_rate_clean']:.3f} {res['flip_rate_clean_ci']}"
@@ -209,9 +229,10 @@ def main():
     OUT.mkdir(exist_ok=True)
     (OUT / f"patching_{a.model}.json").write_text(json.dumps(res, indent=2))
     raw = [{"id": base.iloc[j]["id"], "domain": base.iloc[j]["domain"],
-            "target_proj": float(targets[j]), "patched_text": t,
-            "patched_unsafe": bool(u), "degenerate": bool(g)}
-           for j, t, u, g in zip(idx, patch_txt, patch_unsafe, deg)]
+            "target_proj": float(targets[j]), "baseline_text": base_txt[j],
+            "patched_text": t, "patched_unsafe": bool(u), "patched_any_call": bool(k),
+            "degenerate": bool(g)}
+           for j, t, u, k, g in zip(idx, patch_txt, patch_unsafe, patch_call, deg)]
     (OUT / f"patching_raw_{a.model}.json").write_text(json.dumps(raw, indent=1))
     log(f"\nwrote {OUT / f'patching_{a.model}.json'}")
 
