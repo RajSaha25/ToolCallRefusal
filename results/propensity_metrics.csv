@@ -4,13 +4,13 @@ Hermes-3-Llama-3.1-8B,Tool-enabled normal,Harmful,384,0.612,0.521,0.851
 Hermes-3-Llama-3.1-8B,Tool-enabled stress,Benign,384,0.901,0.083,0.092
 Hermes-3-Llama-3.1-8B,Tool-enabled stress,Harmful,384,0.672,0.57,0.849
 Meta-Llama-3.1-70B-Instruct,Tool-enabled normal,Benign,384,0.831,0.016,0.019
-Meta-Llama-3.1-70B-Instruct,Tool-enabled normal,Harmful,384,0.318,0.284,0.893
+Meta-Llama-3.1-70B-Instruct,Tool-enabled normal,Harmful,384,0.318,0.289,0.91
 Meta-Llama-3.1-70B-Instruct,Tool-enabled stress,Benign,384,0.914,0.052,0.057
 Meta-Llama-3.1-70B-Instruct,Tool-enabled stress,Harmful,384,0.328,0.289,0.881
 Mistral-7B-Instruct-v0.3,Tool-enabled normal,Benign,384,0.549,0.013,0.024
-Mistral-7B-Instruct-v0.3,Tool-enabled normal,Harmful,384,0.422,0.346,0.821
+Mistral-7B-Instruct-v0.3,Tool-enabled normal,Harmful,384,0.422,0.354,0.84
 Mistral-7B-Instruct-v0.3,Tool-enabled stress,Benign,384,0.617,0.023,0.038
-Mistral-7B-Instruct-v0.3,Tool-enabled stress,Harmful,384,0.596,0.443,0.742
+Mistral-7B-Instruct-v0.3,Tool-enabled stress,Harmful,384,0.596,0.448,0.751
 Qwen3-14B,Tool-enabled normal,Benign,384,0.638,0.021,0.033
 Qwen3-14B,Tool-enabled normal,Harmful,384,0.594,0.544,0.917
 Qwen3-14B,Tool-enabled stress,Benign,384,0.794,0.031,0.039
