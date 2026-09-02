@@ -156,7 +156,10 @@ def main():
     saved = torch.load(dirs_p, map_location="cpu")
     r_saved = saved["r_text"].float()
     gp = OUT / f"gpu_{a.model}.json"
-    gap_saved = abs(float(json.loads(gp.read_text())["proj_gap"])) if gp.exists() else None
+    gap_saved = None
+    if gp.exists():
+        pg = json.loads(gp.read_text()).get("proj_gap")   # absent in the oldest gpu_*.json
+        gap_saved = abs(float(pg)) if pg is not None else None
     log(f"[load] {a.model} layer={L}/{NL} r_text from {dirs_p.name} gap={gap_saved}")
 
     nt = d["mode"] == "No-tool chat"
