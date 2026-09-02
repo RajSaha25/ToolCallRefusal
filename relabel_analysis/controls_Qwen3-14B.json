@@ -1,0 +1,234 @@
+{
+  "model": "Qwen3-14B",
+  "layer": 33,
+  "diag": {
+    "layer": 33,
+    "n_layers": 40,
+    "gap_rebuilt": 333.03,
+    "gap_saved": null,
+    "cos_saved_rebuilt": 0.993,
+    "mean_proj_over_gap": 0.006,
+    "cos_r_mean": 0.003,
+    "cos_r_bos": -0.187,
+    "cos_r_meanout": 1.0,
+    "mean_norm": 569.6,
+    "bos_norm": 15215.8
+  },
+  "kl": {
+    "ablate_rtext": {
+      "dataset": 2.3132,
+      "generic": 1.5869
+    },
+    "ablate_meanout": {
+      "dataset": 2.3726,
+      "generic": 1.6258
+    },
+    "ablate_random": {
+      "dataset": 0.0039,
+      "generic": 0.0043
+    },
+    "ablate_meandir": {
+      "dataset": 22.9656,
+      "generic": 21.0433
+    }
+  },
+  "kl_n": 48,
+  "scan": [
+    {
+      "layer": 14,
+      "sep": 7.85,
+      "kl_dataset": 0.0134,
+      "kl_generic": 0.0249,
+      "cos_with_operating": 0.063,
+      "pass_generic": true,
+      "pass_dataset": true
+    },
+    {
+      "layer": 15,
+      "sep": 8.2,
+      "kl_dataset": 0.0123,
+      "kl_generic": 0.0258,
+      "cos_with_operating": 0.095,
+      "pass_generic": true,
+      "pass_dataset": true
+    },
+    {
+      "layer": 16,
+      "sep": 10.34,
+      "kl_dataset": 0.0395,
+      "kl_generic": 0.0254,
+      "cos_with_operating": 0.114,
+      "pass_generic": true,
+      "pass_dataset": true
+    },
+    {
+      "layer": 17,
+      "sep": 11.01,
+      "kl_dataset": 0.3739,
+      "kl_generic": 0.2744,
+      "cos_with_operating": 0.098,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 18,
+      "sep": 15.11,
+      "kl_dataset": 0.2369,
+      "kl_generic": 0.2668,
+      "cos_with_operating": 0.137,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 19,
+      "sep": 18.38,
+      "kl_dataset": 0.1371,
+      "kl_generic": 0.2202,
+      "cos_with_operating": 0.147,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 20,
+      "sep": 22.69,
+      "kl_dataset": 0.1924,
+      "kl_generic": 0.2992,
+      "cos_with_operating": 0.162,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 21,
+      "sep": 23.95,
+      "kl_dataset": 0.0636,
+      "kl_generic": 0.0903,
+      "cos_with_operating": 0.183,
+      "pass_generic": true,
+      "pass_dataset": true
+    },
+    {
+      "layer": 22,
+      "sep": 31.68,
+      "kl_dataset": 0.2393,
+      "kl_generic": 0.3782,
+      "cos_with_operating": 0.255,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 23,
+      "sep": 35.65,
+      "kl_dataset": 0.6037,
+      "kl_generic": 0.5445,
+      "cos_with_operating": 0.275,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 24,
+      "sep": 47.05,
+      "kl_dataset": 0.4209,
+      "kl_generic": 0.3773,
+      "cos_with_operating": 0.327,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 25,
+      "sep": 68.03,
+      "kl_dataset": 0.2509,
+      "kl_generic": 0.2991,
+      "cos_with_operating": 0.395,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 26,
+      "sep": 93.92,
+      "kl_dataset": 0.7695,
+      "kl_generic": 0.7138,
+      "cos_with_operating": 0.461,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 27,
+      "sep": 118.69,
+      "kl_dataset": 0.6752,
+      "kl_generic": 0.6669,
+      "cos_with_operating": 0.532,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 28,
+      "sep": 144.11,
+      "kl_dataset": 1.5264,
+      "kl_generic": 1.2298,
+      "cos_with_operating": 0.614,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 29,
+      "sep": 173.48,
+      "kl_dataset": 2.1654,
+      "kl_generic": 1.7536,
+      "cos_with_operating": 0.69,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 30,
+      "sep": 218.3,
+      "kl_dataset": 2.615,
+      "kl_generic": 2.3997,
+      "cos_with_operating": 0.781,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 31,
+      "sep": 260.31,
+      "kl_dataset": 2.5769,
+      "kl_generic": 2.4758,
+      "cos_with_operating": 0.872,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 32,
+      "sep": 294.23,
+      "kl_dataset": 1.7343,
+      "kl_generic": 1.3763,
+      "cos_with_operating": 0.934,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 33,
+      "sep": 333.03,
+      "kl_dataset": 2.1352,
+      "kl_generic": 1.4812,
+      "cos_with_operating": 0.993,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 34,
+      "sep": 364.97,
+      "kl_dataset": 2.0707,
+      "kl_generic": 1.375,
+      "cos_with_operating": 0.941,
+      "pass_generic": false,
+      "pass_dataset": false
+    }
+  ],
+  "quantized_4bit": false,
+  "tools_native": true,
+  "add_coef": null,
+  "steering": {
+    "grid": [],
+    "harmful_unsafe": []
+  }
+}

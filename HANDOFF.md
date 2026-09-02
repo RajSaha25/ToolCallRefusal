@@ -154,12 +154,15 @@ to *this* direction because of what it shares with the common mode.
 | Command-R-7B | 0.68 | **0.33** | 0.48 | 0.69 | 0.47 (6% deg.) |
 | Mistral-7B | 0.49 | **0.33** | 0.35 | 0.47 | 0.54 (10% deg.) |
 | Gemma-3-27B | 0.66 | *100% deg.* | **1.00** (1% deg.) | 0.68 | *100% deg.* |
-| Llama-3.1-70B (4-bit) | *running* | | | | |
+| Llama-3.1-70B (4-bit, n=120) | 0.69 | 0.63 | 0.64 | 0.69 | **0.34** (0% deg., 76% short) |
 | Qwen3-14B | *running* (first session: 0.78 → 0.93, 0% deg.) | | | | |
 
 Reading it: Command-R is the Arditi case, and its mean direction carries part of the signal
 (ablating it alone drops refusal 20 points). Mistral is a modest real drop with a clean random
-null. Gemma: your fix works at 27B, and the coherent ablation *raises* refusal to 1.00 — the
+null. Llama drops 7 points under the direction and 35 under the mean direction alone, coherently
+but with three-quarters of the outputs turning terse — its common mode carries more of its
+refusal behaviour than the max-separation direction does. Gemma: your fix works at 27B, and the
+coherent ablation *raises* refusal to 1.00 — the
 outputs are fluent, on-topic refusals, and prompts the baseline hedged on become flat refusals.
 With Qwen, that makes two of five models where removing the max-separation direction *increases*
 refusal — consistent with the direction being harmfulness/topic rather than refusal in those
@@ -172,10 +175,14 @@ families (your Zhou et al. / Wollschläger et al. pointers).
 | Mistral-7B | 0.004 | 0.01 | 0.06 (5% deg.) | 97% degenerate |
 | Command-R-7B | 0.41 among the coherent half (50% deg.) | 100% deg. | 100% deg. | 100% deg. |
 | Gemma-3-27B | 0.013 | 91% deg. | 100% deg. | 100% deg. |
-| Llama-3.1-70B (4-bit), Qwen3-14B | *running* | | | |
+| Llama-3.1-70B (4-bit, n=120) | **0.24** (0% deg.) | — | 0.35 (8% deg.) | — |
+| Qwen3-14B | *running* | | | |
 
-Arditi's 1× produces essentially no refusal in Mistral and Gemma; Command-R breaks before 1×. The
-draft's 4× is degenerate everywhere. "Addition rescues Llama" should be withdrawn, as you said.
+Arditi's 1× produces essentially no refusal in Mistral and Gemma, and Command-R breaks before 1×.
+Llama is the one model where 1× behaves as Arditi describe: 0.01 → 0.24, fully coherent. The
+draft's 4× is degenerate everywhere. "Addition rescues Llama" (0 → 100%) should be withdrawn as
+you said; "addition raises Llama's benign refusal to 24% at the natural magnitude" is what
+survives.
 
 **Predictions were written down before the session and scored afterwards**: `PREDICTIONS.md`.
 Held: the patching decomposition (5/5), the random-direction null, Gemma's mean-out coherence and
@@ -213,7 +220,7 @@ problem: there the output is degenerate, so neither number means anything.
 | Mistral-7B | 29%→13% → **49%→33%** | 0%→80% → **0%→0.4%** | 0.689 → **0.760** | 24% → **20%** = 6 + 13 |
 | Command-R-7B | 72%→2% → **68%→33%** | 2%→92% → **0%→41%** (50% degenerate) | 0.751 → **0.768** | 62% → **34%** = 6 + 29 |
 | Gemma-3-27B | 21%→0% → **66%→100%** (mean-out; raw direction not reportable) | 1%→25% → **0%→1%** | 0.791 → **0.790** | 46% → **90%** = 3 + 87 |
-| Llama-3.1-70B | 73%→61% → **71%→59%** | 1%→1% → *running* (4-bit) | 0.881 → **0.864** | 40% → **13%** = 3 + 9 (4-bit) |
+| Llama-3.1-70B | 73%→61% → **71%→59%** | 1%→1% → **1%→24%** (4-bit) | 0.881 → **0.864** | 40% → **13%** = 3 + 9 (4-bit) |
 
 Unsafe-given-call after patching: 0.89 / 0.93 / 0.92 / 0.80 / 0.96. The patching column should
 become its own table (`tab:patching` in `paper_updates.tex`) because the split is the finding.

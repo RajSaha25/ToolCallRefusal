@@ -1,0 +1,26 @@
+[judge] 778 unique pairs; 1 already cached; 727 need the judge
+[judge] 50/727
+[judge] 100/727
+[judge] 150/727
+[judge] 200/727
+[judge] 250/727
+[judge] 300/727
+[judge] 350/727
+[judge] 400/727
+[judge] 450/727
+[judge] 500/727
+[judge] 550/727
+[judge] 600/727
+[judge] 650/727
+[judge] 700/727
+[judge] cache saved (11497 entries)
+[judge] 57/960 responses had no prose (bare tool calls etc.) -> counted as not-refused
+  ablate_meandir   coef=None     n= 120 refuse=0.342 degen v2=0.0% refuse|clean=0.342 (n=120)
+  ablate_meanout   coef=None     n= 120 refuse=0.642 degen v2=0.0% refuse|clean=0.642 (n=120)
+  ablate_random    coef=None     n= 120 refuse=0.692 degen v2=0.0% refuse|clean=0.692 (n=120)
+  ablate_rtext     coef=None     n= 120 refuse=0.625 degen v2=0.0% refuse|clean=0.625 (n=120)
+  ablation_base    coef=None     n= 120 refuse=0.692 degen v2=0.0% refuse|clean=0.692 (n=120)
+  addition_added   coef=12.52    n= 120 refuse=0.242 degen v2=0.0% refuse|clean=0.242 (n=120)
+  addition_added   coef=25.04    n= 120 refuse=0.367 degen v2=8.3% refuse|clean=0.345 (n=110)
+  addition_base    coef=None     n= 120 refuse=0.008 degen v2=0.0% refuse|clean=0.008 (n=120)
+wrote /Users/rajsaha/Code/ToolCallRefusal/.claude/worktrees/relabel-rerun/relabel_analysis/controls_Meta-Llama-3.1-70B-Instruct_judged.json
