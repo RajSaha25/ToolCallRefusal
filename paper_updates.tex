@@ -97,6 +97,85 @@ Llama-3.1-70B  & $0.450\!\to\!0.360$ & $-0.090$ $(-0.14,-0.04)$ & $0.740\!\to\!0
 \end{tabular}
 \end{table}
 
+% ---------------------------------------------------------------------------
+% 4. REPLACEMENT for the patching row of Table~\ref{tab:mech}, as its own table.
+%    The draft reports one number per model (unsafe -> safe after patching the
+%    refusal projection to its matched no-tool value). That number cannot tell a
+%    safer call from no call at all, so it is split here. Predicate-scored, no
+%    classifier; every generation saved; degeneracy screened.
+% ---------------------------------------------------------------------------
+\begin{table}[t]
+\centering
+\caption{Activation patching on harmful tool-enabled prompts: the refusal projection at the
+operating layer is overwritten with its value on the matched no-tool prompt, and unsafe calls
+that revert are counted ($n{=}300$ baseline prompts per model; flips are over the unsafe
+subset, with bootstrap 95\% CIs). ``via safe call'' means the patched model still called a tool
+and the call scored safe; ``via no call'' means it emitted no tool call. Unsafe\,$\mid$\,call
+is the unsafe rate among calls the patched model still makes. Patching moves models from
+acting to refusing in text; it does not make the calls they still make safer.}
+\label{tab:patching}
+  \begin{tabular}{lcccccc}
+\toprule
+Model & Unsafe base & Flip (draft) & Flip (rerun, 95\% CI) & via safe call & via no call & Unsafe\,$\mid$\,call \\
+\midrule
+Qwen3-14B      & 50\% & 18\% & 24\% (18, 31) & 9\% & 15\% & 89\% \\
+Mistral-7B     & 32\% & 24\% & 20\% (12, 28) & 6\% & 13\% & 93\% \\
+Command-R-7B   & 12\% & 62\% & 34\% (20, 49) & 6\% & 29\% & 92\% \\
+Gemma-3-27B    & 13\% & 46\% & 90\% (79, 97) & 3\% & 87\% & 80\% \\
+Llama-3.1-70B  & -- & 40\% & \multicolumn{4}{c}{not rerun} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---------------------------------------------------------------------------
+% 5. REPLACEMENT for the steering figure/paragraph. Any-call is reported on both
+%    sides because 'unsafe -> 0' by way of 'no calls' is not safer calling, and
+%    text-judged over-refusal misses a model that answers a benign tool task in
+%    prose without doing it. Rows whose outputs are mostly degenerate (v2 rule)
+%    are kept but marked; their refusal numbers should not be quoted.
+% ---------------------------------------------------------------------------
+\begin{table}[t]
+\centering
+\caption{Steering along $r_\text{text}$ in tool mode, by coefficient. Harmful side: share
+of prompts with any tool call, unsafe-call rate, and the unsafe rate among calls made. Benign
+side: share with any tool call (task completion) and judged over-refusal. Deg.\ is the share
+of degenerate outputs (repetition/non-linguistic); rows above 25\% are marked $\ddagger$ and
+their rates are artefacts. Unsafe\,$\mid$\,call never falls: steering removes unsafe calls
+by removing calls, on both sides.}
+\label{tab:steering-calls}
+  \begin{tabular}{lr|ccc|cc|c}
+\toprule
+ & & \multicolumn{3}{c|}{Harmful} & \multicolumn{2}{c|}{Benign} & \\
+Model & $c$ & Any call & Unsafe & Unsafe\,$\mid$\,call & Any call & Over-refusal & Deg. \\
+\midrule
+Qwen3-14B      & 0 & 0.61 & 0.54 & 0.88 & 0.66 & 0.00 & 0\% \\
+               & 200 & 0.48 & 0.39 & 0.80 & 0.63 & 0.01 & 0\% \\
+               & 450 & 0.32 & 0.24 & 0.76 & 0.48 & 0.08 & 2\% \\
+               & 700$^\ddagger$ & 0.07 & 0.03 & 0.43 & 0.22 & 0.44 & 51\% \\
+\midrule
+Mistral-7B     & 0 & 0.39 & 0.27 & 0.70 & 0.51 & 0.03 & 0\% \\
+               & 5 & 0.31 & 0.17 & 0.56 & 0.52 & 0.03 & 0\% \\
+               & 11 & 0.02 & 0.01 & 0.25 & 0.05 & 0.08 & 1\% \\
+               & 17$^\ddagger$ & 0.00 & 0.00 & -- & 0.00 & 0.68 & 36\% \\
+\midrule
+Command-R-7B   & 0 & 0.12 & 0.12 & 0.96 & 0.42 & 0.03 & 0\% \\
+               & 49 & 0.04 & 0.04 & 0.88 & 0.40 & 0.18 & 1\% \\
+               & 110$^\ddagger$ & 0.00 & 0.00 & -- & 0.00 & 0.67 & 94\% \\
+               & 172$^\ddagger$ & 0.00 & 0.00 & -- & 0.00 & 1.00 & 100\% \\
+\midrule
+Gemma-3-27B    & 0 & 0.15 & 0.12 & 0.77 & 0.39 & 0.22 & 1\% \\
+               & 12162 & 0.04 & 0.04 & 0.78 & 0.07 & 0.14 & 1\% \\
+               & 27375$^\ddagger$ & 0.00 & 0.00 & -- & 0.00 & 0.73 & 78\% \\
+               & 42587$^\ddagger$ & 0.00 & 0.00 & -- & 0.00 & 1.00 & 100\% \\
+\midrule
+Llama-3.1-70B  & 0 & 0.77 & 0.52 & 0.67 & 0.93 & 0.03 & 0\% \\
+               & 9 & 0.49 & 0.36 & 0.73 & 0.71 & 0.23 & 0\% \\
+               & 20 & 0.03 & 0.02 & 0.80 & 0.12 & 0.41 & 6\% \\
+               & 31$^\ddagger$ & 0.00 & 0.00 & -- & 0.00 & 1.00 & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ===========================================================================
 % WRITING OUTLINES --- everything below is commented out on purpose.
 %
@@ -163,11 +242,25 @@ Llama-3.1-70B  & $0.450\!\to\!0.360$ & $-0.090$ $(-0.14,-0.04)$ & $0.740\!\to\!0
 %         0.394 or Llama 0.213 (Table~\ref{tab:cosine}).
 %       - Llama is the coherent outlier: weakest alignment AND null suppression.
 %
-% 1c. REPLACES 'strong predictor but partial mediator'
-%     Only the AUC range changes; the mediation argument stands.
+% 1c. REPLACES 'strong predictor but partial mediator' --- THE MEDIATOR CLAIM NARROWS
 %       - AUC range 0.69-0.88 becomes 0.76-0.86 under the
 %         global-scope scorer; all five now reproduce their published AUC.
-%       - Keep the patching numbers and all the existing caveats.
+%       - Patching was rerun (Table~\ref{tab:patching}); the draft's numbers came
+%         from runs with no saved generations, before the template fix. Overall
+%         flip rates are in the same range, but they decompose badly for the claim:
+%           Qwen3-14B      flip 24\% = safe call 9\% + no call 15\%;  unsafe|call after 89\%
+%           Mistral-7B     flip 20\% = safe call 6\% + no call 13\%;  unsafe|call after 93\%
+%           Command-R-7B   flip 34\% = safe call 6\% + no call 29\%;  unsafe|call after 92\%
+%           Gemma-3-27B    flip 90\% = safe call 3\% + no call 87\%;  unsafe|call after 80\%
+%       - So the projection mediates whether the model ACTS (it flips to a text
+%         refusal), not whether the action it takes is safe: among calls the
+%         patched model still makes, ~90 percent stay unsafe. Say 'partial
+%         mediator of engagement', not of tool-call safety.
+%       - The no-call outputs are mostly coherent text refusals (Qwen 21/23,
+%         Command-R 8/10; Mistral 6/13, rest hedged how-to prose), so this IS
+%         refusal transfer in the paper's sense -- just not a safety mechanism.
+%       - Same pattern as ablation (Table~\ref{tab:ablation-action}) and steering
+%         (1e): three interventions, one story -- the direction gates engagement.
 %
 % 1d. NEW PARAGRAPH --- ablation on behaviour (Table~\ref{tab:ablation-action})
 %     Must cover:
@@ -185,31 +278,41 @@ Llama-3.1-70B  & $0.450\!\to\!0.360$ & $-0.090$ $(-0.14,-0.04)$ & $0.740\!\to\!0
 %         because the output is broken. Consistent with 1a, and worth noting as
 %         convergent evidence rather than a separate finding.
 %
-% 1e. REPLACES 'Steering is a blunt lever' --- THIS CONCLUSION CHANGES
-%     The published claim rests on high-coefficient points where the model is
-%     degenerate. At coefficients the model survives, the trade-off is much
-%     better than 'blunt'. Clean operating points (0% degenerate):
-%       Mistral   c=11    unsafe 0.270 -> 0.005   over-refusal 0.083
-%       Command-R c=49    unsafe 0.115 -> 0.035   over-refusal 0.183
-%       Gemma     c=12162 unsafe 0.120 -> 0.035   over-refusal 0.142
-%       Qwen      c=450   unsafe 0.535 -> 0.240   over-refusal 0.083
-%       Llama     c=20    unsafe 0.515 -> 0.020   over-refusal 0.408 (6.7% degen)
+% 1e. REPLACES 'Steering is a blunt lever' --- THE CONCLUSION CHANGES, BUT NOT
+%     IN THE DIRECTION AN EARLIER VERSION OF THESE NOTES SAID. Use
+%     Table~\ref{tab:steering-calls}. Two measurement problems in the draft:
+%       (i)  top-of-grid points are 32-100 percent degenerate (v2 detector), so
+%            the over-refusal rates there (Qwen 0.44, Command-R/Gemma/Llama 1.00)
+%            measure breakage, not refusal;
+%       (ii) 'unsafe -> 0' at the next coefficient down is not safer calling. The
+%            model stops calling tools at all, on BOTH sides:
+%              Mistral  c=11    harmful any-call 0.39->0.02, unsafe|call 0.70->0.25 (n=4)
+%                               benign  any-call 0.51->0.05 while text over-refusal reads 0.08
+%              Llama    c=20    harmful any-call 0.77->0.03, unsafe|call 0.67->0.80
+%                               benign  any-call 0.93->0.12, over-refusal 0.41
+%              Gemma    c=12162 harmful any-call 0.15->0.04, unsafe|call 0.77->0.78
+%                               benign  any-call 0.39->0.07 while over-refusal FALLS 0.22->0.14
+%              Qwen     c=450   harmful any-call 0.61->0.32, unsafe|call 0.88->0.76
+%                               benign  any-call 0.66->0.48, over-refusal 0.08
+%              Command-R c=49   harmful any-call 0.12->0.04, unsafe|call 0.96->0.88
+%                               benign  any-call 0.42->0.40, over-refusal 0.18  <- the one partial exception
 %     Must cover:
-%       - For Mistral, Command-R and Gemma a clean coefficient removes most
-%         unsafe calls at under 20 percent over-refusal. The draft's 'no
-%         coefficient removes unsafe behaviour without large collateral
-%         over-refusal' is too strong and should be dropped.
-%       - Qwen is the genuinely hard case: the clean points only halve the
-%         unsafe rate, and driving it to zero needs a coefficient that breaks
-%         the model.
-%       - The rates at the top of each grid (Qwen 0.442, Command-R 1.000, Gemma
-%         1.000, Llama 1.000) are 32-100 percent degenerate and should not be
-%         quoted as over-refusal at all.
-%     This is a more useful result than the original: it suggests a usable
-%     operating point exists for several models, which also changes the Future
-%     Work 'precise interventions' paragraph -- the problem is less 'steering is
-%     too blunt' and more 'the coefficient has to be chosen per model, below the
-%     degeneracy threshold'.
+%       - Text-judged over-refusal on benign prompts understates collateral damage
+%         badly: a model that answers a benign tool task in prose without calling
+%         the tool is not refusing, but it is not doing the task either. Report
+%         benign any-call (task completion) next to over-refusal.
+%       - Unsafe-given-call is flat or rising at every coefficient in every model:
+%         steering never makes the calls a model still makes safer. It removes
+%         unsafe calls only by removing calls.
+%       - Command-R at c=49 is the only point that cuts harmful unsafe calls
+%         (0.115->0.035) while keeping benign calls (0.42->0.40); even there
+%         unsafe|call is 0.88 and over-refusal is 0.18.
+%       - So 'blunt lever' is, if anything, understated: the lever is engagement,
+%         and it moves benign and harmful engagement together. That is the same
+%         finding as ablation (Table~\ref{tab:ablation-action}) and patching
+%         (Table~\ref{tab:patching}), from a third intervention.
+%       - Future Work: the target is a direction (or a different intervention)
+%         that changes unsafe|call, not any-call; none of the three tried here does.
 
 % ---------------------------------------------------------------------------
 % 2. SECTION 3.6 --- 'Robustness of the direction'

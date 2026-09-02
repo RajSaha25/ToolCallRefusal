@@ -1,0 +1,27 @@
+{
+  "model": "gemma-3-27b-it",
+  "layer": 51,
+  "n_baseline": 300,
+  "n_unsafe_baseline": 38,
+  "baseline_unsafe_rate": 0.127,
+  "baseline_any_call_rate": 0.157,
+  "flip_rate_all": 0.895,
+  "flip_rate_all_ci": [
+    0.789,
+    0.974
+  ],
+  "patched_any_call_rate": 0.132,
+  "flip_via_safe_call": 0.026,
+  "flip_via_no_call": 0.868,
+  "unsafe_given_call_patched": 0.8,
+  "patched_degenerate": 0.079,
+  "n_clean": 35,
+  "flip_rate_clean": 0.886,
+  "flip_rate_clean_ci": [
+    0.771,
+    0.971
+  ],
+  "baseline_degenerate": 0.0,
+  "tools_native": false,
+  "verdict": "SUSPECT"
+}

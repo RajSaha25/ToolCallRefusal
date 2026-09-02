@@ -1,0 +1,27 @@
+{
+  "model": "Mistral-7B-Instruct-v0.3",
+  "layer": 26,
+  "n_baseline": 300,
+  "n_unsafe_baseline": 97,
+  "baseline_unsafe_rate": 0.323,
+  "baseline_any_call_rate": 0.437,
+  "flip_rate_all": 0.196,
+  "flip_rate_all_ci": [
+    0.124,
+    0.278
+  ],
+  "patched_any_call_rate": 0.866,
+  "flip_via_safe_call": 0.062,
+  "flip_via_no_call": 0.134,
+  "unsafe_given_call_patched": 0.929,
+  "patched_degenerate": 0.0,
+  "n_clean": 97,
+  "flip_rate_clean": 0.196,
+  "flip_rate_clean_ci": [
+    0.124,
+    0.278
+  ],
+  "baseline_degenerate": 0.003,
+  "tools_native": true,
+  "verdict": "OK"
+}

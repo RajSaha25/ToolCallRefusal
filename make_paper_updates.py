@@ -181,6 +181,100 @@ w("\\end{tabular}")
 w("\\end{table}")
 w("")
 
+# ---------------------------------------------------------------------------
+# 4. Patching rerun, with the flip decomposed into safe-call vs no-call
+# ---------------------------------------------------------------------------
+PUBLISHED_PATCH = {"Qwen3-14B": 18, "Mistral-7B-Instruct-v0.3": 24, "c4ai-command-r7b-12-2024": 62,
+                   "gemma-3-27b-it": 46, "Meta-Llama-3.1-70B-Instruct": 40}
+
+
+def patch(m):
+    p = OUT / f"patching_{m}.json"
+    return json.loads(p.read_text()) if p.exists() else None
+
+
+w("% ---------------------------------------------------------------------------")
+w("% 4. REPLACEMENT for the patching row of Table~\\ref{tab:mech}, as its own table.")
+w("%    The draft reports one number per model (unsafe -> safe after patching the")
+w("%    refusal projection to its matched no-tool value). That number cannot tell a")
+w("%    safer call from no call at all, so it is split here. Predicate-scored, no")
+w("%    classifier; every generation saved; degeneracy screened.")
+w("% ---------------------------------------------------------------------------")
+w("\\begin{table}[t]")
+w("\\centering")
+w("\\caption{Activation patching on harmful tool-enabled prompts: the refusal projection at the")
+w("operating layer is overwritten with its value on the matched no-tool prompt, and unsafe calls")
+w("that revert are counted ($n{=}300$ baseline prompts per model; flips are over the unsafe")
+w("subset, with bootstrap 95\\% CIs). ``via safe call'' means the patched model still called a tool")
+w("and the call scored safe; ``via no call'' means it emitted no tool call. Unsafe\\,$\\mid$\\,call")
+w("is the unsafe rate among calls the patched model still makes. Patching moves models from")
+w("acting to refusing in text; it does not make the calls they still make safer.}")
+w("\\label{tab:patching}")
+w("  \\begin{tabular}{lcccccc}")
+w("\\toprule")
+w("Model & Unsafe base & Flip (draft) & Flip (rerun, 95\\% CI) & via safe call & via no call "
+  "& Unsafe\\,$\\mid$\\,call \\\\")
+w("\\midrule")
+for m in ORDER:
+    r = patch(m)
+    if r is None:
+        w(f"{ROW[m]:<14} & -- & {PUBLISHED_PATCH[m]}\\% & \\multicolumn{{4}}{{c}}{{not rerun}} \\\\")
+        continue
+    lo, hi = r["flip_rate_all_ci"]
+    dag = "$^\\dagger$" if r.get("quantized_4bit") else ""
+    ugc = "--" if r["unsafe_given_call_patched"] is None else pct(r["unsafe_given_call_patched"])
+    w(f"{ROW[m]:<14}{dag} & {pct(r['baseline_unsafe_rate'])} & {PUBLISHED_PATCH[m]}\\% "
+      f"& {pct(r['flip_rate_all'])} ({round(100 * lo)}, {round(100 * hi)}) "
+      f"& {pct(r['flip_via_safe_call'])} & {pct(r['flip_via_no_call'])} & {ugc} \\\\")
+w("\\bottomrule")
+w("\\end{tabular}")
+if any((patch(m) or {}).get("quantized_4bit") for m in ORDER):
+    w("\\\\[2pt] {\\footnotesize $^\\dagger$ run with 4-bit NF4 weights (bf16 compute) on an 80\\,GB card;")
+    w("the direction was extracted from the bf16 model.}")
+w("\\end{table}")
+w("")
+
+# ---------------------------------------------------------------------------
+# 5. Steering with the call rate explicit on both sides
+# ---------------------------------------------------------------------------
+SC = json.loads((OUT / "steering_calls.json").read_text()) if (OUT / "steering_calls.json").exists() else {}
+w("% ---------------------------------------------------------------------------")
+w("% 5. REPLACEMENT for the steering figure/paragraph. Any-call is reported on both")
+w("%    sides because 'unsafe -> 0' by way of 'no calls' is not safer calling, and")
+w("%    text-judged over-refusal misses a model that answers a benign tool task in")
+w("%    prose without doing it. Rows whose outputs are mostly degenerate (v2 rule)")
+w("%    are kept but marked; their refusal numbers should not be quoted.")
+w("% ---------------------------------------------------------------------------")
+w("\\begin{table}[t]")
+w("\\centering")
+w("\\caption{Steering along $r_\\text{text}$ in tool mode, by coefficient. Harmful side: share")
+w("of prompts with any tool call, unsafe-call rate, and the unsafe rate among calls made. Benign")
+w("side: share with any tool call (task completion) and judged over-refusal. Deg.\\ is the share")
+w("of degenerate outputs (repetition/non-linguistic); rows above 25\\% are marked $\\ddagger$ and")
+w("their rates are artefacts. Unsafe\\,$\\mid$\\,call never falls: steering removes unsafe calls")
+w("by removing calls, on both sides.}")
+w("\\label{tab:steering-calls}")
+w("  \\begin{tabular}{lr|ccc|cc|c}")
+w("\\toprule")
+w(" & & \\multicolumn{3}{c|}{Harmful} & \\multicolumn{2}{c|}{Benign} & \\\\")
+w("Model & $c$ & Any call & Unsafe & Unsafe\\,$\\mid$\\,call & Any call & Over-refusal & Deg. \\\\")
+w("\\midrule")
+for m in ORDER:
+    for i, r in enumerate(SC.get(m, {}).get("rows", [])):
+        deg = max(r["h_degen_v2"], r["b_degen_v2"])
+        mark = "$^\\ddagger$" if deg >= 0.25 else ""
+        ugc = "--" if r["h_unsafe_given_call"] is None else f"{r['h_unsafe_given_call']:.2f}"
+        name = ROW[m] if i == 0 else ""
+        w(f"{name:<14} & {r['coef']}{mark} & {r['h_any_call']:.2f} & {r['h_unsafe']:.2f} & {ugc} "
+          f"& {r['b_any_call']:.2f} & {r['b_over_refusal']:.2f} & {pct(deg)} \\\\")
+    w("\\midrule")
+L.pop()  # drop the trailing midrule
+w("\\bottomrule")
+w("\\end{tabular}")
+w("\\end{table}")
+w("")
+
+
 def P(m, k):
     return round(100 * s(m)[k]["new"])
 
@@ -258,11 +352,26 @@ w("%         True for Qwen 0.741, Mistral 0.773, Gemma 0.797; NOT for Command-R"
 w("%         0.394 or Llama 0.213 (Table~\\ref{tab:cosine}).")
 w("%       - Llama is the coherent outlier: weakest alignment AND null suppression.")
 w("%")
-w("% 1c. REPLACES 'strong predictor but partial mediator'")
-w("%     Only the AUC range changes; the mediation argument stands.")
+w("% 1c. REPLACES 'strong predictor but partial mediator' --- THE MEDIATOR CLAIM NARROWS")
 w(f"%       - AUC range 0.69-0.88 becomes {min(aucs):.2f}-{max(aucs):.2f} under the")
 w("%         global-scope scorer; all five now reproduce their published AUC.")
-w("%       - Keep the patching numbers and all the existing caveats.")
+w("%       - Patching was rerun (Table~\\ref{tab:patching}); the draft's numbers came")
+w("%         from runs with no saved generations, before the template fix. Overall")
+w("%         flip rates are in the same range, but they decompose badly for the claim:")
+for m in ORDER:
+    r = patch(m)
+    if r:
+        w(f"%           {ROW[m]:<14} flip {pct(r['flip_rate_all'])} = safe call {pct(r['flip_via_safe_call'])}"
+          f" + no call {pct(r['flip_via_no_call'])};  unsafe|call after {pct(r['unsafe_given_call_patched'] or 0)}")
+w("%       - So the projection mediates whether the model ACTS (it flips to a text")
+w("%         refusal), not whether the action it takes is safe: among calls the")
+w("%         patched model still makes, ~90 percent stay unsafe. Say 'partial")
+w("%         mediator of engagement', not of tool-call safety.")
+w("%       - The no-call outputs are mostly coherent text refusals (Qwen 21/23,")
+w("%         Command-R 8/10; Mistral 6/13, rest hedged how-to prose), so this IS")
+w("%         refusal transfer in the paper's sense -- just not a safety mechanism.")
+w("%       - Same pattern as ablation (Table~\\ref{tab:ablation-action}) and steering")
+w("%         (1e): three interventions, one story -- the direction gates engagement.")
 w("%")
 w("% 1d. NEW PARAGRAPH --- ablation on behaviour (Table~\\ref{tab:ablation-action})")
 w("%     Must cover:")
@@ -280,31 +389,41 @@ w("%       - Gemma's row is the degeneracy again -- its tool-calling goes to zer
 w("%         because the output is broken. Consistent with 1a, and worth noting as")
 w("%         convergent evidence rather than a separate finding.")
 w("%")
-w("% 1e. REPLACES 'Steering is a blunt lever' --- THIS CONCLUSION CHANGES")
-w("%     The published claim rests on high-coefficient points where the model is")
-w("%     degenerate. At coefficients the model survives, the trade-off is much")
-w("%     better than 'blunt'. Clean operating points (0% degenerate):")
-w("%       Mistral   c=11    unsafe 0.270 -> 0.005   over-refusal 0.083")
-w("%       Command-R c=49    unsafe 0.115 -> 0.035   over-refusal 0.183")
-w("%       Gemma     c=12162 unsafe 0.120 -> 0.035   over-refusal 0.142")
-w("%       Qwen      c=450   unsafe 0.535 -> 0.240   over-refusal 0.083")
-w("%       Llama     c=20    unsafe 0.515 -> 0.020   over-refusal 0.408 (6.7% degen)")
+w("% 1e. REPLACES 'Steering is a blunt lever' --- THE CONCLUSION CHANGES, BUT NOT")
+w("%     IN THE DIRECTION AN EARLIER VERSION OF THESE NOTES SAID. Use")
+w("%     Table~\\ref{tab:steering-calls}. Two measurement problems in the draft:")
+w("%       (i)  top-of-grid points are 32-100 percent degenerate (v2 detector), so")
+w("%            the over-refusal rates there (Qwen 0.44, Command-R/Gemma/Llama 1.00)")
+w("%            measure breakage, not refusal;")
+w("%       (ii) 'unsafe -> 0' at the next coefficient down is not safer calling. The")
+w("%            model stops calling tools at all, on BOTH sides:")
+w("%              Mistral  c=11    harmful any-call 0.39->0.02, unsafe|call 0.70->0.25 (n=4)")
+w("%                               benign  any-call 0.51->0.05 while text over-refusal reads 0.08")
+w("%              Llama    c=20    harmful any-call 0.77->0.03, unsafe|call 0.67->0.80")
+w("%                               benign  any-call 0.93->0.12, over-refusal 0.41")
+w("%              Gemma    c=12162 harmful any-call 0.15->0.04, unsafe|call 0.77->0.78")
+w("%                               benign  any-call 0.39->0.07 while over-refusal FALLS 0.22->0.14")
+w("%              Qwen     c=450   harmful any-call 0.61->0.32, unsafe|call 0.88->0.76")
+w("%                               benign  any-call 0.66->0.48, over-refusal 0.08")
+w("%              Command-R c=49   harmful any-call 0.12->0.04, unsafe|call 0.96->0.88")
+w("%                               benign  any-call 0.42->0.40, over-refusal 0.18  <- the one partial exception")
 w("%     Must cover:")
-w("%       - For Mistral, Command-R and Gemma a clean coefficient removes most")
-w("%         unsafe calls at under 20 percent over-refusal. The draft's 'no")
-w("%         coefficient removes unsafe behaviour without large collateral")
-w("%         over-refusal' is too strong and should be dropped.")
-w("%       - Qwen is the genuinely hard case: the clean points only halve the")
-w("%         unsafe rate, and driving it to zero needs a coefficient that breaks")
-w("%         the model.")
-w("%       - The rates at the top of each grid (Qwen 0.442, Command-R 1.000, Gemma")
-w("%         1.000, Llama 1.000) are 32-100 percent degenerate and should not be")
-w("%         quoted as over-refusal at all.")
-w("%     This is a more useful result than the original: it suggests a usable")
-w("%     operating point exists for several models, which also changes the Future")
-w("%     Work 'precise interventions' paragraph -- the problem is less 'steering is")
-w("%     too blunt' and more 'the coefficient has to be chosen per model, below the")
-w("%     degeneracy threshold'.")
+w("%       - Text-judged over-refusal on benign prompts understates collateral damage")
+w("%         badly: a model that answers a benign tool task in prose without calling")
+w("%         the tool is not refusing, but it is not doing the task either. Report")
+w("%         benign any-call (task completion) next to over-refusal.")
+w("%       - Unsafe-given-call is flat or rising at every coefficient in every model:")
+w("%         steering never makes the calls a model still makes safer. It removes")
+w("%         unsafe calls only by removing calls.")
+w("%       - Command-R at c=49 is the only point that cuts harmful unsafe calls")
+w("%         (0.115->0.035) while keeping benign calls (0.42->0.40); even there")
+w("%         unsafe|call is 0.88 and over-refusal is 0.18.")
+w("%       - So 'blunt lever' is, if anything, understated: the lever is engagement,")
+w("%         and it moves benign and harmful engagement together. That is the same")
+w("%         finding as ablation (Table~\\ref{tab:ablation-action}) and patching")
+w("%         (Table~\\ref{tab:patching}), from a third intervention.")
+w("%       - Future Work: the target is a direction (or a different intervention)")
+w("%         that changes unsafe|call, not any-call; none of the three tried here does.")
 w("")
 w("% ---------------------------------------------------------------------------")
 w("% 2. SECTION 3.6 --- 'Robustness of the direction'")

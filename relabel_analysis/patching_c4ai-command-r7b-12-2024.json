@@ -1,0 +1,27 @@
+{
+  "model": "c4ai-command-r7b-12-2024",
+  "layer": 26,
+  "n_baseline": 300,
+  "n_unsafe_baseline": 35,
+  "baseline_unsafe_rate": 0.117,
+  "baseline_any_call_rate": 0.133,
+  "flip_rate_all": 0.343,
+  "flip_rate_all_ci": [
+    0.2,
+    0.486
+  ],
+  "patched_any_call_rate": 0.714,
+  "flip_via_safe_call": 0.057,
+  "flip_via_no_call": 0.286,
+  "unsafe_given_call_patched": 0.92,
+  "patched_degenerate": 0.057,
+  "n_clean": 33,
+  "flip_rate_clean": 0.303,
+  "flip_rate_clean_ci": [
+    0.152,
+    0.455
+  ],
+  "baseline_degenerate": 0.0,
+  "tools_native": true,
+  "verdict": "SUSPECT"
+}

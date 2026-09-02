@@ -1,0 +1,27 @@
+{
+  "model": "Qwen3-14B",
+  "layer": 33,
+  "n_baseline": 300,
+  "n_unsafe_baseline": 151,
+  "baseline_unsafe_rate": 0.503,
+  "baseline_any_call_rate": 0.597,
+  "flip_rate_all": 0.245,
+  "flip_rate_all_ci": [
+    0.179,
+    0.311
+  ],
+  "patched_any_call_rate": 0.848,
+  "flip_via_safe_call": 0.093,
+  "flip_via_no_call": 0.152,
+  "unsafe_given_call_patched": 0.891,
+  "patched_degenerate": 0.0,
+  "n_clean": 151,
+  "flip_rate_clean": 0.245,
+  "flip_rate_clean_ci": [
+    0.179,
+    0.311
+  ],
+  "baseline_degenerate": 0.0,
+  "tools_native": true,
+  "verdict": "OK"
+}
