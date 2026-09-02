@@ -185,7 +185,8 @@ tex = PREAMBLE + convert(SRC.read_text()) + "\n\\end{document}\n"
 tex_path = HERE / f"_{BASE}.tex"
 tex_path.write_text(tex)
 r = subprocess.run(["pdflatex", "-interaction=nonstopmode", "-output-directory",
-                    str(HERE), str(tex_path)], capture_output=True, text=True)
+                    str(HERE), str(tex_path)], capture_output=True, text=True,
+                   errors="replace")   # pdflatex's log is not always valid UTF-8
 pdf = HERE / f"_{BASE}.pdf"
 if pdf.exists():
     final = HERE / f"{BASE}.pdf"
