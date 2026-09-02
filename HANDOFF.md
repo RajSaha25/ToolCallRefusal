@@ -217,6 +217,35 @@ This is the same failure mode the relabel fixed for Table 1 — it just was neve
 intervention results. Gemma looks similar on the surface (regex 0, judge 120) but is a different
 problem: there the output is degenerate, so neither number means anything.
 
+**What replaces the regex, and how it was checked.** Every refusal label on this branch comes
+from the three-way LLM judge (refuse / caveat / comply; Haiku 4.5, temperature 0, cached), the
+same one the Table 1 relabel used. It was cross-checked against a second judge on 538 responses
+(`data/crosscheck_report.json`): three-way agreement 0.92 (κ 0.86), binary agreement 0.97
+(κ 0.94), 0.95 on harmful prompts and 1.00 on benign. Degenerate output is screened out *before*
+the judge sees it (§1b), because the rubric's "withheld help" reading of gibberish is the one
+bias the judge does have.
+
+**Is the "ablation raises refusal" result a classifier artefact?** Testable from the saved labels
+without a GPU: pair each prompt's base and ablated response and count transitions.
+
+| model, condition | became refuse | stopped refusing | refuse → comply |
+|---|---|---|---|
+| Qwen, direction ablated | 40 (24 from caveat, 16 from comply) | 2 | 0 |
+| Gemma, mean-out ablated | 81 (63 from caveat, 18 from comply) | 0 | 0 |
+| Command-R, direction ablated | 3 | 88 | 41 |
+| Mistral, direction ablated | 10 | 48 | 11 |
+
+The sign does not depend on how "caveat" is folded — counting hedged compliance as refusal still
+leaves Qwen +23 and Gemma +18 from outright compliance — and a judge bias would have to reverse
+direction between models on the same prompts. The three predicate-scored interventions (§3.1,
+§3.3, §3.4) involve no classifier at all, and they agree.
+
+**If a stronger judge is wanted for the paper:** re-judging every saved generation with a
+Sonnet-class model is a one-line change and no GPU (~15k responses, an hour or two, tens of
+dollars). It will not change the sign of anything above, but it removes the objection and gives a
+Haiku–Sonnet agreement figure to report. That is also the moment to add the fourth verdict you
+proposed (incoherent), so the screen and the rubric agree.
+
 ---
 
 ## 3. Exact changes to the paper
