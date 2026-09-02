@@ -149,18 +149,21 @@ to *this* direction because of what it shares with the common mode.
 
 **Ablation controls, harmful no-tool prompts, n = 240, judged refusal over coherent outputs:**
 
-| Model | none | r_text | mean-out | random | mean-dir | Reading |
-|---|---|---|---|---|---|---|
-| Command-R-7B | 0.68 | **0.33** | 0.48 | 0.69 | 0.47 (6% deg.) | Arditi holds; the mean direction carries part of the signal |
-| Mistral-7B | 0.49 | **0.33** | 0.35 | 0.47 | 0.54 (10% deg.) | modest real drop; random is a clean null |
-| Gemma-3-27B | 0.66 | *100% degenerate* | **1.00** (1% deg.) | 0.68 | *100% degenerate* | your fix works at 27B; coherent ablation *raises* refusal |
-| Llama-3.1-70B (4-bit) | *running* | | | | | |
-| Qwen3-14B | *running* (earlier run: 0.78 → 0.93, 0% degenerate) | | | | | |
+| Model | none | r_text | mean-out | random | mean-dir |
+|---|---|---|---|---|---|
+| Command-R-7B | 0.68 | **0.33** | 0.48 | 0.69 | 0.47 (6% deg.) |
+| Mistral-7B | 0.49 | **0.33** | 0.35 | 0.47 | 0.54 (10% deg.) |
+| Gemma-3-27B | 0.66 | *100% deg.* | **1.00** (1% deg.) | 0.68 | *100% deg.* |
+| Llama-3.1-70B (4-bit) | *running* | | | | |
+| Qwen3-14B | *running* (first session: 0.78 → 0.93, 0% deg.) | | | | |
 
-The Gemma mean-out outputs are fluent, on-topic refusals; prompts the baseline hedged on become
-flat refusals. With Qwen, that makes two of five models where removing the max-separation
-direction *increases* refusal — consistent with the direction being harmfulness/topic rather than
-refusal in those families (your Zhou et al. / Wollschläger et al. pointers).
+Reading it: Command-R is the Arditi case, and its mean direction carries part of the signal
+(ablating it alone drops refusal 20 points). Mistral is a modest real drop with a clean random
+null. Gemma: your fix works at 27B, and the coherent ablation *raises* refusal to 1.00 — the
+outputs are fluent, on-topic refusals, and prompts the baseline hedged on become flat refusals.
+With Qwen, that makes two of five models where removing the max-separation direction *increases*
+refusal — consistent with the direction being harmfulness/topic rather than refusal in those
+families (your Zhou et al. / Wollschläger et al. pointers).
 
 **Addition at multiples of the diff-in-means gap, benign no-tool prompts, n = 240:**
 
@@ -264,8 +267,10 @@ The headline column has no consistent story. The conditional column barely moves
 the rate of calling a tool at all swings 10–22 points in both directions. **Ablation changes how
 often a model acts, not how safely it acts once it does.**
 
-Caveat for the text: Gemma's tool-calling collapses to zero, so its apparent safety gain is the
-model ceasing to act — capability damage, not alignment.
+Caveat for the text: Gemma's tool-calling collapses to zero because its ablated outputs are the
+same token loops as in §1b, so its apparent safety gain is the model ceasing to produce anything —
+capability damage, not alignment. This row should be rerun with the mean-out direction (§5, item 5)
+before it is quoted.
 
 ### 3.4 Steering — this conclusion changes
 
