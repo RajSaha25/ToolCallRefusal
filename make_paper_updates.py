@@ -274,6 +274,113 @@ w("\\end{tabular}")
 w("\\end{table}")
 w("")
 
+# ---------------------------------------------------------------------------
+# 6. Direction admissibility (KL guardrail) and ablation controls
+# ---------------------------------------------------------------------------
+
+
+def ctrl(m):
+    p = OUT / f"controls_{m}.json"
+    return json.loads(p.read_text()) if p.exists() else None
+
+
+def ctrl_j(m):
+    p = OUT / f"controls_{m}_judged.json"
+    return json.loads(p.read_text()).get("conditions", {}) if p.exists() else {}
+
+
+def cj(m, key):
+    r = ctrl_j(m).get(key)
+    if r is None:
+        return "--"
+    s = f"{r['refuse_clean']:.2f}" if r["refuse_clean"] is not None else "--"
+    return s + (f"$^\\ddagger$" if r["degenerate_v2"] >= 0.25 else "")
+
+
+w("% ---------------------------------------------------------------------------")
+w("% 6. NEW TABLE: is the direction admissible, and what do the controls do?")
+w("%    Arditi et al. keep a candidate direction only if ablating it changes the")
+w("%    next-token distribution on harmless prompts by KL < 0.1. The draft never")
+w("%    checked this. 'generic' = 48 ordinary requests (their protocol); 'dataset' =")
+w("%    the benchmark's benign prompts. Refusal rates are the judge on coherent")
+w("%    outputs only (v2 degeneracy rule); a dagger marks a condition with >= 25%")
+w("%    degenerate output, whose rate should not be quoted.")
+w("% ---------------------------------------------------------------------------")
+w("\\begin{table}[t]")
+w("\\centering")
+w("\\caption{Direction admissibility and ablation controls, harmful no-tool prompts ($n{=}240$).")
+w("KL is the mean next-token KL$(\\text{clean}\\,\\|\\,\\text{ablated})$ on harmless prompts under")
+w("all-layer projection removal; Arditi et al.\\ require $<0.1$. ``Layers'' counts candidate layers")
+w("in the 35--85\\% depth band passing that threshold on generic prompts. Refusal is judged on")
+w("coherent outputs; $\\ddagger$ marks conditions with $\\geq 25\\%$ degenerate output. Mean-out projects")
+w("the mean activation out of the direction before ablating; random is a unit Gaussian direction;")
+w("mean-dir ablates the mean-activation direction itself.}")
+w("\\label{tab:controls}")
+w("  \\begin{tabular}{lcc|c|ccccc}")
+w("\\toprule")
+w(" & \\multicolumn{2}{c|}{KL of $r_\\text{text}$} & & \\multicolumn{5}{c}{Refusal after ablating} \\\\")
+w("Model & generic & dataset & Layers & none & $r_\\text{text}$ & mean-out & random & mean-dir \\\\")
+w("\\midrule")
+for m in ORDER:
+    c = ctrl(m)
+    if c is None:
+        w(f"{ROW[m]:<14} & \\multicolumn{{8}}{{c}}{{not run}} \\\\")
+        continue
+    kg, kd = c["kl"]["ablate_rtext"]["generic"], c["kl"]["ablate_rtext"]["dataset"]
+    npass = sum(s["pass_generic"] for s in c.get("scan", []))
+    ntot = len(c.get("scan", []))
+    dag = "$^\\dagger$" if c.get("quantized_4bit") else ""
+    w(f"{ROW[m]:<14}{dag} & {kg:.2f} & {kd:.2f} & {npass}/{ntot} & {cj(m, 'ablation_base|None')} "
+      f"& {cj(m, 'ablate_rtext|None')} & {cj(m, 'ablate_meanout|None')} & {cj(m, 'ablate_random|None')} "
+      f"& {cj(m, 'ablate_meandir|None')} \\\\")
+w("\\bottomrule")
+w("\\end{tabular}")
+w("\\end{table}")
+w("")
+
+# ---------------------------------------------------------------------------
+# 7. Addition at multiples of the natural magnitude
+# ---------------------------------------------------------------------------
+w("% ---------------------------------------------------------------------------")
+w("% 7. REPLACEMENT for the addition column: the draft added 4x the diff-in-means")
+w("%    gap, which is degenerate in every model. Arditi add 1x. This is the sweep.")
+w("% ---------------------------------------------------------------------------")
+w("\\begin{table}[t]")
+w("\\centering")
+w("\\caption{Activation addition on benign no-tool prompts ($n{=}240$) at multiples of the")
+w("diff-in-means gap (Arditi et al.\\ use $1\\times$; the draft used $4\\times$). Each cell is judged")
+w("refusal among coherent outputs, with the degenerate share in parentheses. The refusal a model")
+w("can be pushed to before its output breaks is far below the draft's 100\\%.}")
+w("\\label{tab:addition}")
+w("  \\begin{tabular}{lccccc}")
+w("\\toprule")
+w("Model & $0\\times$ & $1\\times$ & $1.5\\times$ & $2\\times$ & $3\\times$ \\\\")
+w("\\midrule")
+for m in ORDER:
+    c = ctrl(m)
+    if c is None or not ctrl_j(m):
+        w(f"{ROW[m]:<14} & \\multicolumn{{5}}{{c}}{{not run}} \\\\")
+        continue
+    cells = []
+    base = ctrl_j(m).get("addition_base|None")
+    cells.append(f"{base['refuse_clean']:.2f}" if base else "--")
+    coefs = {round(mu, 2): co for mu, co in zip(c.get("add_mults", []), c.get("add_coefs", []))}
+    for mu in (1.0, 1.5, 2.0, 3.0):
+        co = coefs.get(mu)
+        r = ctrl_j(m).get(f"addition_added|{co}") if co is not None else None
+        if r is None:
+            cells.append("--")
+        elif r["refuse_clean"] is None:
+            cells.append(f"-- ({pct(r['degenerate_v2'])} deg.)")
+        else:
+            cells.append(f"{r['refuse_clean']:.2f} ({pct(r['degenerate_v2'])})")
+    dag = "$^\\dagger$" if c.get("quantized_4bit") else ""
+    w(f"{ROW[m]:<14}{dag} & " + " & ".join(cells) + " \\\\")
+w("\\bottomrule")
+w("\\end{tabular}")
+w("\\end{table}")
+w("")
+
 
 def P(m, k):
     return round(100 * s(m)[k]["new"])

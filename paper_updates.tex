@@ -176,6 +176,63 @@ Llama-3.1-70B  & 0 & 0.77 & 0.52 & 0.67 & 0.93 & 0.03 & 0\% \\
 \end{tabular}
 \end{table}
 
+% ---------------------------------------------------------------------------
+% 6. NEW TABLE: is the direction admissible, and what do the controls do?
+%    Arditi et al. keep a candidate direction only if ablating it changes the
+%    next-token distribution on harmless prompts by KL < 0.1. The draft never
+%    checked this. 'generic' = 48 ordinary requests (their protocol); 'dataset' =
+%    the benchmark's benign prompts. Refusal rates are the judge on coherent
+%    outputs only (v2 degeneracy rule); a dagger marks a condition with >= 25%
+%    degenerate output, whose rate should not be quoted.
+% ---------------------------------------------------------------------------
+\begin{table}[t]
+\centering
+\caption{Direction admissibility and ablation controls, harmful no-tool prompts ($n{=}240$).
+KL is the mean next-token KL$(\text{clean}\,\|\,\text{ablated})$ on harmless prompts under
+all-layer projection removal; Arditi et al.\ require $<0.1$. ``Layers'' counts candidate layers
+in the 35--85\% depth band passing that threshold on generic prompts. Refusal is judged on
+coherent outputs; $\ddagger$ marks conditions with $\geq 25\%$ degenerate output. Mean-out projects
+the mean activation out of the direction before ablating; random is a unit Gaussian direction;
+mean-dir ablates the mean-activation direction itself.}
+\label{tab:controls}
+  \begin{tabular}{lcc|c|ccccc}
+\toprule
+ & \multicolumn{2}{c|}{KL of $r_\text{text}$} & & \multicolumn{5}{c}{Refusal after ablating} \\
+Model & generic & dataset & Layers & none & $r_\text{text}$ & mean-out & random & mean-dir \\
+\midrule
+Qwen3-14B      & \multicolumn{8}{c}{not run} \\
+Mistral-7B     & 0.25 & 0.91 & 0/17 & 0.49 & 0.33 & 0.35 & 0.47 & 0.50 \\
+Command-R-7B   & 0.04 & 0.14 & 8/17 & 0.68 & 0.33 & 0.48 & 0.69 & 0.47 \\
+Gemma-3-27B    & 11.34 & 10.95 & 0/32 & -- & -- & -- & -- & -- \\
+Llama-3.1-70B  & \multicolumn{8}{c}{not run} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---------------------------------------------------------------------------
+% 7. REPLACEMENT for the addition column: the draft added 4x the diff-in-means
+%    gap, which is degenerate in every model. Arditi add 1x. This is the sweep.
+% ---------------------------------------------------------------------------
+\begin{table}[t]
+\centering
+\caption{Activation addition on benign no-tool prompts ($n{=}240$) at multiples of the
+diff-in-means gap (Arditi et al.\ use $1\times$; the draft used $4\times$). Each cell is judged
+refusal among coherent outputs, with the degenerate share in parentheses. The refusal a model
+can be pushed to before its output breaks is far below the draft's 100\%.}
+\label{tab:addition}
+  \begin{tabular}{lccccc}
+\toprule
+Model & $0\times$ & $1\times$ & $1.5\times$ & $2\times$ & $3\times$ \\
+\midrule
+Qwen3-14B      & \multicolumn{5}{c}{not run} \\
+Mistral-7B     & 0.00 & 0.00 (0\%) & 0.01 (0\%) & 0.06 (5\%) & 1.00 (98\%) \\
+Command-R-7B   & 0.00 & 0.41 (50\%) & -- (100\% deg.) & -- (100\% deg.) & -- (100\% deg.) \\
+Gemma-3-27B    & \multicolumn{5}{c}{not run} \\
+Llama-3.1-70B  & \multicolumn{5}{c}{not run} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 % ===========================================================================
 % WRITING OUTLINES --- everything below is commented out on purpose.
 %

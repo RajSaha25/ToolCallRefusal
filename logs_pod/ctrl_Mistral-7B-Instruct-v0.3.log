@@ -1,0 +1,47 @@
+[data] complete_safety_eval_dataset_normalized.xlsx: 2304 prompts
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights:   2%|▏         | 6/291 [00:00<00:04, 58.18it/s]Loading weights:   8%|▊         | 24/291 [00:00<00:02, 120.24it/s]Loading weights:  14%|█▍        | 42/291 [00:00<00:01, 141.05it/s]Loading weights:  21%|██        | 60/291 [00:00<00:01, 151.08it/s]Loading weights:  27%|██▋       | 78/291 [00:00<00:01, 157.45it/s]Loading weights:  33%|███▎      | 96/291 [00:00<00:01, 159.16it/s]Loading weights:  39%|███▉      | 114/291 [00:00<00:01, 159.96it/s]Loading weights:  45%|████▌     | 132/291 [00:00<00:00, 161.21it/s]Loading weights:  52%|█████▏    | 150/291 [00:00<00:00, 162.54it/s]Loading weights:  58%|█████▊    | 168/291 [00:01<00:00, 163.92it/s]Loading weights:  64%|██████▍   | 186/291 [00:01<00:00, 164.41it/s]Loading weights:  70%|███████   | 204/291 [00:01<00:00, 166.20it/s]Loading weights:  76%|███████▋  | 222/291 [00:01<00:00, 166.75it/s]Loading weights:  82%|████████▏ | 240/291 [00:01<00:00, 167.56it/s]Loading weights:  89%|████████▊ | 258/291 [00:01<00:00, 168.24it/s]Loading weights:  95%|█████████▍| 276/291 [00:01<00:00, 166.15it/s]Loading weights: 100%|██████████| 291/291 [00:01<00:00, 161.99it/s]
+[hooks] decoder layers at net.model.layers (n=32)
+[render] template carries tools natively: True
+[load] Mistral-7B-Instruct-v0.3 layer=26/32 r_text from directions_Mistral-7B-Instruct-v0.3.pt gap=7.45
+[acts] 128+128 prompts x 33 layers (1s)
+[dir] layer=26 n_layers=32 gap_rebuilt=7.07 gap_saved=7.45 cos_saved_rebuilt=0.991 mean_proj_over_gap=0.025 cos_r_mean=0.014 cos_r_bos=-0.062 cos_r_meanout=1.0 mean_norm=12.9 bos_norm=215.6
+[KL] condition          dataset   generic   (Arditi threshold 0.1; generic is their protocol)
+[KL] ablate_rtext         0.906     0.247   FAIL on generic
+[KL] ablate_meanout       0.992     0.277   FAIL on generic
+[KL] ablate_random        0.007     0.004   PASS on generic
+[KL] ablate_meandir       7.273     4.541   FAIL on generic
+[KL] (1s)
+[scan] 17 candidate layers, 0 pass KL<0.1 on generic, 0 on dataset (3s)
+   L11  sep=    0.62 KL(data)=   0.913 KL(gen)=   0.337 cos= 0.119 
+   L12  sep=    0.84 KL(data)=   0.921 KL(gen)=   0.285 cos= 0.148 
+   L13  sep=    1.05 KL(data)=   1.231 KL(gen)=   0.456 cos= 0.211 
+   L14  sep=    1.48 KL(data)=   0.954 KL(gen)=   0.374 cos= 0.262 
+   L15  sep=    1.82 KL(data)=   0.637 KL(gen)=   0.293 cos= 0.336 
+   L16  sep=    2.20 KL(data)=   1.082 KL(gen)=   0.479 cos= 0.387 
+   L17  sep=    2.82 KL(data)=   1.332 KL(gen)=   0.499 cos= 0.460 
+   L18  sep=    3.40 KL(data)=   1.286 KL(gen)=   0.458 cos= 0.523 
+   L19  sep=    4.00 KL(data)=   1.257 KL(gen)=   0.350 cos= 0.611 
+   L20  sep=    4.55 KL(data)=   1.110 KL(gen)=   0.327 cos= 0.677 
+   L21  sep=    5.23 KL(data)=   1.421 KL(gen)=   0.281 cos= 0.746 
+   L22  sep=    5.55 KL(data)=   1.168 KL(gen)=   0.254 cos= 0.796 
+   L23  sep=    5.80 KL(data)=   1.069 KL(gen)=   0.243 cos= 0.834 
+   L24  sep=    6.14 KL(data)=   1.075 KL(gen)=   0.228 cos= 0.876 
+   L25  sep=    6.64 KL(data)=   0.978 KL(gen)=   0.227 cos= 0.942 
+   L26  sep=    7.07 KL(data)=   0.878 KL(gen)=   0.223 cos= 0.991   <- operating
+   L27  sep=    7.58 KL(data)=   1.012 KL(gen)=   0.247 cos= 0.942 
+[scan] best admissible (generic): None
+[gen] ablation_base    coef=None  degen v1=0.0% v2=0.0% short=0.4%
+[gen] ablate_rtext     coef=None  degen v1=0.0% v2=0.0% short=0.8%
+[gen] ablate_meanout   coef=None  degen v1=0.0% v2=0.0% short=0.8%
+[gen] ablate_random    coef=None  degen v1=0.0% v2=0.0% short=0.8%
+[gen] ablate_meandir   coef=None  degen v1=7.5% v2=10.0% short=7.5%
+[abl] 240 x 5 conditions (250s)
+[gen] addition_base    coef=None  degen v1=0.0% v2=0.0% short=0.0%
+[gen] addition_added   coef=7.07  degen v1=0.0% v2=0.4% short=0.0%
+[gen] addition_added   coef=10.6  degen v1=0.0% v2=0.4% short=0.0%
+[gen] addition_added   coef=14.13  degen v1=1.3% v2=5.0% short=0.0%
+[gen] addition_added   coef=21.2  degen v1=86.3% v2=97.5% short=0.0%
+[add] 240 x 4 multiples of gap=7.1 (237s)
+
+wrote /workspace/repo/relabel_analysis/controls_Mistral-7B-Instruct-v0.3.json and controls_raw (2400 completions to judge)

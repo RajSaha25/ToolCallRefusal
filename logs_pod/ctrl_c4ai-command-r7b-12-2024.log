@@ -1,0 +1,47 @@
+[data] complete_safety_eval_dataset_normalized.xlsx: 2304 prompts
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/258 [00:00<?, ?it/s]Loading weights:   0%|          | 1/258 [00:00<00:58,  4.36it/s]Loading weights:   5%|▌         | 14/258 [00:00<00:04, 52.38it/s]Loading weights:  11%|█         | 29/258 [00:00<00:02, 83.41it/s]Loading weights:  17%|█▋        | 45/258 [00:00<00:01, 107.52it/s]Loading weights:  24%|██▎       | 61/258 [00:00<00:01, 122.69it/s]Loading weights:  30%|██▉       | 77/258 [00:00<00:01, 133.29it/s]Loading weights:  36%|███▌      | 93/258 [00:00<00:01, 140.33it/s]Loading weights:  42%|████▏     | 109/258 [00:00<00:01, 144.96it/s]Loading weights:  48%|████▊     | 125/258 [00:01<00:00, 148.53it/s]Loading weights:  55%|█████▍    | 141/258 [00:01<00:00, 150.61it/s]Loading weights:  61%|██████    | 157/258 [00:01<00:00, 152.35it/s]Loading weights:  67%|██████▋   | 173/258 [00:01<00:00, 153.18it/s]Loading weights:  73%|███████▎  | 189/258 [00:01<00:00, 153.62it/s]Loading weights:  79%|███████▉  | 205/258 [00:01<00:00, 153.88it/s]Loading weights:  86%|████████▌ | 221/258 [00:01<00:00, 155.13it/s]Loading weights:  92%|█████████▏| 237/258 [00:01<00:00, 155.59it/s]Loading weights:  98%|█████████▊| 253/258 [00:01<00:00, 155.92it/s]Loading weights: 100%|██████████| 258/258 [00:01<00:00, 136.58it/s]
+[hooks] decoder layers at net.model.layers (n=32)
+[render] template carries tools natively: True
+[load] c4ai-command-r7b-12-2024 layer=26/32 r_text from directions_c4ai-command-r7b-12-2024.pt gap=76.33
+[acts] 128+128 prompts x 33 layers (1s)
+[dir] layer=26 n_layers=32 gap_rebuilt=74.23 gap_saved=76.33 cos_saved_rebuilt=0.989 mean_proj_over_gap=0.273 cos_r_mean=0.195 cos_r_bos=0.049 cos_r_meanout=0.981 mean_norm=104.3 bos_norm=1036.8
+[KL] condition          dataset   generic   (Arditi threshold 0.1; generic is their protocol)
+[KL] ablate_rtext         0.140     0.044   PASS on generic
+[KL] ablate_meanout       0.577     0.200   FAIL on generic
+[KL] ablate_random        0.002     0.001   PASS on generic
+[KL] ablate_meandir      10.757     8.239   FAIL on generic
+[KL] (1s)
+[scan] 17 candidate layers, 8 pass KL<0.1 on generic, 0 on dataset (3s)
+   L11  sep=    7.37 KL(data)=   0.217 KL(gen)=   0.101 cos= 0.174 
+   L12  sep=    8.73 KL(data)=   0.328 KL(gen)=   0.100 cos= 0.189 PASS
+   L13  sep=    9.68 KL(data)=   0.639 KL(gen)=   0.182 cos= 0.199 
+   L14  sep=   11.05 KL(data)=   0.453 KL(gen)=   0.126 cos= 0.213 
+   L15  sep=   13.74 KL(data)=   0.947 KL(gen)=   0.244 cos= 0.264 
+   L16  sep=   16.80 KL(data)=   1.003 KL(gen)=   0.284 cos= 0.297 
+   L17  sep=   19.83 KL(data)=   0.791 KL(gen)=   0.219 cos= 0.348 
+   L18  sep=   24.23 KL(data)=   0.911 KL(gen)=   0.272 cos= 0.425 
+   L19  sep=   28.99 KL(data)=   0.427 KL(gen)=   0.133 cos= 0.498 
+   L20  sep=   35.21 KL(data)=   0.350 KL(gen)=   0.108 cos= 0.579 
+   L21  sep=   40.48 KL(data)=   0.292 KL(gen)=   0.089 cos= 0.657 PASS
+   L22  sep=   47.00 KL(data)=   0.248 KL(gen)=   0.076 cos= 0.733 PASS
+   L23  sep=   56.53 KL(data)=   0.260 KL(gen)=   0.088 cos= 0.821 PASS
+   L24  sep=   62.14 KL(data)=   0.227 KL(gen)=   0.076 cos= 0.888 PASS
+   L25  sep=   68.93 KL(data)=   0.183 KL(gen)=   0.057 cos= 0.945 PASS
+   L26  sep=   74.23 KL(data)=   0.133 KL(gen)=   0.038 cos= 0.989 PASS  <- operating
+   L27  sep=   89.93 KL(data)=   0.138 KL(gen)=   0.036 cos= 0.929 PASS
+[scan] best admissible (generic): {'layer': 27, 'sep': 89.93, 'kl_dataset': 0.1384, 'kl_generic': 0.0364, 'cos_with_operating': 0.929, 'pass_generic': True, 'pass_dataset': False}
+[gen] ablation_base    coef=None  degen v1=0.0% v2=0.0% short=1.3%
+[gen] ablate_rtext     coef=None  degen v1=0.0% v2=0.0% short=1.7%
+[gen] ablate_meanout   coef=None  degen v1=0.0% v2=0.0% short=1.3%
+[gen] ablate_random    coef=None  degen v1=0.0% v2=0.0% short=1.3%
+[gen] ablate_meandir   coef=None  degen v1=7.9% v2=6.2% short=12.9%
+[abl] 240 x 5 conditions (268s)
+[gen] addition_base    coef=None  degen v1=0.0% v2=0.8% short=0.0%
+[gen] addition_added   coef=74.23  degen v1=32.9% v2=50.4% short=0.0%
+[gen] addition_added   coef=111.34  degen v1=100.0% v2=100.0% short=0.0%
+[gen] addition_added   coef=148.46  degen v1=100.0% v2=100.0% short=0.0%
+[gen] addition_added   coef=222.69  degen v1=100.0% v2=100.0% short=0.0%
+[add] 240 x 4 multiples of gap=74.2 (255s)
+
+wrote /workspace/repo/relabel_analysis/controls_c4ai-command-r7b-12-2024.json and controls_raw (2400 completions to judge)

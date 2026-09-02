@@ -1,0 +1,272 @@
+{
+  "model": "Mistral-7B-Instruct-v0.3",
+  "layer": 26,
+  "diag": {
+    "layer": 26,
+    "n_layers": 32,
+    "gap_rebuilt": 7.07,
+    "gap_saved": 7.45,
+    "cos_saved_rebuilt": 0.991,
+    "mean_proj_over_gap": 0.025,
+    "cos_r_mean": 0.014,
+    "cos_r_bos": -0.062,
+    "cos_r_meanout": 1.0,
+    "mean_norm": 12.9,
+    "bos_norm": 215.6
+  },
+  "kl": {
+    "ablate_rtext": {
+      "dataset": 0.9056,
+      "generic": 0.2471
+    },
+    "ablate_meanout": {
+      "dataset": 0.9915,
+      "generic": 0.2766
+    },
+    "ablate_random": {
+      "dataset": 0.007,
+      "generic": 0.0041
+    },
+    "ablate_meandir": {
+      "dataset": 7.273,
+      "generic": 4.5414
+    }
+  },
+  "kl_n": 48,
+  "scan": [
+    {
+      "layer": 11,
+      "sep": 0.62,
+      "kl_dataset": 0.9132,
+      "kl_generic": 0.3368,
+      "cos_with_operating": 0.119,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 12,
+      "sep": 0.84,
+      "kl_dataset": 0.9209,
+      "kl_generic": 0.2851,
+      "cos_with_operating": 0.148,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 13,
+      "sep": 1.05,
+      "kl_dataset": 1.2308,
+      "kl_generic": 0.4563,
+      "cos_with_operating": 0.211,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 14,
+      "sep": 1.48,
+      "kl_dataset": 0.9536,
+      "kl_generic": 0.3743,
+      "cos_with_operating": 0.262,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 15,
+      "sep": 1.82,
+      "kl_dataset": 0.6366,
+      "kl_generic": 0.2928,
+      "cos_with_operating": 0.336,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 16,
+      "sep": 2.2,
+      "kl_dataset": 1.0823,
+      "kl_generic": 0.4793,
+      "cos_with_operating": 0.387,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 17,
+      "sep": 2.82,
+      "kl_dataset": 1.3317,
+      "kl_generic": 0.4989,
+      "cos_with_operating": 0.46,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 18,
+      "sep": 3.4,
+      "kl_dataset": 1.2864,
+      "kl_generic": 0.458,
+      "cos_with_operating": 0.523,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 19,
+      "sep": 4.0,
+      "kl_dataset": 1.2574,
+      "kl_generic": 0.3504,
+      "cos_with_operating": 0.611,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 20,
+      "sep": 4.55,
+      "kl_dataset": 1.1102,
+      "kl_generic": 0.3268,
+      "cos_with_operating": 0.677,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 21,
+      "sep": 5.23,
+      "kl_dataset": 1.4211,
+      "kl_generic": 0.2809,
+      "cos_with_operating": 0.746,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 22,
+      "sep": 5.55,
+      "kl_dataset": 1.1681,
+      "kl_generic": 0.254,
+      "cos_with_operating": 0.796,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 23,
+      "sep": 5.8,
+      "kl_dataset": 1.0693,
+      "kl_generic": 0.2435,
+      "cos_with_operating": 0.834,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 24,
+      "sep": 6.14,
+      "kl_dataset": 1.0753,
+      "kl_generic": 0.228,
+      "cos_with_operating": 0.876,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 25,
+      "sep": 6.64,
+      "kl_dataset": 0.9784,
+      "kl_generic": 0.2267,
+      "cos_with_operating": 0.942,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 26,
+      "sep": 7.07,
+      "kl_dataset": 0.8784,
+      "kl_generic": 0.2226,
+      "cos_with_operating": 0.991,
+      "pass_generic": false,
+      "pass_dataset": false
+    },
+    {
+      "layer": 27,
+      "sep": 7.58,
+      "kl_dataset": 1.0125,
+      "kl_generic": 0.2468,
+      "cos_with_operating": 0.942,
+      "pass_generic": false,
+      "pass_dataset": false
+    }
+  ],
+  "quantized_4bit": false,
+  "tools_native": true,
+  "add_coef": null,
+  "steering": {
+    "grid": [],
+    "harmful_unsafe": []
+  },
+  "add_mults": [
+    1.0,
+    1.5,
+    2.0,
+    3.0
+  ],
+  "add_coefs": [
+    7.07,
+    10.6,
+    14.13,
+    21.2
+  ],
+  "degeneracy": {
+    "ablation_base|None": {
+      "n": 240,
+      "degenerate_v1": 0.0,
+      "degenerate_v2": 0.0,
+      "short_v2": 0.004
+    },
+    "ablate_rtext|None": {
+      "n": 240,
+      "degenerate_v1": 0.0,
+      "degenerate_v2": 0.0,
+      "short_v2": 0.008
+    },
+    "ablate_meanout|None": {
+      "n": 240,
+      "degenerate_v1": 0.0,
+      "degenerate_v2": 0.0,
+      "short_v2": 0.008
+    },
+    "ablate_random|None": {
+      "n": 240,
+      "degenerate_v1": 0.0,
+      "degenerate_v2": 0.0,
+      "short_v2": 0.008
+    },
+    "ablate_meandir|None": {
+      "n": 240,
+      "degenerate_v1": 0.075,
+      "degenerate_v2": 0.1,
+      "short_v2": 0.075
+    },
+    "addition_base|None": {
+      "n": 240,
+      "degenerate_v1": 0.0,
+      "degenerate_v2": 0.0,
+      "short_v2": 0.0
+    },
+    "addition_added|7.07": {
+      "n": 240,
+      "degenerate_v1": 0.0,
+      "degenerate_v2": 0.004,
+      "short_v2": 0.0
+    },
+    "addition_added|10.6": {
+      "n": 240,
+      "degenerate_v1": 0.0,
+      "degenerate_v2": 0.004,
+      "short_v2": 0.0
+    },
+    "addition_added|14.13": {
+      "n": 240,
+      "degenerate_v1": 0.013,
+      "degenerate_v2": 0.05,
+      "short_v2": 0.0
+    },
+    "addition_added|21.2": {
+      "n": 240,
+      "degenerate_v1": 0.863,
+      "degenerate_v2": 0.975,
+      "short_v2": 0.0
+    }
+  }
+}

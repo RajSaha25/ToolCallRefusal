@@ -1,0 +1,49 @@
+[data] complete_safety_eval_dataset_normalized.xlsx: 2304 prompts
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/1247 [00:00<?, ?it/s]Loading weights:   0%|          | 1/1247 [00:00<05:14,  3.96it/s]Loading weights:   1%|          | 13/1247 [00:00<00:27, 45.70it/s]Loading weights:   2%|▏         | 26/1247 [00:00<00:16, 74.02it/s]Loading weights:   3%|▎         | 39/1247 [00:00<00:13, 89.40it/s]Loading weights:   4%|▍         | 50/1247 [00:06<03:51,  5.16it/s]Loading weights:   5%|▍         | 57/1247 [00:13<08:08,  2.43it/s]Loading weights:   5%|▍         | 62/1247 [00:14<06:38,  2.97it/s]Loading weights:   5%|▌         | 66/1247 [00:14<06:13,  3.16it/s]Loading weights:   6%|▌         | 69/1247 [00:18<08:57,  2.19it/s]Loading weights:   6%|▌         | 71/1247 [00:20<10:13,  1.92it/s]Loading weights:   6%|▌         | 74/1247 [00:20<08:10,  2.39it/s]Loading weights:   6%|▌         | 76/1247 [00:20<07:20,  2.66it/s]Loading weights:   6%|▋         | 78/1247 [00:21<06:33,  2.97it/s]Loading weights:   6%|▋         | 79/1247 [00:21<06:10,  3.16it/s]Loading weights:   6%|▋         | 81/1247 [00:23<09:20,  2.08it/s]Loading weights:   7%|▋         | 82/1247 [00:24<13:02,  1.49it/s]Loading weights:   7%|▋         | 83/1247 [00:26<17:30,  1.11it/s]Loading weights:   7%|▋         | 87/1247 [00:27<09:21,  2.07it/s]Loading weights:   7%|▋         | 91/1247 [00:27<05:51,  3.29it/s]Loading weights:   7%|▋         | 92/1247 [00:27<05:31,  3.48it/s]Loading weights:   8%|▊         | 95/1247 [00:29<08:05,  2.37it/s]Loading weights:   8%|▊         | 101/1247 [00:29<04:20,  4.41it/s]Loading weights:   8%|▊         | 103/1247 [00:30<04:54,  3.88it/s]Loading weights:   8%|▊         | 105/1247 [00:30<04:11,  4.54it/s]Loading weights:   9%|▉         | 118/1247 [00:30<01:28, 12.79it/s]Loading weights:  11%|█         | 131/1247 [00:31<00:48, 22.82it/s]Loading weights:  12%|█▏        | 146/1247 [00:31<00:30, 35.64it/s]Loading weights:  13%|█▎        | 159/1247 [00:31<00:22, 47.95it/s]Loading weights:  14%|█▍        | 173/1247 [00:31<00:17, 59.87it/s]Loading weights:  15%|█▍        | 187/1247 [00:31<00:14, 70.73it/s]Loading weights:  16%|█▋        | 205/1247 [00:31<00:11, 90.80it/s]Loading weights:  18%|█▊        | 220/1247 [00:31<00:09, 103.56it/s]Loading weights:  19%|█▉        | 234/1247 [00:31<00:09, 110.86it/s]Loading weights:  20%|█▉        | 248/1247 [00:31<00:08, 117.66it/s]Loading weights:  21%|██        | 263/1247 [00:32<00:08, 117.98it/s]Loading weights:  22%|██▏       | 277/1247 [00:32<00:08, 115.51it/s]Loading weights:  23%|██▎       | 291/1247 [00:32<00:08, 113.94it/s]Loading weights:  24%|██▍       | 304/1247 [00:32<00:08, 117.80it/s]Loading weights:  26%|██▌       | 321/1247 [00:32<00:07, 129.21it/s]Loading weights:  27%|██▋       | 338/1247 [00:32<00:06, 138.94it/s]Loading weights:  28%|██▊       | 353/1247 [00:32<00:06, 141.57it/s]Loading weights:  30%|██▉       | 368/1247 [00:32<00:07, 124.17it/s]Loading weights:  31%|███       | 381/1247 [00:32<00:06, 124.06it/s]Loading weights:  32%|███▏      | 394/1247 [00:33<00:06, 124.10it/s]Loading weights:  33%|███▎      | 408/1247 [00:33<00:07, 119.24it/s]Loading weights:  34%|███▍      | 421/1247 [00:33<00:06, 120.34it/s]Loading weights:  35%|███▍      | 434/1247 [00:33<00:06, 121.06it/s]Loading weights:  36%|███▌      | 447/1247 [00:33<00:06, 122.27it/s]Loading weights:  37%|███▋      | 460/1247 [00:33<00:06, 122.11it/s]Loading weights:  38%|███▊      | 473/1247 [00:33<00:06, 121.62it/s]Loading weights:  39%|███▉      | 486/1247 [00:33<00:06, 122.46it/s]Loading weights:  40%|████      | 504/1247 [00:33<00:05, 136.88it/s]Loading weights:  42%|████▏     | 519/1247 [00:34<00:05, 139.57it/s]Loading weights:  43%|████▎     | 535/1247 [00:34<00:05, 134.89it/s]Loading weights:  44%|████▍     | 550/1247 [00:34<00:05, 130.37it/s]Loading weights:  45%|████▌     | 564/1247 [00:34<00:05, 124.89it/s]Loading weights:  47%|████▋     | 583/1247 [00:34<00:04, 140.69it/s]Loading weights:  48%|████▊     | 598/1247 [00:34<00:04, 140.87it/s]Loading weights:  49%|████▉     | 614/1247 [00:34<00:04, 136.80it/s]Loading weights:  50%|█████     | 628/1247 [00:34<00:04, 128.50it/s]Loading weights:  51%|█████▏    | 642/1247 [00:35<00:04, 123.59it/s]Loading weights:  53%|█████▎    | 660/1247 [00:35<00:04, 138.34it/s]Loading weights:  54%|█████▍    | 675/1247 [00:35<00:04, 140.47it/s]Loading weights:  55%|█████▌    | 690/1247 [00:35<00:03, 140.98it/s]Loading weights:  57%|█████▋    | 705/1247 [00:35<00:04, 133.52it/s]Loading weights:  58%|█████▊    | 719/1247 [00:35<00:04, 125.86it/s]Loading weights:  59%|█████▊    | 732/1247 [00:35<00:04, 126.93it/s]Loading weights:  60%|█████▉    | 746/1247 [00:35<00:04, 121.94it/s]Loading weights:  61%|██████▏   | 764/1247 [00:35<00:03, 135.25it/s]Loading weights:  62%|██████▏   | 778/1247 [00:35<00:03, 136.37it/s]Loading weights:  64%|██████▎   | 792/1247 [00:36<00:03, 135.86it/s]Loading weights:  65%|██████▍   | 807/1247 [00:36<00:03, 139.45it/s]Loading weights:  96%|█████████▌| 1193/1247 [00:36<00:00, 1211.37it/s]Loading weights: 100%|██████████| 1247/1247 [00:36<00:00, 34.34it/s]  
+[hooks] decoder layers at net.model.language_model.layers (n=62)
+[render] template carries tools natively: False  -> injecting schemas into the prompt text
+[load] gemma-3-27b-it layer=51/62 r_text from directions_gemma-3-27b-it.pt gap=18944.4
+[acts] 128+128 prompts x 63 layers (4s)
+[dir] layer=51 n_layers=62 gap_rebuilt=18554.49 gap_saved=18944.4 cos_saved_rebuilt=0.991 mean_proj_over_gap=1.004 cos_r_mean=0.243 cos_r_bos=0.188 cos_r_meanout=0.97 mean_norm=76577.8 bos_norm=872552.0
+[KL] condition          dataset   generic   (Arditi threshold 0.1; generic is their protocol)
+[KL] ablate_rtext        10.951    11.339   FAIL on generic
+[KL] ablate_meanout       4.309     2.478   FAIL on generic
+[KL] ablate_random        0.125     0.040   PASS on generic
+[KL] ablate_meandir      50.324    45.923   FAIL on generic
+[KL] (4s)
+[scan] 32 candidate layers, 0 pass KL<0.1 on generic, 0 on dataset (28s)
+   L21  sep=  255.50 KL(data)=  29.738 KL(gen)=  29.166 cos=-0.002 
+   L22  sep=  343.50 KL(data)=  16.802 KL(gen)=  15.713 cos= 0.160 
+   L23  sep=  428.04 KL(data)=  12.821 KL(gen)=  12.874 cos= 0.075 
+   L24  sep=  619.10 KL(data)=  11.305 KL(gen)=  13.563 cos= 0.064 
+   L25  sep=  832.16 KL(data)=  13.283 KL(gen)=  13.751 cos= 0.065 
+   L26  sep= 1239.05 KL(data)=  19.888 KL(gen)=  19.817 cos= 0.184 
+   L27  sep= 1515.86 KL(data)=  25.534 KL(gen)=  24.450 cos=-0.032 
+   L28  sep= 1758.72 KL(data)=  26.895 KL(gen)=  24.655 cos= 0.237 
+   L29  sep= 2055.31 KL(data)=  13.172 KL(gen)=  13.357 cos= 0.135 
+   L30  sep= 2773.86 KL(data)=  21.702 KL(gen)=  20.712 cos= 0.272 
+   L31  sep= 4118.58 KL(data)=  34.688 KL(gen)=  33.795 cos= 0.302 
+   L32  sep= 4884.88 KL(data)=  29.760 KL(gen)=  29.189 cos= 0.329 
+   L33  sep= 5483.19 KL(data)=  24.811 KL(gen)=  23.856 cos= 0.365 
+   L34  sep= 5908.20 KL(data)=  19.967 KL(gen)=  19.553 cos= 0.379 
+   L35  sep= 5705.52 KL(data)=  15.562 KL(gen)=  15.723 cos= 0.407 
+   L36  sep= 6396.39 KL(data)=  15.250 KL(gen)=  14.937 cos= 0.436 
+   L37  sep= 8222.11 KL(data)=  19.658 KL(gen)=  19.352 cos= 0.495 
+   L38  sep= 9049.26 KL(data)=  18.115 KL(gen)=  17.858 cos= 0.541 
+   L39  sep= 9116.86 KL(data)=  12.869 KL(gen)=  12.647 cos= 0.573 
+   L40  sep=10049.18 KL(data)=  14.217 KL(gen)=  13.723 cos= 0.615 
+   L41  sep=11230.25 KL(data)=  13.071 KL(gen)=  12.926 cos= 0.647 
+   L42  sep=12216.65 KL(data)=  13.857 KL(gen)=  13.772 cos= 0.671 
+   L43  sep=12687.82 KL(data)=  16.280 KL(gen)=  15.938 cos= 0.695 
+   L44  sep=13407.28 KL(data)=  14.848 KL(gen)=  14.853 cos= 0.723 
+   L45  sep=13224.85 KL(data)=  15.110 KL(gen)=  15.039 cos= 0.738 
+   L46  sep=14634.88 KL(data)=  15.141 KL(gen)=  14.592 cos= 0.789 
+   L47  sep=16135.07 KL(data)=  11.989 KL(gen)=  11.950 cos= 0.848 
+   L48  sep=16490.18 KL(data)=  12.905 KL(gen)=  13.100 cos= 0.874 
+   L49  sep=17093.18 KL(data)=  15.113 KL(gen)=  14.519 cos= 0.921 
+   L50  sep=17996.96 KL(data)=  11.453 KL(gen)=  10.316 cos= 0.962 
+   L51  sep=18554.49 KL(data)=  12.200 KL(gen)=  11.802 cos= 0.991   <- operating
+   L52  sep=18742.70 KL(data)=  12.840 KL(gen)=  12.373 cos= 0.983 
+[scan] best admissible (generic): None
+[gen] ablation_base    coef=None  degen v1=0.0% v2=0.0% short=0.8%
